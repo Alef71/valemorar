@@ -5,6 +5,7 @@ import br.com.valemorar.domain.usuario.dto.UsuarioCreateDTO;
 import br.com.valemorar.domain.usuario.dto.UsuarioResponseDTO;
 import br.com.valemorar.domain.usuario.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,6 +20,7 @@ public class UsuarioService {
         this.usuarioRepository = usuarioRepository;
     }
 
+    @Transactional
     public UsuarioResponseDTO criar(UsuarioCreateDTO dto) {
         if (usuarioRepository.existsByEmail(dto.email())) {
             throw new RuntimeException("E-mail já cadastrado");
@@ -37,6 +39,7 @@ public class UsuarioService {
         return UsuarioResponseDTO.fromEntity(salvo);
     }
 
+    @Transactional(readOnly = true)
     public List<UsuarioResponseDTO> listarTodos() {
         return usuarioRepository.findAll()
                 .stream()
@@ -44,12 +47,14 @@ public class UsuarioService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public UsuarioResponseDTO buscarPorId(UUID id) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
         return UsuarioResponseDTO.fromEntity(usuario);
     }
 
+    @Transactional
     public UsuarioResponseDTO atualizar(UUID id, UsuarioCreateDTO dto) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
@@ -62,6 +67,31 @@ public class UsuarioService {
         return UsuarioResponseDTO.fromEntity(atualizado);
     }
 
+    @Transactional
+    public UsuarioResponseDTO desativarConta(UUID id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        usuario.setStatus("INATIVO");
+        usuario.setAtualizadoEm(LocalDateTime.now());
+
+        Usuario atualizado = usuarioRepository.save(usuario);
+        return UsuarioResponseDTO.fromEntity(atualizado);
+    }
+
+    @Transactional
+    public UsuarioResponseDTO bloquearUsuario(UUID id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        usuario.setStatus("BLOQUEADO");
+        usuario.setAtualizadoEm(LocalDateTime.now());
+
+        Usuario atualizado = usuarioRepository.save(usuario);
+        return UsuarioResponseDTO.fromEntity(atualizado);
+    }
+
+    @Transactional
     public void deletar(UUID id) {
         if (!usuarioRepository.existsById(id)) {
             throw new RuntimeException("Usuário não encontrado");
