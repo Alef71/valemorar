@@ -1,18 +1,20 @@
-package br.com.valemorar.domain.denucia.controller;
+package br.com.valemorar.domain.denuncia.controller;
 
-import br.com.valemorar.domain.denucia.dto.DenunciaCreateDTO;
-import br.com.valemorar.domain.denucia.dto.DenunciaResponseDTO;
-import br.com.valemorar.domain.denucia.service.DenunciaService;
+import br.com.valemorar.domain.denuncia.dto.DenunciaCreateDTO;
+import br.com.valemorar.domain.denuncia.dto.DenunciaResponseDTO;
+import br.com.valemorar.domain.denuncia.service.DenunciaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -36,11 +38,11 @@ public class DenunciaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(dto));
     }
 
-    @Operation(summary = "Listar todas as denúncias", description = "Retorna uma lista com todas as denúncias registradas")
-    @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
+    @Operation(summary = "Listar todas as denúncias", description = "Retorna uma página com todas as denúncias registradas")
+    @ApiResponse(responseCode = "200", description = "Página retornada com sucesso")
     @GetMapping
-    public ResponseEntity<List<DenunciaResponseDTO>> listarTodos() {
-        return ResponseEntity.ok(service.listarTodos());
+    public ResponseEntity<Page<DenunciaResponseDTO>> listarTodos(@PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(service.listarTodos(pageable));
     }
 
     @Operation(summary = "Buscar denúncia por ID", description = "Busca os detalhes de uma denúncia específica pelo seu UUID")
@@ -53,14 +55,31 @@ public class DenunciaController {
         return ResponseEntity.ok(service.buscarPorId(id));
     }
 
-    @Operation(summary = "Buscar denúncias por status", description = "Retorna uma lista de denúncias filtradas pelo status informado")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Lista de denúncias retornada com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Status inválido ou não encontrado")
-    })
+    @Operation(summary = "Buscar denúncias por status", description = "Retorna uma página de denúncias filtradas pelo status informado")
+    @ApiResponse(responseCode = "200", description = "Página de denúncias retornada com sucesso")
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<DenunciaResponseDTO>> buscarPorStatus(@PathVariable String status) {
-        return ResponseEntity.ok(service.buscarPorStatus(status));
+    public ResponseEntity<Page<DenunciaResponseDTO>> buscarPorStatus(
+            @PathVariable String status,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(service.buscarPorStatus(status, pageable));
+    }
+
+    @Operation(summary = "Buscar denúncias por anúncio", description = "Retorna as denúncias associadas a um anúncio específico")
+    @ApiResponse(responseCode = "200", description = "Página de denúncias do anúncio retornada com sucesso")
+    @GetMapping("/anuncio/{anuncioId}")
+    public ResponseEntity<Page<DenunciaResponseDTO>> buscarPorAnuncio(
+            @PathVariable UUID anuncioId,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(service.buscarPorAnuncio(anuncioId, pageable));
+    }
+
+    @Operation(summary = "Buscar denúncias por denunciante", description = "Retorna as denúncias realizadas por um determinado usuário")
+    @ApiResponse(responseCode = "200", description = "Página de denúncias do usuário retornada com sucesso")
+    @GetMapping("/denunciante/{denuncianteId}")
+    public ResponseEntity<Page<DenunciaResponseDTO>> buscarPorDenunciante(
+            @PathVariable UUID denuncianteId,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(service.buscarPorDenunciante(denuncianteId, pageable));
     }
 
     @Operation(summary = "Resolver denúncia", description = "Atualiza o status de uma denúncia e registra o responsável pela resolução")

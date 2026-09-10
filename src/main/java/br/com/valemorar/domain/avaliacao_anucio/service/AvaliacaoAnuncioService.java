@@ -5,6 +5,7 @@ import br.com.valemorar.domain.avaliacao_anucio.dto.AvaliacaoAnuncioCreateDTO;
 import br.com.valemorar.domain.avaliacao_anucio.dto.AvaliacaoAnuncioResponseDTO;
 import br.com.valemorar.domain.avaliacao_anucio.repository.AvaliacaoAnuncioRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,6 +20,7 @@ public class AvaliacaoAnuncioService {
         this.repository = repository;
     }
 
+    @Transactional
     public AvaliacaoAnuncioResponseDTO criar(AvaliacaoAnuncioCreateDTO dto) {
         AvaliacaoAnuncio avaliacao = new AvaliacaoAnuncio();
         avaliacao.setAnuncioId(dto.anuncioId());
@@ -31,6 +33,7 @@ public class AvaliacaoAnuncioService {
         return AvaliacaoAnuncioResponseDTO.fromEntity(salvo);
     }
 
+    @Transactional(readOnly = true)
     public List<AvaliacaoAnuncioResponseDTO> listarTodos() {
         return repository.findAll()
                 .stream()
@@ -38,12 +41,14 @@ public class AvaliacaoAnuncioService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public AvaliacaoAnuncioResponseDTO buscarPorId(UUID id) {
         AvaliacaoAnuncio avaliacao = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Avaliação não encontrada"));
         return AvaliacaoAnuncioResponseDTO.fromEntity(avaliacao);
     }
 
+    @Transactional(readOnly = true)
     public List<AvaliacaoAnuncioResponseDTO> buscarPorAnuncio(UUID anuncioId) {
         return repository.findByAnuncioId(anuncioId)
                 .stream()
@@ -51,6 +56,7 @@ public class AvaliacaoAnuncioService {
                 .toList();
     }
 
+    @Transactional
     public AvaliacaoAnuncioResponseDTO atualizar(UUID id, AvaliacaoAnuncioCreateDTO dto) {
         AvaliacaoAnuncio avaliacao = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Avaliação não encontrada"));
@@ -62,6 +68,7 @@ public class AvaliacaoAnuncioService {
         return AvaliacaoAnuncioResponseDTO.fromEntity(atualizado);
     }
 
+    @Transactional
     public void deletar(UUID id) {
         if (!repository.existsById(id)) {
             throw new RuntimeException("Avaliação não encontrada");

@@ -5,12 +5,14 @@ import br.com.valemorar.domain.notificacao.dto.NotificacaoResponseDTO;
 import br.com.valemorar.domain.notificacao.service.NotificacaoService;
 import br.com.valemorar.domain.usuario.Usuario;
 import br.com.valemorar.domain.usuario.dto.UsuarioResponseDTO;
+import br.com.valemorar.domain.usuario.enums.StatusUsuarioEnum;
 import br.com.valemorar.domain.usuario.repository.UsuarioRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -25,11 +27,9 @@ public class AdminService {
     }
 
     @Transactional(readOnly = true)
-    public List<UsuarioResponseDTO> listarTodosUsuarios() {
-        return usuarioRepository.findAll()
-                .stream()
-                .map(UsuarioResponseDTO::fromEntity)
-                .toList();
+    public Page<UsuarioResponseDTO> listarTodosUsuarios(Pageable pageable) {
+        return usuarioRepository.findAll(pageable)
+                .map(UsuarioResponseDTO::fromEntity);
     }
 
     @Transactional
@@ -37,7 +37,12 @@ public class AdminService {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        usuario.setStatus(novoStatus.toUpperCase());
+        try {
+            usuario.setStatus(StatusUsuarioEnum.valueOf(novoStatus.toUpperCase()));
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Status inválido: " + novoStatus);
+        }
+
         usuario.setAtualizadoEm(LocalDateTime.now());
 
         Usuario salvo = usuarioRepository.save(usuario);
@@ -52,6 +57,7 @@ public class AdminService {
         usuarioRepository.deleteById(id);
     }
 
+    @Transactional
     public NotificacaoResponseDTO enviarNotificacao(NotificacaoCreateDTO dto) {
         return notificacaoService.criar(dto);
     }

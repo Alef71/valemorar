@@ -1,4 +1,4 @@
-package br.com.valemorar.domain.denucia;
+package br.com.valemorar.domain.denuncia;
 
 import jakarta.persistence.*;
 import lombok.Getter;

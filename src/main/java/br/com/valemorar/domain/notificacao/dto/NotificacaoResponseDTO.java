@@ -1,6 +1,7 @@
 package br.com.valemorar.domain.notificacao.dto;
 
 import br.com.valemorar.domain.notificacao.Notificacao;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 

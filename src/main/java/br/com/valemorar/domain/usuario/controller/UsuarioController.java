@@ -2,6 +2,7 @@ package br.com.valemorar.domain.usuario.controller;
 
 import br.com.valemorar.domain.usuario.dto.UsuarioCreateDTO;
 import br.com.valemorar.domain.usuario.dto.UsuarioResponseDTO;
+import br.com.valemorar.domain.usuario.dto.UsuarioUpdateDTO;
 import br.com.valemorar.domain.usuario.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,40 +38,69 @@ public class UsuarioController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(dto));
     }
 
-    @Operation(summary = "Listar todos os usuários", description = "Retorna uma lista de todos os usuários cadastrados (Uso Admin)")
+    @Operation(summary = "Obter perfil logado", description = "Retorna os dados do usuário autenticado via token JWT sem risco de IDOR")
+    @ApiResponse(responseCode = "200", description = "Perfil retornado com sucesso")
+    @GetMapping("/me")
+    public ResponseEntity<UsuarioResponseDTO> obterPerfilProprio() {
+        return ResponseEntity.ok(service.buscarPerfilProprio());
+    }
+
+    @Operation(summary = "Atualizar perfil próprio", description = "Atualiza os dados pessoais do usuário autenticado no token (RF01)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usuário atualizado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos")
+    })
+    @PutMapping("/me")
+    public ResponseEntity<UsuarioResponseDTO> atualizarPerfilProprio(@RequestBody @Valid UsuarioUpdateDTO dto) {
+        return ResponseEntity.ok(service.atualizarPerfilProprio(dto));
+    }
+
+    @Operation(summary = "Desativar própria conta", description = "Permite que o usuário autenticado desative sua conta temporariamente (RF03 / LGPD)")
+    @ApiResponse(responseCode = "200", description = "Conta desativada temporariamente com sucesso")
+    @PatchMapping("/me/desativar")
+    public ResponseEntity<UsuarioResponseDTO> desativarMinhaConta() {
+        return ResponseEntity.ok(service.desativarMinhaConta());
+    }
+
+    @Operation(summary = "Listar todos os usuários (Admin)", description = "Retorna uma lista de todos os usuários cadastrados")
     @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UsuarioResponseDTO>> listarTodos() {
         return ResponseEntity.ok(service.listarTodos());
     }
 
-    @Operation(summary = "Buscar usuário por ID", description = "Busca as informações do perfil pelo UUID do usuário")
+    @Operation(summary = "Buscar usuário por ID (Admin)", description = "Busca as informações de um perfil pelo UUID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Usuário encontrado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Usuário não encontrado")
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
     })
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UsuarioResponseDTO> buscarPorId(@PathVariable UUID id) {
         return ResponseEntity.ok(service.buscarPorId(id));
     }
 
-    @Operation(summary = "Atualizar usuário", description = "Atualiza os dados pessoais cadastrados (nome, telefone, foto) (RF01)")
+    @Operation(summary = "Atualizar usuário por ID (Admin)", description = "Permite que administradores alterem dados cadastrais por ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Usuário atualizado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos ou usuário não encontrado")
+            @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
     })
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UsuarioResponseDTO> atualizar(@PathVariable UUID id,
-            @RequestBody @Valid UsuarioCreateDTO dto) {
+            @RequestBody @Valid UsuarioUpdateDTO dto) {
         return ResponseEntity.ok(service.atualizar(id, dto));
     }
 
-    @Operation(summary = "Desativar conta temporariamente", description = "Permite que o usuário desative sua conta temporariamente, ocultando perfil e anúncios (RF03 / LGPD)")
+    @Operation(summary = "Desativar conta por ID (Admin)", description = "Ação administrativa para desativar uma conta por ID")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Conta desativada temporariamente com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Usuário não encontrado")
+            @ApiResponse(responseCode = "200", description = "Conta desativada com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
     })
     @PatchMapping("/{id}/desativar")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UsuarioResponseDTO> desativarConta(@PathVariable UUID id) {
         return ResponseEntity.ok(service.desativarConta(id));
     }
@@ -77,19 +108,22 @@ public class UsuarioController {
     @Operation(summary = "Bloquear/Banir usuário (Admin)", description = "Ação administrativa para banir/bloquear usuários mal-intencionados (RF13)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Usuário bloqueado/banido com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Usuário não encontrado")
+            @ApiResponse(responseCode = "403", description = "Acesso negado"),
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
     })
     @PatchMapping("/{id}/bloquear")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UsuarioResponseDTO> bloquearUsuario(@PathVariable UUID id) {
         return ResponseEntity.ok(service.bloquearUsuario(id));
     }
 
-    @Operation(summary = "Excluir conta definitivamente", description = "Exclui definitivamente a conta do usuário do banco de dados (RF03 / LGPD)")
+    @Operation(summary = "Excluir conta definitivamente (Admin)", description = "Exclui definitivamente a conta do usuário pelo ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Conta excluída definitivamente com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Usuário não encontrado")
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
     })
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deletar(@PathVariable UUID id) {
         service.deletar(id);
         return ResponseEntity.noContent().build();

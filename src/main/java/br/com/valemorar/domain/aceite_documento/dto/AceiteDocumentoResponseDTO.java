@@ -1,6 +1,7 @@
 package br.com.valemorar.domain.aceite_documento.dto;
 
 import br.com.valemorar.domain.aceite_documento.AceiteDocumento;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 

@@ -8,11 +8,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -36,11 +38,11 @@ public class EnderecoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(dto));
     }
 
-    @Operation(summary = "Listar todos os endereços", description = "Retorna uma lista com todos os endereços cadastrados")
-    @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
+    @Operation(summary = "Listar todos os endereços", description = "Retorna uma página com todos os endereços cadastrados")
+    @ApiResponse(responseCode = "200", description = "Página retornada com sucesso")
     @GetMapping
-    public ResponseEntity<List<EnderecoResponseDTO>> listarTodos() {
-        return ResponseEntity.ok(service.listarTodos());
+    public ResponseEntity<Page<EnderecoResponseDTO>> listarTodos(@PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(service.listarTodos(pageable));
     }
 
     @Operation(summary = "Buscar endereço por ID", description = "Busca os detalhes de um endereço específico pelo seu UUID")
@@ -53,14 +55,22 @@ public class EnderecoController {
         return ResponseEntity.ok(service.buscarPorId(id));
     }
 
-    @Operation(summary = "Buscar endereços por cidade", description = "Retorna uma lista de endereços localizados em uma determinada cidade")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Lista de endereços da cidade retornada com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Cidade não encontrada ou sem registros")
-    })
+    @Operation(summary = "Buscar endereços por cidade", description = "Retorna uma página de endereços localizados em uma determinada cidade")
+    @ApiResponse(responseCode = "200", description = "Página de endereços da cidade retornada com sucesso")
     @GetMapping("/cidade/{cidade}")
-    public ResponseEntity<List<EnderecoResponseDTO>> buscarPorCidade(@PathVariable String cidade) {
-        return ResponseEntity.ok(service.buscarPorCidade(cidade));
+    public ResponseEntity<Page<EnderecoResponseDTO>> buscarPorCidade(
+            @PathVariable String cidade,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(service.buscarPorCidade(cidade, pageable));
+    }
+
+    @Operation(summary = "Buscar endereços por CEP", description = "Retorna uma página de endereços filtrados pelo CEP informado")
+    @ApiResponse(responseCode = "200", description = "Página de endereços do CEP retornada com sucesso")
+    @GetMapping("/cep/{cep}")
+    public ResponseEntity<Page<EnderecoResponseDTO>> buscarPorCep(
+            @PathVariable String cep,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(service.buscarPorCep(cep, pageable));
     }
 
     @Operation(summary = "Atualizar endereço", description = "Atualiza os dados de um endereço existente pelo seu UUID")

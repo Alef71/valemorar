@@ -1,6 +1,7 @@
-package br.com.valemorar.domain.denucia.dto;
+package br.com.valemorar.domain.denuncia.dto;
 
-import br.com.valemorar.domain.denucia.Denuncia;
+import br.com.valemorar.domain.denuncia.Denuncia;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 

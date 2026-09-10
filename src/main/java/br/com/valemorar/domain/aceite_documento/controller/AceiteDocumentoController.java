@@ -8,11 +8,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -37,11 +39,12 @@ public class AceiteDocumentoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.registrarAceite(dto));
     }
 
-    @Operation(summary = "Listar todos os aceites", description = "Retorna uma lista com todos os registros de aceites de documentos")
-    @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
+    @Operation(summary = "Listar todos os aceites", description = "Retorna uma página com todos os registros de aceites de documentos")
+    @ApiResponse(responseCode = "200", description = "Página retornada com sucesso")
     @GetMapping
-    public ResponseEntity<List<AceiteDocumentoResponseDTO>> listarTodos() {
-        return ResponseEntity.ok(service.listarTodos());
+    public ResponseEntity<Page<AceiteDocumentoResponseDTO>> listarTodos(
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(service.listarTodos(pageable));
     }
 
     @Operation(summary = "Buscar aceite por ID", description = "Busca os detalhes de um registro de aceite específico pelo seu UUID")
@@ -54,14 +57,16 @@ public class AceiteDocumentoController {
         return ResponseEntity.ok(service.buscarPorId(id));
     }
 
-    @Operation(summary = "Buscar aceites por ID do usuário", description = "Retorna todos os registros de aceites pertencentes a um usuário específico")
+    @Operation(summary = "Buscar aceites por ID do usuário", description = "Retorna uma página de registros de aceites pertencentes a um usuário específico")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Lista de aceites do usuário retornada com sucesso"),
+            @ApiResponse(responseCode = "200", description = "Página de aceites do usuário retornada com sucesso"),
             @ApiResponse(responseCode = "400", description = "Usuário não encontrado ou sem registros")
     })
     @GetMapping("/usuario/{usuarioId}")
-    public ResponseEntity<List<AceiteDocumentoResponseDTO>> buscarPorUsuario(@PathVariable UUID usuarioId) {
-        return ResponseEntity.ok(service.buscarPorUsuario(usuarioId));
+    public ResponseEntity<Page<AceiteDocumentoResponseDTO>> buscarPorUsuario(
+            @PathVariable UUID usuarioId,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(service.buscarPorUsuario(usuarioId, pageable));
     }
 
     @Operation(summary = "Deletar registro de aceite", description = "Remove um registro de aceite pelo seu UUID")

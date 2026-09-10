@@ -9,6 +9,7 @@ import java.util.UUID;
 
 @Repository
 public interface LocadorRepository extends JpaRepository<Locador, UUID> {
+
     Optional<Locador> findByDocumento(String documento);
 
     boolean existsByDocumento(String documento);

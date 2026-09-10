@@ -8,11 +8,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -29,18 +31,18 @@ public class LocatarioController {
     @Operation(summary = "Criar perfil de locatário", description = "Cadastra um novo perfil de locatário no sistema")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Locatário criado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos")
+            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos ou usuário já cadastrado")
     })
     @PostMapping
     public ResponseEntity<LocatarioResponseDTO> criar(@RequestBody @Valid LocatarioCreateDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(dto));
     }
 
-    @Operation(summary = "Listar todos os locatários", description = "Retorna uma lista com todos os locatários cadastrados")
-    @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
+    @Operation(summary = "Listar todos os locatários", description = "Retorna uma página com todos os locatários cadastrados")
+    @ApiResponse(responseCode = "200", description = "Página de locatários retornada com sucesso")
     @GetMapping
-    public ResponseEntity<List<LocatarioResponseDTO>> listarTodos() {
-        return ResponseEntity.ok(service.listarTodos());
+    public ResponseEntity<Page<LocatarioResponseDTO>> listarTodos(@PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(service.listarTodos(pageable));
     }
 
     @Operation(summary = "Buscar locatário por ID do usuário", description = "Busca os detalhes do perfil de locatário pelo UUID do usuário")

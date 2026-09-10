@@ -9,6 +9,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,30 +34,31 @@ public class AnuncioController {
     @Operation(summary = "Criar um novo anúncio", description = "Cadastra um novo anúncio de imóvel no sistema (RF06)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Anúncio criado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos")
+            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos ou imóvel já possui anúncio ativo")
     })
     @PostMapping
     public ResponseEntity<AnuncioResponseDTO> criar(@RequestBody @Valid AnuncioCreateDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(anuncioService.criar(dto));
     }
 
-    @Operation(summary = "Listar todos os anúncios", description = "Retorna uma lista com todos os anúncios cadastrados")
-    @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
+    @Operation(summary = "Listar todos os anúncios", description = "Retorna uma página com todos os anúncios cadastrados")
+    @ApiResponse(responseCode = "200", description = "Página retornada com sucesso")
     @GetMapping
-    public ResponseEntity<List<AnuncioResponseDTO>> listarTodos() {
-        return ResponseEntity.ok(anuncioService.listarTodos());
+    public ResponseEntity<Page<AnuncioResponseDTO>> listarTodos(@PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(anuncioService.listarTodos(pageable));
     }
 
     @Operation(summary = "Buscar anúncios com filtros avançados", description = "Filtra anúncios por cidade, faixa de preço, número de quartos e tags de proximidade (RF07 e RF08)")
     @ApiResponse(responseCode = "200", description = "Busca realizada com sucesso")
     @GetMapping("/busca")
-    public ResponseEntity<List<AnuncioResponseDTO>> buscarComFiltros(
+    public ResponseEntity<Page<AnuncioResponseDTO>> buscarComFiltros(
             @Parameter(description = "Cidade para limitação geográfica (RF08)") @RequestParam(required = false) String cidade,
             @Parameter(description = "Valor mínimo do aluguel") @RequestParam(required = false) BigDecimal precoMin,
             @Parameter(description = "Valor máximo do aluguel") @RequestParam(required = false) BigDecimal precoMax,
             @Parameter(description = "Número mínimo de quartos") @RequestParam(required = false) Integer quartos,
-            @Parameter(description = "Tags de pontos de interesse ex: IFNMG, UFVJM (RF07)") @RequestParam(required = false) List<String> tags) {
-        return ResponseEntity.ok(anuncioService.buscarComFiltros(cidade, precoMin, precoMax, quartos, tags));
+            @Parameter(description = "Tags de pontos de interesse ex: IFNMG, UFVJM (RF07)") @RequestParam(required = false) List<String> tags,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(anuncioService.buscarComFiltros(cidade, precoMin, precoMax, quartos, tags, pageable));
     }
 
     @Operation(summary = "Buscar anúncio por ID", description = "Busca os detalhes de um anúncio específico pelo seu UUID")
@@ -68,10 +72,12 @@ public class AnuncioController {
     }
 
     @Operation(summary = "Buscar anúncios por anunciante", description = "Retorna os anúncios publicados por um anunciante específico")
-    @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
+    @ApiResponse(responseCode = "200", description = "Página retornada com sucesso")
     @GetMapping("/anunciante/{anuncianteId}")
-    public ResponseEntity<List<AnuncioResponseDTO>> buscarPorAnunciante(@PathVariable UUID anuncianteId) {
-        return ResponseEntity.ok(anuncioService.buscarPorAnunciante(anuncianteId));
+    public ResponseEntity<Page<AnuncioResponseDTO>> buscarPorAnunciante(
+            @PathVariable UUID anuncianteId,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(anuncioService.buscarPorAnunciante(anuncianteId, pageable));
     }
 
     @Operation(summary = "Atualizar anúncio", description = "Atualiza as informações de um anúncio existente")
@@ -80,7 +86,8 @@ public class AnuncioController {
             @ApiResponse(responseCode = "400", description = "Dados inválidos ou anúncio não encontrado")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<AnuncioResponseDTO> atualizar(@PathVariable UUID id,
+    public ResponseEntity<AnuncioResponseDTO> atualizar(
+            @PathVariable UUID id,
             @RequestBody @Valid AnuncioCreateDTO dto) {
         return ResponseEntity.ok(anuncioService.atualizar(id, dto));
     }

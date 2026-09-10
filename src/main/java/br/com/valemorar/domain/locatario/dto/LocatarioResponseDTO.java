@@ -1,6 +1,7 @@
 package br.com.valemorar.domain.locatario.dto;
 
 import br.com.valemorar.domain.locatario.Locatario;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 

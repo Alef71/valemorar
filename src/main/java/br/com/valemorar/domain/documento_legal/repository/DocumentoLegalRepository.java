@@ -10,7 +10,14 @@ import java.util.UUID;
 
 @Repository
 public interface DocumentoLegalRepository extends JpaRepository<DocumentoLegal, UUID> {
-    List<DocumentoLegal> findByTipo(String tipo);
+
+    List<DocumentoLegal> findAllByOrderByPublicadoEmDesc();
+
+    List<DocumentoLegal> findByTipoOrderByPublicadoEmDesc(String tipo);
 
     Optional<DocumentoLegal> findByTipoAndVersao(String tipo, String versao);
+
+    boolean existsByTipoAndVersao(String tipo, String versao);
+
+    boolean existsByTipoAndVersaoAndIdNot(String tipo, String versao, UUID id);
 }

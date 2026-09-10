@@ -1,6 +1,7 @@
 package br.com.valemorar.domain.foto_imovel.dto;
 
 import br.com.valemorar.domain.foto_imovel.FotoImovel;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 

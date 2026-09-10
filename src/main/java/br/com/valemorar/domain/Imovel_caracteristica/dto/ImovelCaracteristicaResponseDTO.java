@@ -1,6 +1,7 @@
-package br.com.valemorar.domain.Imovel_caracteristica.dto;
+package br.com.valemorar.domain.imovel_caracteristica.dto;
 
-import br.com.valemorar.domain.Imovel_caracteristica.ImovelCaracteristica;
+import br.com.valemorar.domain.imovel_caracteristica.ImovelCaracteristica;
+
 import java.util.UUID;
 
 public record ImovelCaracteristicaResponseDTO(

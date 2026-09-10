@@ -3,8 +3,9 @@ package br.com.valemorar.domain.categoria_caracteristica.service;
 import br.com.valemorar.domain.categoria_caracteristica.CategoriaCaracteristica;
 import br.com.valemorar.domain.categoria_caracteristica.dto.CategoriaCaracteristicaCreateDTO;
 import br.com.valemorar.domain.categoria_caracteristica.dto.CategoriaCaracteristicaResponseDTO;
-import br.com.valemorar.domain.categoria_caracteristica.repositiry.CategoriaCaracteristicaRepository;
+import br.com.valemorar.domain.categoria_caracteristica.repository.CategoriaCaracteristicaRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -18,9 +19,10 @@ public class CategoriaCaracteristicaService {
         this.repository = repository;
     }
 
+    @Transactional
     public CategoriaCaracteristicaResponseDTO criar(CategoriaCaracteristicaCreateDTO dto) {
         if (repository.existsByNome(dto.nome())) {
-            throw new RuntimeException("Já existe uma categoria de característica cadastrada com este nome");
+            throw new IllegalArgumentException("Já existe uma categoria de característica cadastrada com este nome");
         }
 
         CategoriaCaracteristica entity = new CategoriaCaracteristica();
@@ -32,22 +34,29 @@ public class CategoriaCaracteristicaService {
         return CategoriaCaracteristicaResponseDTO.fromEntity(salvo);
     }
 
+    @Transactional(readOnly = true)
     public List<CategoriaCaracteristicaResponseDTO> listarTodos() {
-        return repository.findAll()
+        return repository.findAllByOrderByOrdemAsc()
                 .stream()
                 .map(CategoriaCaracteristicaResponseDTO::fromEntity)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public CategoriaCaracteristicaResponseDTO buscarPorId(UUID id) {
         CategoriaCaracteristica entity = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Categoria de característica não encontrada"));
+                .orElseThrow(() -> new IllegalArgumentException("Categoria de característica não encontrada"));
         return CategoriaCaracteristicaResponseDTO.fromEntity(entity);
     }
 
+    @Transactional
     public CategoriaCaracteristicaResponseDTO atualizar(UUID id, CategoriaCaracteristicaCreateDTO dto) {
         CategoriaCaracteristica entity = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Categoria de característica não encontrada"));
+                .orElseThrow(() -> new IllegalArgumentException("Categoria de característica não encontrada"));
+
+        if (repository.existsByNomeAndIdNot(dto.nome(), id)) {
+            throw new IllegalArgumentException("Já existe outra categoria de característica cadastrada com este nome");
+        }
 
         entity.setNome(dto.nome());
         entity.setIcone(dto.icone());
@@ -57,9 +66,10 @@ public class CategoriaCaracteristicaService {
         return CategoriaCaracteristicaResponseDTO.fromEntity(atualizado);
     }
 
+    @Transactional
     public void deletar(UUID id) {
         if (!repository.existsById(id)) {
-            throw new RuntimeException("Categoria de característica não encontrada");
+            throw new IllegalArgumentException("Categoria de característica não encontrada");
         }
         repository.deleteById(id);
     }

@@ -1,13 +1,16 @@
-package br.com.valemorar.domain.Imovel_caracteristica.controller;
+package br.com.valemorar.domain.imovel_caracteristica.controller;
 
-import br.com.valemorar.domain.Imovel_caracteristica.dto.ImovelCaracteristicaCreateDTO;
-import br.com.valemorar.domain.Imovel_caracteristica.dto.ImovelCaracteristicaResponseDTO;
-import br.com.valemorar.domain.Imovel_caracteristica.service.ImovelCaracteristicaService;
+import br.com.valemorar.domain.imovel_caracteristica.dto.ImovelCaracteristicaCreateDTO;
+import br.com.valemorar.domain.imovel_caracteristica.dto.ImovelCaracteristicaResponseDTO;
+import br.com.valemorar.domain.imovel_caracteristica.service.ImovelCaracteristicaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +32,7 @@ public class ImovelCaracteristicaController {
     @Operation(summary = "Associar característica ao imóvel", description = "Cadastra o vínculo de uma característica a um imóvel específico")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Característica associada ao imóvel com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos")
+            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos ou associação já existente")
     })
     @PostMapping
     public ResponseEntity<ImovelCaracteristicaResponseDTO> criar(
@@ -37,11 +40,12 @@ public class ImovelCaracteristicaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(dto));
     }
 
-    @Operation(summary = "Listar todas as características de imóveis", description = "Retorna uma lista com todas as associações de características registradas nos imóveis")
-    @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
+    @Operation(summary = "Listar todas as características de imóveis", description = "Retorna uma página com todas as associações de características registradas nos imóveis")
+    @ApiResponse(responseCode = "200", description = "Página retornada com sucesso")
     @GetMapping
-    public ResponseEntity<List<ImovelCaracteristicaResponseDTO>> listarTodos() {
-        return ResponseEntity.ok(service.listarTodos());
+    public ResponseEntity<Page<ImovelCaracteristicaResponseDTO>> listarTodos(
+            @PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(service.listarTodos(pageable));
     }
 
     @Operation(summary = "Buscar associação por ID", description = "Busca os detalhes de uma característica do imóvel pelo seu UUID")
@@ -70,12 +74,13 @@ public class ImovelCaracteristicaController {
             @ApiResponse(responseCode = "400", description = "Dados inválidos ou registro não encontrado")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<ImovelCaracteristicaResponseDTO> atualizar(@PathVariable UUID id,
+    public ResponseEntity<ImovelCaracteristicaResponseDTO> atualizar(
+            @PathVariable UUID id,
             @RequestBody @Valid ImovelCaracteristicaCreateDTO dto) {
         return ResponseEntity.ok(service.atualizar(id, dto));
     }
 
-    @Operation(summary = "Remover característica do imóvel", description = "Remove a associação de uma característica com o imóvel pelo seu UUID")
+    @Operation(summary = "Remover característica do imóvel por ID", description = "Remove a associação de uma característica com o imóvel pelo seu UUID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Registro deletado com sucesso"),
             @ApiResponse(responseCode = "400", description = "Registro não encontrado")
@@ -83,6 +88,19 @@ public class ImovelCaracteristicaController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable UUID id) {
         service.deletar(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Remover característica por Imóvel e Característica", description = "Remove o vínculo informando o ID do imóvel e da característica")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Registro deletado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Registro não encontrado")
+    })
+    @DeleteMapping("/imovel/{imovelId}/caracteristica/{caracteristicaId}")
+    public ResponseEntity<Void> deletarPorImovelECaracteristica(
+            @PathVariable UUID imovelId,
+            @PathVariable UUID caracteristicaId) {
+        service.deletarPorImovelECaracteristica(imovelId, caracteristicaId);
         return ResponseEntity.noContent().build();
     }
 }

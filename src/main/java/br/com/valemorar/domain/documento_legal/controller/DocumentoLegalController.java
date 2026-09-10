@@ -29,14 +29,14 @@ public class DocumentoLegalController {
     @Operation(summary = "Criar um documento legal", description = "Cadastra um novo documento ou termo legal no sistema")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Documento legal criado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos")
+            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos ou documento/versão já existente")
     })
     @PostMapping
     public ResponseEntity<DocumentoLegalResponseDTO> criar(@RequestBody @Valid DocumentoLegalCreateDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(dto));
     }
 
-    @Operation(summary = "Listar todos os documentos legais", description = "Retorna uma lista com todos os documentos legais cadastrados")
+    @Operation(summary = "Listar todos os documentos legais", description = "Retorna uma lista com todos os documentos legais cadastrados ordenados do mais recente para o mais antigo")
     @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
     @GetMapping
     public ResponseEntity<List<DocumentoLegalResponseDTO>> listarTodos() {
@@ -53,14 +53,23 @@ public class DocumentoLegalController {
         return ResponseEntity.ok(service.buscarPorId(id));
     }
 
-    @Operation(summary = "Buscar documentos legais por tipo", description = "Retorna uma lista de documentos legais filtrados pelo tipo informado")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Lista de documentos do tipo informado retornada com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Tipo inválido ou sem registros")
-    })
+    @Operation(summary = "Buscar documentos legais por tipo", description = "Retorna uma lista de documentos legais filtrados pelo tipo informado (ex: TERMOS_USO, PRIVACIDADE)")
+    @ApiResponse(responseCode = "200", description = "Lista de documentos do tipo informado retornada com sucesso")
     @GetMapping("/tipo/{tipo}")
     public ResponseEntity<List<DocumentoLegalResponseDTO>> buscarPorTipo(@PathVariable String tipo) {
         return ResponseEntity.ok(service.buscarPorTipo(tipo));
+    }
+
+    @Operation(summary = "Buscar documento legal por tipo e versão", description = "Retorna um documento legal específico filtrado por tipo e versão")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Documento legal encontrado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Documento legal não encontrado")
+    })
+    @GetMapping("/tipo/{tipo}/versao/{versao}")
+    public ResponseEntity<DocumentoLegalResponseDTO> buscarPorTipoEVersao(
+            @PathVariable String tipo,
+            @PathVariable String versao) {
+        return ResponseEntity.ok(service.buscarPorTipoEVersao(tipo, versao));
     }
 
     @Operation(summary = "Atualizar documento legal", description = "Atualiza os dados de um documento legal existente pelo seu UUID")

@@ -1,6 +1,7 @@
 package br.com.valemorar.domain.sessao.dto;
 
 import br.com.valemorar.domain.sessao.Sessao;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 

@@ -1,6 +1,7 @@
 package br.com.valemorar.infra;
 
 import br.com.valemorar.domain.usuario.Usuario;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import javax.crypto.SecretKey;
@@ -13,11 +14,14 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    @Value("${jwt.secret:chaveSecretaMuitoSeguraParaOValemorarProjeto123456}")
+    @Value("${jwt.secret}")
     private String jwtSecret;
 
-    @Value("${jwt.expiration:86400000}") // 24 horas
+    @Value("${jwt.expiration:900000}") // 15 minutos em milissegundos
     private long jwtExpirationInMs;
+
+    @Value("${jwt.refresh-expiration:604800000}") // 7 dias
+    private long refreshExpirationInMs;
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
@@ -37,6 +41,18 @@ public class JwtTokenProvider {
                 .compact();
     }
 
+    public String gerarRefreshToken(Usuario usuario) {
+        Date agora = new Date();
+        Date dataExpiracao = new Date(agora.getTime() + refreshExpirationInMs);
+
+        return Jwts.builder()
+                .subject(usuario.getId().toString())
+                .issuedAt(agora)
+                .expiration(dataExpiracao)
+                .signWith(getSigningKey())
+                .compact();
+    }
+
     public boolean validarToken(String token) {
         try {
             Jwts.parser()
@@ -47,6 +63,15 @@ public class JwtTokenProvider {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public String extrairSubject(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        return claims.getSubject();
     }
 
     public String extrairEmailGoogle(String idToken) {

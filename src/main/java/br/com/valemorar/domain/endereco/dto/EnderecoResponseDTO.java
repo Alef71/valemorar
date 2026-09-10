@@ -1,6 +1,7 @@
 package br.com.valemorar.domain.endereco.dto;
 
 import br.com.valemorar.domain.endereco.Endereco;
+
 import java.util.UUID;
 
 public record EnderecoResponseDTO(

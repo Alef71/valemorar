@@ -1,4 +1,4 @@
-package br.com.valemorar.domain.Imovel_caracteristica;
+package br.com.valemorar.domain.imovel_caracteristica;
 
 import jakarta.persistence.*;
 import lombok.Getter;

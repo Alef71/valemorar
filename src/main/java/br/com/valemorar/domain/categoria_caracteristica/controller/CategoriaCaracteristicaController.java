@@ -29,7 +29,7 @@ public class CategoriaCaracteristicaController {
     @Operation(summary = "Criar categoria de característica", description = "Cadastra uma nova categoria para agrupamento de características")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Categoria criada com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos")
+            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos ou nome já cadastrado")
     })
     @PostMapping
     public ResponseEntity<CategoriaCaracteristicaResponseDTO> criar(
@@ -37,7 +37,7 @@ public class CategoriaCaracteristicaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(dto));
     }
 
-    @Operation(summary = "Listar todas as categorias de características", description = "Retorna uma lista com todas as categorias de características cadastradas")
+    @Operation(summary = "Listar todas as categorias de características", description = "Retorna uma lista com todas as categorias de características ordenadas")
     @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
     @GetMapping
     public ResponseEntity<List<CategoriaCaracteristicaResponseDTO>> listarTodos() {

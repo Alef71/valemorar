@@ -4,9 +4,11 @@ import br.com.valemorar.domain.auth.dto.*;
 import br.com.valemorar.domain.auth.entity.TokenRecuperacao;
 import br.com.valemorar.domain.auth.repository.TokenRecuperacaoRepository;
 import br.com.valemorar.domain.usuario.Usuario;
+import br.com.valemorar.domain.usuario.enums.PerfilEnum;
+import br.com.valemorar.domain.usuario.enums.StatusUsuarioEnum;
 import br.com.valemorar.domain.usuario.repository.UsuarioRepository;
-import br.com.valemorar.infra.JwtTokenProvider;
 import br.com.valemorar.infra.EmailService;
+import br.com.valemorar.infra.JwtTokenProvider;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,13 +47,18 @@ public class AuthService {
             throw new IllegalArgumentException("E-mail ou senha inválidos");
         }
 
-        if ("INATIVO".equalsIgnoreCase(usuario.getStatus()) || "BLOQUEADO".equalsIgnoreCase(usuario.getStatus())) {
+        if (usuario.getStatus() == StatusUsuarioEnum.INATIVO || usuario.getStatus() == StatusUsuarioEnum.BLOQUEADO) {
             throw new IllegalStateException("Conta desativada ou bloqueada");
         }
 
         String tokenJwt = jwtTokenProvider.gerarToken(usuario);
-        return new AuthResponseDTO(tokenJwt, usuario.getId(), usuario.getNome(), usuario.getEmail(),
-                usuario.getStatus());
+        return new AuthResponseDTO(
+                tokenJwt,
+                usuario.getId(),
+                usuario.getNome(),
+                usuario.getEmail(),
+                usuario.getStatus(),
+                usuario.getPerfil());
     }
 
     @Transactional
@@ -65,15 +72,21 @@ public class AuthService {
                     novoUsuario.setEmail(emailGoogle);
                     novoUsuario.setNome(nomeGoogle);
                     novoUsuario.setSenhaHash(passwordEncoder.encode(UUID.randomUUID().toString()));
-                    novoUsuario.setStatus("ATIVO");
+                    novoUsuario.setStatus(StatusUsuarioEnum.ATIVO);
+                    novoUsuario.setPerfil(PerfilEnum.ROLE_USER);
                     novoUsuario.setCriadoEm(LocalDateTime.now());
                     novoUsuario.setAtualizadoEm(LocalDateTime.now());
                     return usuarioRepository.save(novoUsuario);
                 });
 
         String tokenJwt = jwtTokenProvider.gerarToken(usuario);
-        return new AuthResponseDTO(tokenJwt, usuario.getId(), usuario.getNome(), usuario.getEmail(),
-                usuario.getStatus());
+        return new AuthResponseDTO(
+                tokenJwt,
+                usuario.getId(),
+                usuario.getNome(),
+                usuario.getEmail(),
+                usuario.getStatus(),
+                usuario.getPerfil());
     }
 
     @Transactional

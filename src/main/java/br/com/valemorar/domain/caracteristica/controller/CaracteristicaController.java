@@ -8,6 +8,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,18 +32,18 @@ public class CaracteristicaController {
     @Operation(summary = "Criar uma característica", description = "Cadastra uma nova característica de imóvel no sistema")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Característica criada com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos")
+            @ApiResponse(responseCode = "400", description = "Dados inválidos ou nome já cadastrado")
     })
     @PostMapping
     public ResponseEntity<CaracteristicaResponseDTO> criar(@RequestBody @Valid CaracteristicaCreateDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(dto));
     }
 
-    @Operation(summary = "Listar todas as características", description = "Retorna uma lista com todas as características cadastradas")
-    @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
+    @Operation(summary = "Listar todas as características", description = "Retorna uma página com todas as características cadastradas")
+    @ApiResponse(responseCode = "200", description = "Página retornada com sucesso")
     @GetMapping
-    public ResponseEntity<List<CaracteristicaResponseDTO>> listarTodos() {
-        return ResponseEntity.ok(service.listarTodos());
+    public ResponseEntity<Page<CaracteristicaResponseDTO>> listarTodos(@PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(service.listarTodos(pageable));
     }
 
     @Operation(summary = "Buscar característica por ID", description = "Busca os detalhes de uma característica específica pelo seu UUID")
@@ -53,7 +56,7 @@ public class CaracteristicaController {
         return ResponseEntity.ok(service.buscarPorId(id));
     }
 
-    @Operation(summary = "Buscar características por categoria", description = "Retorna todas as características vinculadas a uma categoria específica")
+    @Operation(summary = "Buscar características por categoria", description = "Retorna a lista de características vinculadas a uma categoria específica, ordenadas pelo campo de ordem")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Lista de características da categoria retornada com sucesso"),
             @ApiResponse(responseCode = "400", description = "Categoria não encontrada ou sem características")

@@ -4,7 +4,10 @@ import br.com.valemorar.domain.sessao.Sessao;
 import br.com.valemorar.domain.sessao.dto.SessaoCreateDTO;
 import br.com.valemorar.domain.sessao.dto.SessaoResponseDTO;
 import br.com.valemorar.domain.sessao.repository.SessaoRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,6 +22,7 @@ public class SessaoService {
         this.repository = repository;
     }
 
+    @Transactional
     public SessaoResponseDTO criar(SessaoCreateDTO dto) {
         Sessao entity = new Sessao();
         entity.setUsuarioId(dto.usuarioId());
@@ -32,38 +36,46 @@ public class SessaoService {
         return SessaoResponseDTO.fromEntity(salvo);
     }
 
-    public List<SessaoResponseDTO> listarTodos() {
-        return repository.findAll()
-                .stream()
-                .map(SessaoResponseDTO::fromEntity)
-                .toList();
+    @Transactional(readOnly = true)
+    public Page<SessaoResponseDTO> listarTodos(Pageable pageable) {
+        return repository.findAll(pageable)
+                .map(SessaoResponseDTO::fromEntity);
     }
 
+    @Transactional(readOnly = true)
     public SessaoResponseDTO buscarPorId(UUID id) {
         Sessao entity = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Sessão não encontrada"));
+                .orElseThrow(() -> new IllegalArgumentException("Sessão não encontrada"));
         return SessaoResponseDTO.fromEntity(entity);
     }
 
+    @Transactional(readOnly = true)
     public List<SessaoResponseDTO> buscarPorUsuario(UUID usuarioId) {
-        return repository.findByUsuarioId(usuarioId)
+        return repository.findByUsuarioIdOrderByCriadoEmDesc(usuarioId)
                 .stream()
                 .map(SessaoResponseDTO::fromEntity)
                 .toList();
     }
 
+    @Transactional
     public SessaoResponseDTO revogarSessao(UUID id) {
         Sessao entity = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Sessão não encontrada"));
+                .orElseThrow(() -> new IllegalArgumentException("Sessão não encontrada"));
 
         entity.setRevogadoEm(LocalDateTime.now());
         Sessao atualizado = repository.save(entity);
         return SessaoResponseDTO.fromEntity(atualizado);
     }
 
+    @Transactional
+    public void revogarTodasDoUsuario(UUID usuarioId) {
+        repository.revogarTodasDoUsuario(usuarioId);
+    }
+
+    @Transactional
     public void deletar(UUID id) {
         if (!repository.existsById(id)) {
-            throw new RuntimeException("Sessão não encontrada");
+            throw new IllegalArgumentException("Sessão não encontrada");
         }
         repository.deleteById(id);
     }

@@ -9,7 +9,10 @@ import java.util.UUID;
 
 @Repository
 public interface CaracteristicaRepository extends JpaRepository<Caracteristica, UUID> {
-    List<Caracteristica> findByCategoriaId(UUID categoriaId);
+
+    List<Caracteristica> findByCategoriaIdOrderByOrdemAsc(UUID categoriaId);
 
     boolean existsByNome(String nome);
+
+    boolean existsByNomeAndIdNot(String nome, UUID id);
 }
