@@ -1,12 +1,14 @@
 package br.com.valemorar.domain.anucio;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -27,7 +29,17 @@ public class Anuncio {
     @Column(name = "anunciante_id")
     private UUID anuncianteId;
 
+    private String cidade;
+
+    private Integer quartos;
+
+    @ElementCollection
+    @CollectionTable(name = "anuncio_tags", joinColumns = @JoinColumn(name = "anuncio_id"))
+    @Column(name = "tag")
+    private List<String> tags;
+
     private BigDecimal valor;
+
     private String modalidade;
 
     @Column(name = "valor_condominio")
