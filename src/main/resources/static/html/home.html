@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ValeMorar - Alugue um lar para chamar de seu</title>
+    <link rel="stylesheet" href="../css/home.css">
+</head>
+<body>
+
+    <!-- HEADER DINÂMICO -->
+    <header class="app-header">
+        <a href="home.html" class="brand-logo">ValeMorar</a>
+        <nav class="nav-links" id="nav-links">
+            <a href="home.html" class="active">Home</a>
+            <a href="auth.html">Entrar / Cadastrar</a>
+        </nav>
+    </header>
+
+    <main class="main-container">
+
+        <!-- SEÇÃO HERO / DOBRA PRINCIPAL COM FORMULÁRIO -->
+        <section class="main-section-fold">
+            <div class="fold-wrapper">
+                <div class="overlay"></div>
+                <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80" alt="Alugue um lar para chamar de seu" class="fold-image">
+            </div>
+
+            <div class="formbox">
+                <form class="search-box" action="busca.html" method="GET">
+                    <h1 class="title">Alugue um lar<br/> para chamar de seu</h1>
+
+                    <div class="form-group">
+                        <label for="city">Cidade</label>
+                        <input type="text" id="city" name="cidade" placeholder="Busque por cidade">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="neighbor">Bairro</label>
+                        <input type="text" id="neighbor" name="bairro" placeholder="Busque por bairro">
+                    </div>
+
+                    <div class="filters-wrapper">
+                        <div class="form-group">
+                            <label for="price">Valor Máximo (R$)</label>
+                            <input type="number" id="price" name="preco" placeholder="Ex: 2000" min="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="rooms">Quartos</label>
+                            <input type="number" id="rooms" name="quartos" placeholder="Nº de quartos" min="1">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit">Buscar agora</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- SEÇÃO DE DESTAQUE / BANNER -->
+        <section class="content-container">
+            <div class="banner-wrapper">
+                <div class="banner-card">
+                    <div class="banner-content">
+                        <h2 class="banner-title">Encontre acomodações verificadas no Vale</h2>
+                        <p class="banner-description">Reserve imóveis diretamente com proprietários e moradores locais de forma rápida e transparente.</p>
+                    </div>
+                    <a href="busca.html" class="btn-secondary-action">Encontre imóveis para alugar</a>
+                </div>
+
+                <!-- CARDS DE RECOMENDAÇÃO -->
+                <div class="highlights-grid">
+                    <div class="highlight-card">
+                        <div class="card-icon">🏠</div>
+                        <h3>Sem Burocracia</h3>
+                        <p>Negocie diretamente com quem entende do assunto.</p>
+                    </div>
+                    <div class="highlight-card">
+                        <div class="card-icon">📍</div>
+                        <h3>Localização Ideal</h3>
+                        <p>Opções nos melhores bairros e regiões da cidade.</p>
+                    </div>
+                    <div class="highlight-card">
+                        <div class="card-icon">🔒</div>
+                        <h3>Segurança Garantida</h3>
+                        <p>Anúncios verificados para a sua tranquilidade.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="app-footer">
+        <p>&copy; 2026 ValeMorar. Todos os direitos reservados.</p>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script src="../js/header.js"></script>
+</body>
+</html>

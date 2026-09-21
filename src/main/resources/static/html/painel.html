@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ValeMorar - Painel do Usuário</title>
+    <link rel="stylesheet" href="../css/painel.css">
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header class="app-header">
+        <a href="home.html" class="brand-logo">ValeMorar</a>
+        <nav class="nav-links">
+            <a href="home.html">Home</a>
+            <a href="painel.html" class="active">Meu Painel</a>
+            <button id="btn-logout" class="btn-logout">Sair</button>
+        </nav>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="dashboard-container">
+        
+        <!-- CARD DE PERFIL -->
+        <aside class="profile-card">
+            <div class="avatar-wrapper">
+                <img id="user-avatar" src="https://via.placeholder.com/120" alt="Foto de Perfil">
+            </div>
+            <h3 id="user-name">Carregando...</h3>
+            <p id="user-email" class="user-email">...</p>
+            <span id="user-role" class="user-badge">Usuário</span>
+
+            <div class="profile-actions">
+                <button class="btn-secondary" id="btn-abrir-modal-perfil">Editar Perfil</button>
+                <button class="btn-secondary" id="btn-abrir-modal-endereco">📍 Gerenciar Endereço</button>
+            </div>
+        </aside>
+
+        <!-- SEÇÃO DE CONTEÚDO E AÇÕES -->
+        <section class="dashboard-content">
+            <div class="welcome-banner">
+                <h2>Olá, <span id="welcome-name">Usuário</span>! 👋</h2>
+                <p>Gerencie seu perfil, endereço e anúncios do sistema.</p>
+            </div>
+
+            <!-- CARD DE ENDEREÇO CADASTRADO -->
+            <div class="content-box">
+                <h3>Meu Endereço Cadastrado</h3>
+                <div id="endereco-info-container">
+                    <p class="empty-message">Nenhum endereço cadastrado no momento.</p>
+                </div>
+            </div>
+
+            <!-- CARDS DE ESTATÍSTICAS -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h4>Meus Anúncios</h4>
+                    <p class="stat-number" id="total-anuncios">0</p>
+                    <a href="#" class="stat-link">Ver todos</a>
+                </div>
+                <div class="stat-card action-card">
+                    <h4>Novo Imóvel</h4>
+                    <p class="stat-desc">Anuncie um imóvel para alugar ou vender.</p>
+                    <button class="btn-primary" id="btn-novo-anuncio">+ Criar Anúncio</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL: EDITAR PERFIL -->
+    <div class="modal-overlay" id="modal-perfil">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Editar Perfil</h3>
+                <button class="btn-close" id="btn-fechar-modal-perfil">&times;</button>
+            </div>
+            <form id="form-editar-perfil">
+                <div class="form-group">
+                    <label for="edit-nome">Nome Completo</label>
+                    <input type="text" id="edit-nome" minlength="3" maxlength="100" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-foto-file">Foto de Perfil (Carregar do PC)</label>
+                    <input type="file" id="edit-foto-file" accept="image/*">
+                </div>
+
+                <!-- PRÉ-VISUALIZAÇÃO DA FOTO SELECIONADA -->
+                <div class="preview-container">
+                    <img id="edit-foto-preview" src="" alt="Pré-visualização" class="preview-avatar">
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" id="btn-cancelar-perfil">Cancelar</button>
+                    <button type="submit" class="btn-primary" id="btn-salvar-perfil">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: CADASTRAR / EDITAR ENDEREÇO -->
+    <div class="modal-overlay" id="modal-endereco">
+        <div class="modal-card modal-lg">
+            <div class="modal-header">
+                <h3 id="modal-endereco-titulo">Cadastrar Endereço</h3>
+                <button class="btn-close" id="btn-fechar-modal-endereco">&times;</button>
+            </div>
+            <form id="form-endereco">
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label for="end-cep">CEP</label>
+                        <input type="text" id="end-cep" placeholder="00000-000" maxlength="9" required>
+                    </div>
+                    <div class="form-group flex-2">
+                        <label for="end-logradouro">Logradouro / Rua</label>
+                        <input type="text" id="end-logradouro" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label for="end-numero">Número</label>
+                        <input type="text" id="end-numero" required>
+                    </div>
+                    <div class="form-group flex-2">
+                        <label for="end-complemento">Complemento (Opcional)</label>
+                        <input type="text" id="end-complemento">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label for="end-bairro">Bairro</label>
+                        <input type="text" id="end-bairro" required>
+                    </div>
+                    <div class="form-group flex-1">
+                        <label for="end-cidade">Cidade</label>
+                        <input type="text" id="end-cidade" required>
+                    </div>
+                    <div class="form-group flex-sm">
+                        <label for="end-estado">UF</label>
+                        <input type="text" id="end-estado" maxlength="2" placeholder="SP" required>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" id="btn-cancelar-endereco">Cancelar</button>
+                    <button type="submit" class="btn-primary" id="btn-salvar-endereco">Salvar Endereço</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="app-footer">
+        <p>&copy; 2026 ValeMorar. Todos os direitos reservados.</p>
+    </footer>
+
+    <script src="../js/painel.js"></script>
+</body>
+</html>

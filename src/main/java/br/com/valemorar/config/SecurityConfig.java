@@ -39,7 +39,12 @@ public class SecurityConfig {
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(authorize -> authorize
-                                                // Endpoints Públicos
+                                                // Arquivos Estáticos do Front-end
+                                                .requestMatchers("/", "/*.html", "/html/**", "/css/**", "/js/**",
+                                                                "/imagem/**")
+                                                .permitAll()
+
+                                                // Endpoints Públicos da API
                                                 .requestMatchers("/api/auth/**").permitAll()
                                                 .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
                                                 .requestMatchers(HttpMethod.GET, "/api/anuncios/**").permitAll()
@@ -65,7 +70,15 @@ public class SecurityConfig {
         @Bean
         public CorsConfigurationSource corsConfigurationSource() {
                 CorsConfiguration configuration = new CorsConfiguration();
-                configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:5173"));
+
+                // Adicionadas as origens do Live Server (127.0.0.1:5500 e localhost:5500)
+                configuration.setAllowedOrigins(List.of(
+                                "http://127.0.0.1:5500",
+                                "http://localhost:5500",
+                                "http://localhost:3000",
+                                "http://localhost:5173",
+                                "http://localhost:8080"));
+
                 configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
                 configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
                 configuration.setAllowCredentials(true);
