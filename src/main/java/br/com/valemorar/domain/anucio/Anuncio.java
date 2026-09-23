@@ -31,6 +31,9 @@ public class Anuncio {
 
     private String cidade;
 
+    @Column(name = "tipo_imovel")
+    private String tipoImovel;
+
     private Integer quartos;
 
     @ElementCollection

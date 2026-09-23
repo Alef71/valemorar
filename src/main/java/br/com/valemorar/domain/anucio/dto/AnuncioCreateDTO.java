@@ -15,6 +15,8 @@ public record AnuncioCreateDTO(
 
         @NotBlank(message = "A cidade é obrigatória") @Size(max = 100, message = "A cidade deve ter no máximo 100 caracteres") String cidade,
 
+        @NotBlank(message = "O tipo do imóvel é obrigatório") @Size(max = 50, message = "O tipo do imóvel deve ter no máximo 50 caracteres") String tipoImovel,
+
         @Min(value = 0, message = "O número de quartos não pode ser negativo") Integer quartos,
 
         List<String> tags,

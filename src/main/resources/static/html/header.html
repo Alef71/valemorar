@@ -1,6 +1,27 @@
-<header class="app-header">
-    <a href="home.html" class="brand-logo">ValeMorar</a>
-    <nav class="nav-links" id="nav-links">
-        <a href="home.html">Home</a>
+<header class="app-header-sticky px-4 sm:px-6 lg:px-12 py-3.5 border-b border-[#ece7dc] bg-white/80 backdrop-blur-md sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+    
+    <!-- Logo com Imagem + Cidade Dinâmica -->
+    <a href="home.html" class="brand-logo-link flex items-center gap-3 group focus:outline-none">
+      <img src="../imagem/vale.jpg" alt="Vale Morar" class="h-10 w-auto object-contain rounded-md">
+      
+      <div id="header-user-city" class="hidden xl:flex items-center pl-3 border-l border-[#dfd9cc] text-[11px] font-bold tracking-widest text-brand-textSecondary uppercase">
+        <!-- Preenchido via JS -->
+      </div>
+    </a>
+
+    <!-- Links do Menu -->
+    <nav class="hidden lg:flex items-center gap-6 text-sm font-medium text-brand-textSecondary">
+      <a href="home.html#cidades" class="nav-link text-brand-green font-bold border-b-2 border-brand-green pb-0.5">Explorar Cidades</a>
+      <a href="busca.html?modalidade=residencial" class="nav-link hover:text-brand-green">Aluguel Residencial</a>
+      <a href="busca.html?modalidade=comercial" class="nav-link hover:text-brand-green">Aluguel Comercial</a>
+      <a href="busca.html?modalidade=sitios" class="nav-link hover:text-brand-green">Sítios & Chácaras</a>
     </nav>
+
+    <!-- Área Dinâmica do Usuário -->
+    <div id="user-header-actions" class="flex items-center gap-3">
+      <!-- Conteúdo inserido dinamicamente via JS -->
+    </div>
+
+  </div>
 </header>

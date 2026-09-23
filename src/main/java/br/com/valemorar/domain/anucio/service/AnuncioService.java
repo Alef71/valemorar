@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,8 +40,9 @@ public class AnuncioService {
         anuncio.setImovelId(dto.imovelId());
         anuncio.setAnuncianteId(dto.anuncianteId());
         anuncio.setCidade(dto.cidade());
+        anuncio.setTipoImovel(dto.tipoImovel() != null ? dto.tipoImovel() : "RESIDENCIAL");
         anuncio.setQuartos(dto.quartos());
-        anuncio.setTags(dto.tags());
+        anuncio.setTags(dto.tags() != null ? new ArrayList<>(dto.tags()) : new ArrayList<>());
         anuncio.setValor(dto.valor());
         anuncio.setModalidade(dto.modalidade());
         anuncio.setValorCondominio(dto.valorCondominio());
@@ -63,9 +65,9 @@ public class AnuncioService {
     }
 
     @Transactional(readOnly = true)
-    public Page<AnuncioResponseDTO> buscarComFiltros(String cidade, BigDecimal precoMin, BigDecimal precoMax,
-            Integer quartos, List<String> tags, Pageable pageable) {
-        return anuncioRepository.buscarComFiltros(cidade, precoMin, precoMax, quartos, tags, pageable)
+    public Page<AnuncioResponseDTO> buscarComFiltros(String cidade, String tipoImovel, BigDecimal precoMin, BigDecimal precoMax,
+                                                    Integer quartos, List<String> tags, Pageable pageable) {
+        return anuncioRepository.buscarComFiltros(cidade, tipoImovel, precoMin, precoMax, quartos, tags, pageable)
                 .map(AnuncioResponseDTO::fromEntity);
     }
 
@@ -90,8 +92,9 @@ public class AnuncioService {
         anuncio.setImovelId(dto.imovelId());
         anuncio.setAnuncianteId(dto.anuncianteId());
         anuncio.setCidade(dto.cidade());
+        anuncio.setTipoImovel(dto.tipoImovel());
         anuncio.setQuartos(dto.quartos());
-        anuncio.setTags(dto.tags());
+        anuncio.setTags(dto.tags() != null ? new ArrayList<>(dto.tags()) : new ArrayList<>());
         anuncio.setValor(dto.valor());
         anuncio.setModalidade(dto.modalidade());
         anuncio.setValorCondominio(dto.valorCondominio());
