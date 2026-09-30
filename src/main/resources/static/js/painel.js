@@ -278,7 +278,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const currentToken = localStorage.getItem('token');
         try {
             const response = await fetch(`${API_BASE}/anuncios/${id}/renovar`, {
-                method: 'PUT',
+                method: 'POST',
                 headers: { 'Authorization': `Bearer ${currentToken}` }
             });
             if (response.ok) {

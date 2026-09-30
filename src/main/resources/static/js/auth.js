@@ -78,9 +78,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (response.ok) {
                     const data = await response.json().catch(() => ({}));
 
-                    if (data.usuario || data.nome || data.id) {
+                    if (data.token) {
+                        localStorage.setItem('token', data.token);
+                    }
+
+                    if (data.usuario || data.nome || data.id || data.usuarioId) {
                         const usuario = {
-                            id: data.id || data.usuario?.id || null,
+                            id: data.usuarioId || data.id || data.usuario?.id || null,
                             nome: data.nome || data.usuario?.nome || email.split('@')[0],
                             email: data.email || data.usuario?.email || email,
                             cidade: data.cidade || data.usuario?.cidade || null,
@@ -151,8 +155,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (resLogin.ok) {
                         const data = await resLogin.json().catch(() => ({}));
 
+                        if (data.token) {
+                            localStorage.setItem('token', data.token);
+                        }
+
                         const usuario = {
-                            id: data.id || data.usuario?.id || null,
+                            id: data.usuarioId || data.id || data.usuario?.id || null,
                             nome: data.nome || data.usuario?.nome || nome || email.split('@')[0],
                             email: data.email || data.usuario?.email || email,
                             cidade: data.cidade || data.usuario?.cidade || null,
