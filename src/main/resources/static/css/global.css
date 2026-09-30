@@ -1,0 +1,205 @@
+/* ==========================================================================
+   SISTEMA DE DESIGN & VARIÁVEIS GLOBAIS - VALE MORAR
+   ========================================================================== */
+:root {
+  /* Cores Institucionais do Vale do Jequitinhonha */
+  --color-verde-vale: #173A2A;    /* Verde Institucional */
+  --color-verde-hover: #112B1F;
+  --color-marrom-terra: #7A4318;  /* Arquitetura/Terra */
+  --color-ocre-dourado: #B98232;  /* Destaques e Ações */
+  --color-dourado-hover: #A66A2C;
+  --color-areia-creme: #F4EFE3;   /* Fundo Principal */
+  --color-verde-suave: #405B38;
+  --color-white: #FFFFFF;
+
+  /* Mapeamento Semântico de Cores */
+  --color-primary: var(--color-verde-vale);
+  --color-primary-hover: var(--color-verde-hover);
+  --color-accent: var(--color-ocre-dourado);
+  --color-accent-hover: var(--color-dourado-hover);
+  --color-bg-body: var(--color-areia-creme);
+  --color-bg-surface: var(--color-white);
+
+  /* Tipografia & Textos */
+  --color-text-primary: #1C241E;
+  --color-text-secondary: #5C4F43;
+  --color-text-muted: #8A7C6F;
+
+  /* Bordas e Divisores */
+  --color-border: #DFD7C8;
+  --color-border-input: #DCD6C9;
+
+  /* Feedback e Status */
+  --color-success-bg: #EAF4EE;
+  --color-success-text: #155724;
+  --color-success-border: #C3E6CB;
+
+  --color-error-bg: #F8D7DA;
+  --color-error-text: #721C24;
+  --color-error-border: #F5C6CB;
+
+  /* Formas e Sombras */
+  --font-family-main: 'Plus Jakarta Sans', 'Segoe UI', Tahoma, sans-serif;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 15px rgba(0, 0, 0, 0.08);
+  --transition-fast: all 0.2s ease-in-out;
+}
+
+/* ==========================================================================
+   RESET & ESTILOS BASE
+   ========================================================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: var(--font-family-main);
+}
+
+body {
+  background-color: var(--color-bg-body);
+  color: var(--color-text-primary);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ==========================================================================
+   COMPONENTES REUTILIZÁVEIS DE FORMULÁRIO E FEEDBACK
+   ========================================================================== */
+
+/* Grupo de Formulário */
+.form-group {
+  margin-bottom: 1.2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-size: 0.875rem;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 0.75rem;
+  border: 1px solid var(--color-border-input);
+  background-color: #FCFBF9;
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  color: var(--color-text-primary);
+  outline: none;
+  transition: var(--transition-fast);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(23, 58, 42, 0.1);
+}
+
+/* Botões Padronizados */
+.btn-submit,
+.btn-primary {
+  width: 100%;
+  padding: 0.8rem;
+  background-color: var(--color-accent);
+  color: var(--color-white);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: var(--transition-fast);
+}
+
+.btn-submit:hover,
+.btn-primary:hover {
+  background-color: var(--color-accent-hover);
+}
+
+.btn-submit:disabled,
+.btn-primary:disabled {
+  background-color: #A0A6AC;
+  cursor: not-allowed;
+}
+
+/* Mensagens de Feedback */
+.mensagem-feedback {
+  display: none;
+  margin-bottom: 1.2rem;
+  padding: 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  text-align: center;
+  font-weight: 500;
+}
+
+.mensagem-feedback.sucesso {
+  background-color: var(--color-success-bg);
+  color: var(--color-success-text);
+  border: 1px solid var(--color-success-border);
+}
+
+.mensagem-feedback.erro {
+  background-color: var(--color-error-bg);
+  color: var(--color-error-text);
+  border: 1px solid var(--color-error-border);
+}
+
+/* ==========================================================================
+   CABEÇALHO E RODAPÉ GLOBAIS
+   ========================================================================== */
+.app-header {
+  background-color: var(--color-bg-surface);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.brand-logo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.nav-links a {
+  margin-left: 1.5rem;
+  text-decoration: none;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  transition: var(--transition-fast);
+}
+
+.nav-links a:hover {
+  color: var(--color-primary);
+}
+
+.app-footer {
+  text-align: center;
+  padding: 1rem;
+  background-color: var(--color-bg-body);
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  border-top: 1px solid var(--color-border);
+}
+
+/* Utilitário para Esconder Scrollbars */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

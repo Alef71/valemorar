@@ -4,8 +4,12 @@ import br.com.valemorar.domain.anucio.Anuncio;
 import br.com.valemorar.domain.anucio.dto.AnuncioCreateDTO;
 import br.com.valemorar.domain.anucio.dto.AnuncioResponseDTO;
 import br.com.valemorar.domain.anucio.repository.AnuncioRepository;
+import br.com.valemorar.domain.imovel.Imovel;
+import br.com.valemorar.domain.imovel.repository.ImovelRepository;
+import br.com.valemorar.infra.SecurityUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,11 +24,15 @@ public class AnuncioService {
 
     private static final String STATUS_ATIVO = "ATIVO";
     private static final String MENSAGEM_NAO_ENCONTRADO = "Anúncio não encontrado";
+    private static final String MENSAGEM_IMOVEL_NAO_ENCONTRADO = "Imóvel não encontrado com o ID fornecido";
+    private static final String MENSAGEM_ACESSO_NEGADO = "Você não tem permissão para acessar este anúncio";
 
     private final AnuncioRepository anuncioRepository;
+    private final ImovelRepository imovelRepository;
 
-    public AnuncioService(AnuncioRepository anuncioRepository) {
+    public AnuncioService(AnuncioRepository anuncioRepository, ImovelRepository imovelRepository) {
         this.anuncioRepository = anuncioRepository;
+        this.imovelRepository = imovelRepository;
     }
 
     @Transactional
@@ -36,17 +44,15 @@ public class AnuncioService {
             throw new IllegalArgumentException("Já existe um anúncio ativo cadastrado para este imóvel");
         }
 
+        Imovel imovel = imovelRepository.findById(dto.imovelId())
+                .orElseThrow(() -> new IllegalArgumentException(MENSAGEM_IMOVEL_NAO_ENCONTRADO));
+
         Anuncio anuncio = new Anuncio();
-        anuncio.setImovelId(dto.imovelId());
-        anuncio.setAnuncianteId(dto.anuncianteId());
-        anuncio.setCidade(dto.cidade());
-        anuncio.setTipoImovel(dto.tipoImovel() != null ? dto.tipoImovel() : "RESIDENCIAL");
-        anuncio.setQuartos(dto.quartos());
-        anuncio.setTags(dto.tags() != null ? new ArrayList<>(dto.tags()) : new ArrayList<>());
+        anuncio.setImovel(imovel);
+        anuncio.setAnuncianteId(getUsuarioAutenticadoId());
         anuncio.setValor(dto.valor());
         anuncio.setModalidade(dto.modalidade());
-        anuncio.setValorCondominio(dto.valorCondominio());
-        anuncio.setValorIptu(dto.valorIptu());
+        anuncio.setTags(dto.tags() != null ? new ArrayList<>(dto.tags()) : new ArrayList<>());
         anuncio.setNotaMedia(BigDecimal.ZERO);
         anuncio.setTotalAvaliacoes(0);
         anuncio.setStatus(statusInicial);
@@ -65,9 +71,9 @@ public class AnuncioService {
     }
 
     @Transactional(readOnly = true)
-    public Page<AnuncioResponseDTO> buscarComFiltros(String cidade, String tipoImovel, BigDecimal precoMin, BigDecimal precoMax,
-                                                    Integer quartos, List<String> tags, Pageable pageable) {
-        return anuncioRepository.buscarComFiltros(cidade, tipoImovel, precoMin, precoMax, quartos, tags, pageable)
+    public Page<AnuncioResponseDTO> buscarComFiltros(String tipoImovel, BigDecimal precoMin, BigDecimal precoMax,
+            Integer quartos, List<String> tags, Pageable pageable) {
+        return anuncioRepository.buscarComFiltros(tipoImovel, precoMin, precoMax, quartos, tags, pageable)
                 .map(AnuncioResponseDTO::fromEntity);
     }
 
@@ -80,6 +86,7 @@ public class AnuncioService {
 
     @Transactional(readOnly = true)
     public Page<AnuncioResponseDTO> buscarPorAnunciante(UUID anuncianteId, Pageable pageable) {
+        validarAcessoAnunciante(anuncianteId);
         return anuncioRepository.findByAnuncianteId(anuncianteId, pageable)
                 .map(AnuncioResponseDTO::fromEntity);
     }
@@ -88,17 +95,16 @@ public class AnuncioService {
     public AnuncioResponseDTO atualizar(UUID id, AnuncioCreateDTO dto) {
         Anuncio anuncio = anuncioRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(MENSAGEM_NAO_ENCONTRADO));
+        validarOwnership(anuncio);
 
-        anuncio.setImovelId(dto.imovelId());
-        anuncio.setAnuncianteId(dto.anuncianteId());
-        anuncio.setCidade(dto.cidade());
-        anuncio.setTipoImovel(dto.tipoImovel());
-        anuncio.setQuartos(dto.quartos());
-        anuncio.setTags(dto.tags() != null ? new ArrayList<>(dto.tags()) : new ArrayList<>());
+        Imovel imovel = imovelRepository.findById(dto.imovelId())
+                .orElseThrow(() -> new IllegalArgumentException(MENSAGEM_IMOVEL_NAO_ENCONTRADO));
+
+        anuncio.setImovel(imovel);
+        anuncio.setAnuncianteId(getUsuarioAutenticadoId());
         anuncio.setValor(dto.valor());
         anuncio.setModalidade(dto.modalidade());
-        anuncio.setValorCondominio(dto.valorCondominio());
-        anuncio.setValorIptu(dto.valorIptu());
+        anuncio.setTags(dto.tags() != null ? new ArrayList<>(dto.tags()) : new ArrayList<>());
 
         if (dto.status() != null) {
             anuncio.setStatus(dto.status());
@@ -116,6 +122,7 @@ public class AnuncioService {
     public AnuncioResponseDTO alterarStatus(UUID id, String status) {
         Anuncio anuncio = anuncioRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(MENSAGEM_NAO_ENCONTRADO));
+        validarOwnership(anuncio);
 
         anuncio.setStatus(status);
         anuncio.setAtualizadoEm(LocalDateTime.now());
@@ -128,6 +135,7 @@ public class AnuncioService {
     public AnuncioResponseDTO renovarAnuncio(UUID id) {
         Anuncio anuncio = anuncioRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(MENSAGEM_NAO_ENCONTRADO));
+        validarOwnership(anuncio);
 
         anuncio.setExpiraEm(LocalDateTime.now().plusDays(90));
         anuncio.setStatus(STATUS_ATIVO);
@@ -139,9 +147,25 @@ public class AnuncioService {
 
     @Transactional
     public void deletar(UUID id) {
-        if (!anuncioRepository.existsById(id)) {
-            throw new IllegalArgumentException(MENSAGEM_NAO_ENCONTRADO);
+        Anuncio anuncio = anuncioRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(MENSAGEM_NAO_ENCONTRADO));
+        validarOwnership(anuncio);
+        anuncioRepository.delete(anuncio);
+    }
+
+    private UUID getUsuarioAutenticadoId() {
+        return SecurityUtils.getUsuarioAutenticado().getId();
+    }
+
+    private void validarAcessoAnunciante(UUID anuncianteId) {
+        if (!getUsuarioAutenticadoId().equals(anuncianteId)) {
+            throw new AccessDeniedException(MENSAGEM_ACESSO_NEGADO);
         }
-        anuncioRepository.deleteById(id);
+    }
+
+    private void validarOwnership(Anuncio anuncio) {
+        if (!getUsuarioAutenticadoId().equals(anuncio.getAnuncianteId())) {
+            throw new AccessDeniedException(MENSAGEM_ACESSO_NEGADO);
+        }
     }
 }

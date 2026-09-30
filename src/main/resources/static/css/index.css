@@ -1,0 +1,35 @@
+@import url('global.css');
+
+/* Customização do Input Range (Filtro de Preço da Home) */
+input[type=range] {
+  -webkit-appearance: none;
+  background: transparent;
+}
+
+input[type=range]:focus {
+  outline: none;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 18px;
+  width: 18px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  cursor: pointer;
+  margin-top: -6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 6px;
+  cursor: pointer;
+  background: #D8CFC0;
+  border-radius: 3px;
+}
+
+/* Transições de Abas da Home */
+.tab-btn {
+  transition: var(--transition-fast);
+}

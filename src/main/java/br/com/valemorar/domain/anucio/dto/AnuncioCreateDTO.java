@@ -9,27 +9,17 @@ import java.util.UUID;
 
 public record AnuncioCreateDTO(
 
-        @NotNull(message = "O ID do imóvel é obrigatório") UUID imovelId,
+                @NotNull(message = "O ID do imóvel é obrigatório") UUID imovelId,
 
-        @NotNull(message = "O ID do anunciante é obrigatório") UUID anuncianteId,
+                @NotNull(message = "O ID do anunciante é obrigatório") UUID anuncianteId,
 
-        @NotBlank(message = "A cidade é obrigatória") @Size(max = 100, message = "A cidade deve ter no máximo 100 caracteres") String cidade,
+                @NotNull(message = "O valor é obrigatório") @Positive(message = "O valor deve ser maior que zero") BigDecimal valor,
 
-        @NotBlank(message = "O tipo do imóvel é obrigatório") @Size(max = 50, message = "O tipo do imóvel deve ter no máximo 50 caracteres") String tipoImovel,
+                @NotBlank(message = "A modalidade é obrigatória") @Size(max = 50, message = "A modalidade deve ter no máximo 50 caracteres") String modalidade,
 
-        @Min(value = 0, message = "O número de quartos não pode ser negativo") Integer quartos,
+                List<String> tags,
 
-        List<String> tags,
+                @Size(max = 30, message = "O status deve ter no máximo 30 caracteres") String status,
 
-        @NotNull(message = "O valor é obrigatório") @Positive(message = "O valor deve ser maior que zero") BigDecimal valor,
-
-        @NotBlank(message = "A modalidade é obrigatória") @Size(max = 50, message = "A modalidade deve ter no máximo 50 caracteres") String modalidade,
-
-        @PositiveOrZero(message = "O valor do condomínio não pode ser negativo") BigDecimal valorCondominio,
-
-        @PositiveOrZero(message = "O valor do IPTU não pode ser negativo") BigDecimal valorIptu,
-
-        @Size(max = 30, message = "O status deve ter no máximo 30 caracteres") String status,
-
-        @Future(message = "A data de expiração deve ser no futuro") LocalDateTime expiraEm) {
+                @Future(message = "A data de expiração deve ser no futuro") LocalDateTime expiraEm) {
 }

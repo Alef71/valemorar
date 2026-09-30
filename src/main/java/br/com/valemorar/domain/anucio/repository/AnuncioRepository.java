@@ -18,35 +18,32 @@ import java.util.UUID;
 public interface AnuncioRepository extends JpaRepository<Anuncio, UUID> {
 
     @Override
-    @EntityGraph(attributePaths = {"tags"})
+    @EntityGraph(attributePaths = { "tags", "imovel" })
     Optional<Anuncio> findById(UUID id);
 
     @Override
-    @EntityGraph(attributePaths = {"tags"})
+    @EntityGraph(attributePaths = { "tags", "imovel" })
     Page<Anuncio> findAll(Pageable pageable);
 
-    @EntityGraph(attributePaths = {"tags"})
+    @EntityGraph(attributePaths = { "tags", "imovel" })
     Page<Anuncio> findByAnuncianteId(UUID anuncianteId, Pageable pageable);
 
     boolean existsByImovelIdAndStatus(UUID imovelId, String status);
 
-    @EntityGraph(attributePaths = {"tags"})
-    @Query(value = "SELECT DISTINCT a FROM Anuncio a LEFT JOIN FETCH a.tags t WHERE " +
-                    "(:cidade IS NULL OR LOWER(a.cidade) LIKE LOWER(CONCAT('%', :cidade, '%'))) AND " +
-                    "(:tipoImovel IS NULL OR UPPER(a.tipoImovel) = UPPER(:tipoImovel)) AND " +
+    @EntityGraph(attributePaths = { "tags", "imovel" })
+    @Query(value = "SELECT DISTINCT a FROM Anuncio a JOIN FETCH a.imovel i LEFT JOIN FETCH a.tags t WHERE " +
+            "(:tipoImovel IS NULL OR UPPER(i.tipoImovel) = UPPER(:tipoImovel)) AND " +
+            "(:precoMin IS NULL OR a.valor >= :precoMin) AND " +
+            "(:precoMax IS NULL OR a.valor <= :precoMax) AND " +
+            "(:quartos IS NULL OR i.quartos >= :quartos) AND " +
+            "(COALESCE(:tags, NULL) IS NULL OR t IN :tags)", countQuery = "SELECT COUNT(DISTINCT a) FROM Anuncio a JOIN a.imovel i LEFT JOIN a.tags t WHERE "
+                    +
+                    "(:tipoImovel IS NULL OR UPPER(i.tipoImovel) = UPPER(:tipoImovel)) AND " +
                     "(:precoMin IS NULL OR a.valor >= :precoMin) AND " +
                     "(:precoMax IS NULL OR a.valor <= :precoMax) AND " +
-                    "(:quartos IS NULL OR a.quartos >= :quartos) AND " +
-                    "(COALESCE(:tags, NULL) IS NULL OR t IN :tags)", 
-           countQuery = "SELECT COUNT(DISTINCT a) FROM Anuncio a LEFT JOIN a.tags t WHERE " +
-                        "(:cidade IS NULL OR LOWER(a.cidade) LIKE LOWER(CONCAT('%', :cidade, '%'))) AND " +
-                        "(:tipoImovel IS NULL OR UPPER(a.tipoImovel) = UPPER(:tipoImovel)) AND " +
-                        "(:precoMin IS NULL OR a.valor >= :precoMin) AND " +
-                        "(:precoMax IS NULL OR a.valor <= :precoMax) AND " +
-                        "(:quartos IS NULL OR a.quartos >= :quartos) AND " +
-                        "(COALESCE(:tags, NULL) IS NULL OR t IN :tags)")
+                    "(:quartos IS NULL OR i.quartos >= :quartos) AND " +
+                    "(COALESCE(:tags, NULL) IS NULL OR t IN :tags)")
     Page<Anuncio> buscarComFiltros(
-            @Param("cidade") String cidade,
             @Param("tipoImovel") String tipoImovel,
             @Param("precoMin") BigDecimal precoMin,
             @Param("precoMax") BigDecimal precoMax,

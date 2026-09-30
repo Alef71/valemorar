@@ -1,6 +1,7 @@
 package br.com.valemorar.config;
 
 import br.com.valemorar.infra.SecurityFilter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -27,6 +28,9 @@ public class SecurityConfig {
 
         private final SecurityFilter securityFilter;
 
+        @Value("${cors.allowed-origins}")
+        private List<String> allowedOrigins;
+
         public SecurityConfig(SecurityFilter securityFilter) {
                 this.securityFilter = securityFilter;
         }
@@ -39,6 +43,9 @@ public class SecurityConfig {
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(authorize -> authorize
+                                                // Liberar requisições OPTIONS (Preflight CORS)
+                                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                                                 // Arquivos Estáticos do Front-end
                                                 .requestMatchers("/", "/*.html", "/html/**", "/css/**", "/js/**",
                                                                 "/imagem/**")
@@ -47,7 +54,14 @@ public class SecurityConfig {
                                                 // Endpoints Públicos da API
                                                 .requestMatchers("/api/auth/**").permitAll()
                                                 .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
-                                                .requestMatchers(HttpMethod.GET, "/api/anuncios/**").permitAll()
+                                                .requestMatchers(HttpMethod.GET, "/api/anuncios", "/api/anuncios/**")
+                                                .permitAll()
+
+                                                // LIBERADO: Leitura de Endereços/Cidades no Cabeçalho e Vitrine
+                                                .requestMatchers(HttpMethod.GET, "/api/enderecos", "/api/enderecos/**")
+                                                .permitAll()
+
+                                                // Swagger / Docs
                                                 .requestMatchers(
                                                                 "/v3/api-docs/**",
                                                                 "/swagger-ui/**",
@@ -71,16 +85,9 @@ public class SecurityConfig {
         public CorsConfigurationSource corsConfigurationSource() {
                 CorsConfiguration configuration = new CorsConfiguration();
 
-                // Adicionadas as origens do Live Server (127.0.0.1:5500 e localhost:5500)
-                configuration.setAllowedOrigins(List.of(
-                                "http://127.0.0.1:5500",
-                                "http://localhost:5500",
-                                "http://localhost:3000",
-                                "http://localhost:5173",
-                                "http://localhost:8080"));
-
+                configuration.setAllowedOrigins(allowedOrigins);
                 configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-                configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
+                configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept"));
                 configuration.setAllowCredentials(true);
 
                 UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

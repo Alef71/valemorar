@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400;1,6..72,600&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
 
-  <!-- Tailwind CSS CDN -->
+  <!-- Tailwind CSS CDN Configurado com a Paleta Vale Morar -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -24,18 +24,17 @@
           },
           colors: {
             brand: {
-              green: '#1c7b39',
-              greenDark: '#155d2b',
-              greenContainer: '#145c2a',
-              greenLight: '#eaf4ee',
-              orange: '#e67324',
-              orangeDark: '#c95b16',
-              orangeLight: '#fff2e9',
-              cream: '#fbf9f4',
-              surface: '#f7f4ee',
-              surfaceLow: '#f0ede6',
-              textPrimary: '#231e1a',
-              textSecondary: '#665c52',
+              green: '#173A2A',
+              brown: '#7A4318',
+              gold: '#B98232',
+              cream: '#F4EFE3',
+              greenSoft: '#405B38',
+              earthLight: '#A66A2C',
+              orange: '#B98232',
+              orangeDark: '#A66A2C',
+              surface: '#FFFFFF',
+              textPrimary: '#1C241E',
+              textSecondary: '#5C4F43',
             }
           }
         }
@@ -45,17 +44,17 @@
 
   <!-- CSS Externos do Projeto -->
   <link rel="stylesheet" href="../css/header.css">
-  <link rel="stylesheet" href="../css/home.css">
+  <link rel="stylesheet" href="../css/index.css">
 </head>
-<body class="bg-brand-cream text-brand-textPrimary font-sans antialiased selection:bg-brand-orangeLight flex flex-col min-h-screen">
+<body class="bg-brand-cream text-brand-textPrimary font-sans antialiased flex flex-col min-h-screen">
 
   <!-- CABEÇALHO / HEADER -->
-  <header class="app-header-sticky px-4 sm:px-6 lg:px-12 py-3.5 border-b border-[#ece7dc] bg-white/80 backdrop-blur-md sticky top-0 z-50">
+  <header class="app-header-sticky px-4 sm:px-6 lg:px-12 py-3.5 border-b border-[#dfd7c8] bg-white/90 backdrop-blur-md sticky top-0 z-50">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
       
-      <!-- Logo com Imagem vale.jpg + Cidade Dinâmica -->
-      <a href="home.html" class="brand-logo-link flex items-center gap-3 group focus:outline-none">
-        <img src="../imagem/vale.jpg" alt="Vale Morar" class="h-10 w-auto object-contain rounded-md">
+      <!-- LOGO COM CAMINHO CORRIGIDO PARA index.html -->
+      <a href="index.html" class="brand-logo-link flex items-center gap-3 group focus:outline-none">
+        <img src="../imagem/vale%20morar.jpeg" alt="Vale Morar" class="h-10 w-auto object-contain rounded-md">
         
         <div id="header-user-city" class="hidden xl:flex items-center pl-3 border-l border-[#dfd9cc] text-[11px] font-bold tracking-widest text-brand-textSecondary uppercase">
           <!-- Preenchido via JS (header.js) -->
@@ -82,8 +81,8 @@
     <!-- HERO SECTION & BUSCA -->
     <section class="pt-10 pb-12 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto">
       <div class="text-center max-w-3xl mx-auto space-y-4">
-        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#f4ece1] border border-[#e5dcce] text-xs font-bold text-[#79644f] uppercase tracking-wider shadow-xs">
-          <span class="w-2 h-2 rounded-full bg-brand-orange animate-pulse"></span>
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#e8e0d0] border border-[#d8cdba] text-xs font-bold text-brand-brown uppercase tracking-wider shadow-xs">
+          <span class="w-2 h-2 rounded-full bg-brand-gold animate-pulse"></span>
           Alto, Médio e Baixo Jequitinhonha
         </div>
 
@@ -97,17 +96,13 @@
       </div>
 
       <!-- BOX DE BUSCA INTEGRADA -->
-      <div class="mt-8 bg-white border border-[#e8e3d8] rounded-2xl shadow-xl p-4 sm:p-6 max-w-5xl mx-auto">
+      <div class="mt-8 bg-white border border-[#dfd7c8] rounded-2xl shadow-xl p-4 sm:p-6 max-w-5xl mx-auto">
         <form class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 items-end" action="busca.html" method="GET">
           
           <div class="lg:col-span-4">
             <label class="block text-xs font-bold text-brand-textSecondary mb-1.5">Cidade do Vale</label>
             <select name="cidade" class="w-full bg-[#fcfbf9] border border-[#dcd6c9] rounded-lg px-3 py-2.5 text-sm font-semibold text-brand-textPrimary focus:outline-none focus:border-brand-green">
               <option value="">Todas as Cidades</option>
-              <option value="diamantina">Diamantina</option>
-              <option value="aracuai">Araçuaí</option>
-              <option value="almenara">Almenara</option>
-              <option value="capelinha">Capelinha</option>
             </select>
           </div>
 
@@ -122,12 +117,12 @@
               <span class="text-xs font-bold text-brand-green" id="price-val">3.500</span>
             </div>
             <div class="bg-[#fcfbf9] border border-[#dcd6c9] rounded-lg p-2.5 flex items-center">
-              <input type="range" id="price-range" name="preco_max" min="500" max="6000" value="3500" step="100" class="w-full accent-brand-green cursor-pointer">
+              <input type="range" id="price-range" name="preco_max" min="500" max="6000" value="3500" step="100" class="w-full cursor-pointer">
             </div>
           </div>
 
           <div class="lg:col-span-2">
-            <button type="submit" class="w-full bg-brand-orange hover:bg-brand-orangeDark text-white py-2.5 px-4 rounded-lg text-sm font-extrabold shadow-md transition flex items-center justify-center gap-1.5">
+            <button type="submit" class="w-full bg-brand-gold hover:bg-brand-earthLight text-white py-2.5 px-4 rounded-lg text-sm font-extrabold shadow-md transition flex items-center justify-center gap-1.5">
               <span class="material-symbols-outlined text-base">search</span>
               <span>Buscar</span>
             </button>
@@ -138,13 +133,13 @@
     </section>
 
     <!-- VITRINE DE IMÓVEIS -->
-    <section class="py-12 bg-brand-surface border-y border-[#ece7dc]">
+    <section class="py-12 bg-white border-y border-[#dfd7c8]">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
         <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-textPrimary mb-6">Imóveis Recém-Catalogados</h2>
         
         <!-- Container onde os imóveis do backend serão renderizados -->
         <div id="vitrine-imoveis" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <p class="text-stone-500 text-sm col-span-full">Carregando imóveis...</p>
+          <p class="text-brand-textSecondary text-sm col-span-full">Carregando imóveis...</p>
         </div>
       </div>
     </section>
@@ -152,12 +147,12 @@
   </main>
 
   <!-- RODAPÉ -->
-  <footer class="bg-[#f4efe4] border-t border-[#dfd7c8] py-8 text-center text-xs text-[#8a7c6f]">
+  <footer class="bg-brand-cream border-t border-[#dfd7c8] py-8 text-center text-xs text-brand-textSecondary">
     <p>&copy; 2026 Vale Morar Imóveis. Todos os direitos reservados.</p>
   </footer>
 
-  <!-- CARREGAMENTO DE SCRIPTS (Caminhos padronizados) -->
+  <!-- CARREGAMENTO DE SCRIPTS -->
   <script src="../js/header.js"></script>
-  <script src="../js/home.js"></script>
+  <script src="../js/index.js"></script>
 </body>
 </html>

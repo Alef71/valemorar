@@ -1,18 +1,14 @@
 package br.com.valemorar.domain.imovel;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "IMOVEL")
@@ -26,18 +22,19 @@ public class Imovel {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "locador_id")
+    @Column(name = "locador_id", nullable = false)
     private UUID locadorId;
 
-    @Column(name = "endereco_id")
+    @Column(name = "endereco_id", nullable = false)
     private UUID enderecoId;
 
+    @Column(nullable = false)
     private String titulo;
 
     @Column(columnDefinition = "TEXT")
     private String descricao;
 
-    @Column(name = "tipo_imovel")
+    @Column(name = "tipo_imovel", nullable = false)
     private String tipoImovel;
 
     @Column(name = "area_total")
@@ -58,6 +55,12 @@ public class Imovel {
 
     @Column(name = "aceita_pet")
     private Boolean aceitaPet;
+
+    @Column(name = "valor_condominio")
+    private BigDecimal valorCondominio;
+
+    @Column(name = "valor_iptu")
+    private BigDecimal valorIptu;
 
     @Column(name = "criado_em")
     private LocalDateTime criadoEm;
