@@ -1,0 +1,169 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f4f6f9;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* HEADER */
+.app-header {
+    background-color: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.brand-logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #1a252f;
+    text-decoration: none;
+}
+
+.nav-links a {
+    margin-left: 1.5rem;
+    text-decoration: none;
+    color: #555;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.nav-links a:hover {
+    color: #007bff;
+}
+
+/* CONTEÚDO PRINCIPAL */
+.main-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 1rem;
+}
+
+.auth-card {
+    background-color: #ffffff;
+    padding: 2.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 420px;
+}
+
+.auth-title {
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: #1a252f;
+}
+
+/* MENSAGEM DE FEEDBACK */
+.mensagem-feedback {
+    display: none;
+    margin-bottom: 1.2rem;
+    padding: 0.75rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.mensagem-feedback.sucesso {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.mensagem-feedback.erro {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* FORMULÁRIO */
+.form-group {
+    margin-bottom: 1.2rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+    font-weight: 600;
+    color: #495057;
+}
+
+.form-group input {
+    padding: 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+    border-color: #007bff;
+}
+
+/* BOTÃO DE SUBMIT */
+.btn-submit {
+    width: 100%;
+    padding: 0.8rem;
+    background-color: #1a252f;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: background-color 0.2s;
+}
+
+.btn-submit:hover {
+    background-color: #2c3e50;
+}
+
+.btn-submit:disabled {
+    background-color: #a0a6ac;
+    cursor: not-allowed;
+}
+
+/* LINK DE TRANSIÇÃO (CADASTRAR / ENTRAR) */
+.auth-switch {
+    margin-top: 1.5rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.auth-switch a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-switch a:hover {
+    text-decoration: underline;
+}
+
+/* FOOTER */
+.app-footer {
+    text-align: center;
+    padding: 1rem;
+    background-color: #ffffff;
+    font-size: 0.85rem;
+    color: #777;
+    border-top: 1px solid #e9ecef;
+}
