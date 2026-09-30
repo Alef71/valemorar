@@ -4,6 +4,8 @@ import br.com.valemorar.domain.anucio.Anuncio;
 import br.com.valemorar.domain.anucio.dto.AnuncioCreateDTO;
 import br.com.valemorar.domain.anucio.dto.AnuncioResponseDTO;
 import br.com.valemorar.domain.anucio.repository.AnuncioRepository;
+import br.com.valemorar.domain.imovel.Imovel;
+import br.com.valemorar.domain.imovel.repository.ImovelRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,11 +22,14 @@ public class AnuncioService {
 
     private static final String STATUS_ATIVO = "ATIVO";
     private static final String MENSAGEM_NAO_ENCONTRADO = "Anúncio não encontrado";
+    private static final String MENSAGEM_IMOVEL_NAO_ENCONTRADO = "Imóvel não encontrado com o ID fornecido";
 
     private final AnuncioRepository anuncioRepository;
+    private final ImovelRepository imovelRepository;
 
-    public AnuncioService(AnuncioRepository anuncioRepository) {
+    public AnuncioService(AnuncioRepository anuncioRepository, ImovelRepository imovelRepository) {
         this.anuncioRepository = anuncioRepository;
+        this.imovelRepository = imovelRepository;
     }
 
     @Transactional
@@ -36,17 +41,15 @@ public class AnuncioService {
             throw new IllegalArgumentException("Já existe um anúncio ativo cadastrado para este imóvel");
         }
 
+        Imovel imovel = imovelRepository.findById(dto.imovelId())
+                .orElseThrow(() -> new IllegalArgumentException(MENSAGEM_IMOVEL_NAO_ENCONTRADO));
+
         Anuncio anuncio = new Anuncio();
-        anuncio.setImovelId(dto.imovelId());
+        anuncio.setImovel(imovel);
         anuncio.setAnuncianteId(dto.anuncianteId());
-        anuncio.setCidade(dto.cidade());
-        anuncio.setTipoImovel(dto.tipoImovel() != null ? dto.tipoImovel() : "RESIDENCIAL");
-        anuncio.setQuartos(dto.quartos());
-        anuncio.setTags(dto.tags() != null ? new ArrayList<>(dto.tags()) : new ArrayList<>());
         anuncio.setValor(dto.valor());
         anuncio.setModalidade(dto.modalidade());
-        anuncio.setValorCondominio(dto.valorCondominio());
-        anuncio.setValorIptu(dto.valorIptu());
+        anuncio.setTags(dto.tags() != null ? new ArrayList<>(dto.tags()) : new ArrayList<>());
         anuncio.setNotaMedia(BigDecimal.ZERO);
         anuncio.setTotalAvaliacoes(0);
         anuncio.setStatus(statusInicial);
@@ -65,9 +68,9 @@ public class AnuncioService {
     }
 
     @Transactional(readOnly = true)
-    public Page<AnuncioResponseDTO> buscarComFiltros(String cidade, String tipoImovel, BigDecimal precoMin, BigDecimal precoMax,
-                                                    Integer quartos, List<String> tags, Pageable pageable) {
-        return anuncioRepository.buscarComFiltros(cidade, tipoImovel, precoMin, precoMax, quartos, tags, pageable)
+    public Page<AnuncioResponseDTO> buscarComFiltros(String tipoImovel, BigDecimal precoMin, BigDecimal precoMax,
+            Integer quartos, List<String> tags, Pageable pageable) {
+        return anuncioRepository.buscarComFiltros(tipoImovel, precoMin, precoMax, quartos, tags, pageable)
                 .map(AnuncioResponseDTO::fromEntity);
     }
 
@@ -89,16 +92,14 @@ public class AnuncioService {
         Anuncio anuncio = anuncioRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(MENSAGEM_NAO_ENCONTRADO));
 
-        anuncio.setImovelId(dto.imovelId());
+        Imovel imovel = imovelRepository.findById(dto.imovelId())
+                .orElseThrow(() -> new IllegalArgumentException(MENSAGEM_IMOVEL_NAO_ENCONTRADO));
+
+        anuncio.setImovel(imovel);
         anuncio.setAnuncianteId(dto.anuncianteId());
-        anuncio.setCidade(dto.cidade());
-        anuncio.setTipoImovel(dto.tipoImovel());
-        anuncio.setQuartos(dto.quartos());
-        anuncio.setTags(dto.tags() != null ? new ArrayList<>(dto.tags()) : new ArrayList<>());
         anuncio.setValor(dto.valor());
         anuncio.setModalidade(dto.modalidade());
-        anuncio.setValorCondominio(dto.valorCondominio());
-        anuncio.setValorIptu(dto.valorIptu());
+        anuncio.setTags(dto.tags() != null ? new ArrayList<>(dto.tags()) : new ArrayList<>());
 
         if (dto.status() != null) {
             anuncio.setStatus(dto.status());

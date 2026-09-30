@@ -48,18 +48,18 @@ public class AnuncioController {
         return ResponseEntity.ok(anuncioService.listarTodos(pageable));
     }
 
-    @Operation(summary = "Buscar anúncios com filtros avançados", description = "Filtra anúncios por cidade, tipo de imóvel, faixa de preço, número de quartos e tags de proximidade (RF07 e RF08)")
+    @Operation(summary = "Buscar anúncios com filtros avançados", description = "Filtra anúncios por tipo de imóvel, faixa de preço, número de quartos e tags de proximidade (RF07 e RF08)")
     @ApiResponse(responseCode = "200", description = "Busca realizada com sucesso")
     @GetMapping("/busca")
     public ResponseEntity<Page<AnuncioResponseDTO>> buscarComFiltros(
-            @Parameter(description = "Cidade para limitação geográfica (RF08)") @RequestParam(required = false) String cidade,
             @Parameter(description = "Tipo de imóvel ex: RESIDENCIAL, COMERCIAL, CHACARA") @RequestParam(required = false) String tipoImovel,
-            @Parameter(description = "Valor mínimo do aluguel") @RequestParam(required = false) BigDecimal precoMin,
-            @Parameter(description = "Valor máximo do aluguel") @RequestParam(required = false) BigDecimal precoMax,
+            @Parameter(description = "Valor mínimo do aluguel/venda") @RequestParam(required = false) BigDecimal precoMin,
+            @Parameter(description = "Valor máximo do aluguel/venda") @RequestParam(required = false) BigDecimal precoMax,
             @Parameter(description = "Número mínimo de quartos") @RequestParam(required = false) Integer quartos,
             @Parameter(description = "Tags de pontos de interesse ex: IFNMG, UFVJM (RF07)") @RequestParam(required = false) List<String> tags,
             @PageableDefault(size = 10) Pageable pageable) {
-        return ResponseEntity.ok(anuncioService.buscarComFiltros(cidade, tipoImovel, precoMin, precoMax, quartos, tags, pageable));
+        return ResponseEntity
+                .ok(anuncioService.buscarComFiltros(tipoImovel, precoMin, precoMax, quartos, tags, pageable));
     }
 
     @Operation(summary = "Buscar anúncio por ID", description = "Busca os detalhes de um anúncio específico pelo seu UUID")

@@ -45,8 +45,12 @@ public class SecurityFilter extends OncePerRequestFilter {
                     return;
                 }
 
-                // 2. Injeção das permissões/perfis (ROLE_USER, ROLE_ADMIN, etc.)
-                var authorities = List.of(new SimpleGrantedAuthority(usuario.getPerfil().name()));
+                // Garanta que o Spring entenda o Perfil como ROLE
+                String roleName = usuario.getPerfil().name().startsWith("ROLE_")
+                        ? usuario.getPerfil().name()
+                        : "ROLE_" + usuario.getPerfil().name();
+
+                var authorities = List.of(new SimpleGrantedAuthority(roleName));
                 var auth = new UsernamePasswordAuthenticationToken(usuario, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }

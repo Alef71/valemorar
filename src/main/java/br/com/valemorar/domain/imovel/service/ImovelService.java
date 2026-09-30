@@ -92,5 +92,7 @@ public class ImovelService {
         imovel.setAndar(dto.andar());
         imovel.setMobiliado(Boolean.TRUE.equals(dto.mobiliado()));
         imovel.setAceitaPet(Boolean.TRUE.equals(dto.aceitaPet()));
+        imovel.setValorCondominio(dto.valorCondominio());
+        imovel.setValorIptu(dto.valorIptu());
     }
 }

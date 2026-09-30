@@ -1,6 +1,7 @@
 package br.com.valemorar.domain.anucio.dto;
 
 import br.com.valemorar.domain.anucio.Anuncio;
+import br.com.valemorar.domain.imovel.Imovel;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -12,7 +13,6 @@ public record AnuncioResponseDTO(
         UUID id,
         UUID imovelId,
         UUID anuncianteId,
-        String cidade,
         String tipoImovel,
         Integer quartos,
         List<String> tags,
@@ -28,18 +28,19 @@ public record AnuncioResponseDTO(
         LocalDateTime atualizadoEm) {
 
     public static AnuncioResponseDTO fromEntity(Anuncio anuncio) {
+        Imovel imovel = anuncio.getImovel();
+
         return new AnuncioResponseDTO(
                 anuncio.getId(),
-                anuncio.getImovelId(),
+                imovel != null ? imovel.getId() : null,
                 anuncio.getAnuncianteId(),
-                anuncio.getCidade(),
-                anuncio.getTipoImovel(),
-                anuncio.getQuartos(),
+                imovel != null ? imovel.getTipoImovel() : null,
+                imovel != null ? imovel.getQuartos() : null,
                 anuncio.getTags() != null ? new ArrayList<>(anuncio.getTags()) : List.of(),
                 anuncio.getValor(),
                 anuncio.getModalidade(),
-                anuncio.getValorCondominio(),
-                anuncio.getValorIptu(),
+                imovel != null ? imovel.getValorCondominio() : null,
+                imovel != null ? imovel.getValorIptu() : null,
                 anuncio.getNotaMedia(),
                 anuncio.getTotalAvaliacoes(),
                 anuncio.getStatus(),

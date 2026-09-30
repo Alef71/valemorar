@@ -2,6 +2,7 @@ package br.com.valemorar.domain.imovel.dto;
 
 import br.com.valemorar.domain.imovel.Imovel;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -21,6 +22,8 @@ public record ImovelResponseDTO(
         Integer andar,
         Boolean mobiliado,
         Boolean aceitaPet,
+        BigDecimal valorCondominio,
+        BigDecimal valorIptu,
         LocalDateTime criadoEm,
         LocalDateTime atualizadoEm) {
     public static ImovelResponseDTO fromEntity(Imovel imovel) {
@@ -40,6 +43,8 @@ public record ImovelResponseDTO(
                 imovel.getAndar(),
                 imovel.getMobiliado(),
                 imovel.getAceitaPet(),
+                imovel.getValorCondominio(),
+                imovel.getValorIptu(),
                 imovel.getCriadoEm(),
                 imovel.getAtualizadoEm());
     }

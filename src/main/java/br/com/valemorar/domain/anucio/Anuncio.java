@@ -1,5 +1,6 @@
 package br.com.valemorar.domain.anucio;
 
+import br.com.valemorar.domain.imovel.Imovel;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,33 +24,23 @@ public class Anuncio {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "imovel_id")
-    private UUID imovelId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "imovel_id", nullable = false)
+    private Imovel imovel;
 
-    @Column(name = "anunciante_id")
+    @Column(name = "anunciante_id", nullable = false)
     private UUID anuncianteId;
 
-    private String cidade;
+    @Column(nullable = false)
+    private String modalidade; // Ex: ALUGUEL, VENDA
 
-    @Column(name = "tipo_imovel")
-    private String tipoImovel;
-
-    private Integer quartos;
+    @Column(nullable = false)
+    private BigDecimal valor;
 
     @ElementCollection
     @CollectionTable(name = "anuncio_tags", joinColumns = @JoinColumn(name = "anuncio_id"))
     @Column(name = "tag")
     private List<String> tags;
-
-    private BigDecimal valor;
-
-    private String modalidade;
-
-    @Column(name = "valor_condominio")
-    private BigDecimal valorCondominio;
-
-    @Column(name = "valor_iptu")
-    private BigDecimal valorIptu;
 
     @Column(name = "nota_media")
     private BigDecimal notaMedia;
@@ -57,7 +48,8 @@ public class Anuncio {
     @Column(name = "total_avaliacoes")
     private Integer totalAvaliacoes;
 
-    private String status;
+    @Column(nullable = false)
+    private String status; // Ex: ATIVO, PAUSADO, FINALIZADO
 
     @Column(name = "publicado_em")
     private LocalDateTime publicadoEm;
