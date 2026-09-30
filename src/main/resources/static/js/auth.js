@@ -32,14 +32,22 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 const data = await response.json();
                 
-                // Salva o token JWT no localStorage
+                // 1. Salva o Token JWT
                 if (data.token) {
                     localStorage.setItem('token', data.token);
                 }
 
+                // 2. Salva o objeto do Usuário para o header.js e painel.html consumirem
+                const usuario = {
+                    id: data.id || data.usuario?.id || null,
+                    nome: data.nome || data.usuario?.nome || email.split('@')[0],
+                    email: data.email || email
+                };
+                localStorage.setItem('usuario', JSON.stringify(usuario));
+
                 exibirFeedback('Login realizado com sucesso! Redirecionando...', 'sucesso');
                 
-                // Redireciona para o painel do utilizador após 1.5 segundos
+                // 3. Redireciona para o painel
                 setTimeout(() => {
                     window.location.href = 'painel.html';
                 }, 1500);

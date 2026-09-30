@@ -5,17 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ValeMorar - Entrar</title>
     <link rel="stylesheet" href="../css/cadastro.css">
+    <link rel="stylesheet" href="../css/header.css">
 </head>
 <body>
 
-    <!-- HEADER -->
-    <header class="app-header">
-        <a href="home.html" class="brand-logo">ValeMorar</a>
-        <nav class="nav-links">
-            <a href="home.html">Home</a>
-            <a href="auth.html">Entrar</a>
-            <a href="cadastro.html">Cadastrar</a>
-        </nav>
+    <!-- HEADER DINÂMICO -->
+    <header class="app-header-sticky px-4 sm:px-6 lg:px-12 py-3.5">
+      <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+        <a href="home.html" class="brand-logo-link flex items-center gap-3">
+          <span class="text-2xl font-extrabold text-brand-green">Vale<span class="text-brand-orange">Morar</span></span>
+        </a>
+        <div id="user-header-actions" class="flex items-center gap-3"></div>
+      </div>
     </header>
 
     <!-- CONTEÚDO PRINCIPAL -->
@@ -60,7 +61,8 @@
         <p>&copy; 2026 ValeMorar. Todos os direitos reservados.</p>
     </footer>
 
-    <!-- SCRIPT DA PÁGINA DE LOGIN -->
+    <!-- SCRIPTS -->
+    <script src="../js/header.js"></script>
     <script src="../js/auth.js"></script>
 </body>
 </html>

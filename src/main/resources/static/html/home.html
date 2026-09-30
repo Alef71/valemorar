@@ -1,102 +1,163 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ValeMorar - Alugue um lar para chamar de seu</title>
-    <link rel="stylesheet" href="../css/home.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vale Morar - Portal de Aluguéis do Vale do Jequitinhonha</title>
+  
+  <!-- Fontes Google -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400;1,6..72,600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            serif: ['Newsreader', 'serif'],
+          },
+          colors: {
+            brand: {
+              green: '#1c7b39',
+              greenDark: '#155d2b',
+              greenContainer: '#145c2a',
+              greenLight: '#eaf4ee',
+              orange: '#e67324',
+              orangeDark: '#c95b16',
+              orangeLight: '#fff2e9',
+              cream: '#fbf9f4',
+              surface: '#f7f4ee',
+              surfaceLow: '#f0ede6',
+              textPrimary: '#231e1a',
+              textSecondary: '#665c52',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- CSS Externos do Projeto -->
+  <link rel="stylesheet" href="../css/header.css">
+  <link rel="stylesheet" href="../css/home.css">
 </head>
-<body>
+<body class="bg-brand-cream text-brand-textPrimary font-sans antialiased selection:bg-brand-orangeLight flex flex-col min-h-screen">
 
-    <!-- HEADER DINÂMICO -->
-    <header class="app-header">
-        <a href="home.html" class="brand-logo">ValeMorar</a>
-        <nav class="nav-links" id="nav-links">
-            <a href="home.html" class="active">Home</a>
-            <a href="auth.html">Entrar / Cadastrar</a>
-        </nav>
-    </header>
+  <!-- CABEÇALHO / HEADER -->
+  <header class="app-header-sticky px-4 sm:px-6 lg:px-12 py-3.5 border-b border-[#ece7dc] bg-white/80 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      
+      <!-- Logo com Imagem vale.jpg + Cidade Dinâmica -->
+      <a href="home.html" class="brand-logo-link flex items-center gap-3 group focus:outline-none">
+        <img src="../imagem/vale.jpg" alt="Vale Morar" class="h-10 w-auto object-contain rounded-md">
+        
+        <div id="header-user-city" class="hidden xl:flex items-center pl-3 border-l border-[#dfd9cc] text-[11px] font-bold tracking-widest text-brand-textSecondary uppercase">
+          <!-- Preenchido via JS (header.js) -->
+        </div>
+      </a>
 
-    <main class="main-container">
+      <!-- Links do Menu -->
+      <nav class="hidden lg:flex items-center gap-6 text-sm font-medium text-brand-textSecondary">
+        <a href="#cidades" class="nav-link text-brand-green font-bold border-b-2 border-brand-green pb-0.5">Explorar Cidades</a>
+        <a href="busca.html?modalidade=residencial" class="nav-link hover:text-brand-green">Aluguel Residencial</a>
+        <a href="busca.html?modalidade=comercial" class="nav-link hover:text-brand-green">Aluguel Comercial</a>
+        <a href="busca.html?modalidade=sitios" class="nav-link hover:text-brand-green">Sítios & Chácaras</a>
+      </nav>
 
-        <!-- SEÇÃO HERO / DOBRA PRINCIPAL COM FORMULÁRIO -->
-        <section class="main-section-fold">
-            <div class="fold-wrapper">
-                <div class="overlay"></div>
-                <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80" alt="Alugue um lar para chamar de seu" class="fold-image">
+      <!-- ÁREA DINÂMICA DO USUÁRIO (Preenchida pelo header.js) -->
+      <div id="user-header-actions" class="flex items-center gap-3"></div>
+
+    </div>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="flex-1">
+
+    <!-- HERO SECTION & BUSCA -->
+    <section class="pt-10 pb-12 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto">
+      <div class="text-center max-w-3xl mx-auto space-y-4">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#f4ece1] border border-[#e5dcce] text-xs font-bold text-[#79644f] uppercase tracking-wider shadow-xs">
+          <span class="w-2 h-2 rounded-full bg-brand-orange animate-pulse"></span>
+          Alto, Médio e Baixo Jequitinhonha
+        </div>
+
+        <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-brand-textPrimary leading-tight">
+          O seu novo lar no coração do <span class="font-serif italic font-normal text-brand-green">Vale do Jequitinhonha</span>.
+        </h1>
+
+        <p class="text-sm sm:text-base md:text-lg text-brand-textSecondary leading-relaxed">
+          Plataforma dedicada a aluguéis residenciais e comerciais em Diamantina, Araçuaí, Almenara, Capelinha e região.
+        </p>
+      </div>
+
+      <!-- BOX DE BUSCA INTEGRADA -->
+      <div class="mt-8 bg-white border border-[#e8e3d8] rounded-2xl shadow-xl p-4 sm:p-6 max-w-5xl mx-auto">
+        <form class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 items-end" action="busca.html" method="GET">
+          
+          <div class="lg:col-span-4">
+            <label class="block text-xs font-bold text-brand-textSecondary mb-1.5">Cidade do Vale</label>
+            <select name="cidade" class="w-full bg-[#fcfbf9] border border-[#dcd6c9] rounded-lg px-3 py-2.5 text-sm font-semibold text-brand-textPrimary focus:outline-none focus:border-brand-green">
+              <option value="">Todas as Cidades</option>
+              <option value="diamantina">Diamantina</option>
+              <option value="aracuai">Araçuaí</option>
+              <option value="almenara">Almenara</option>
+              <option value="capelinha">Capelinha</option>
+            </select>
+          </div>
+
+          <div class="lg:col-span-4">
+            <label class="block text-xs font-bold text-brand-textSecondary mb-1.5">Bairro ou Referência</label>
+            <input type="text" name="bairro" placeholder="Ex: Centro, UFVJM" class="w-full bg-[#fcfbf9] border border-[#dcd6c9] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-brand-green">
+          </div>
+
+          <div class="lg:col-span-2">
+            <div class="flex justify-between items-center mb-1.5">
+              <label class="text-xs font-bold text-brand-textSecondary">Até R$</label>
+              <span class="text-xs font-bold text-brand-green" id="price-val">3.500</span>
             </div>
-
-            <div class="formbox">
-                <form class="search-box" action="busca.html" method="GET">
-                    <h1 class="title">Alugue um lar<br/> para chamar de seu</h1>
-
-                    <div class="form-group">
-                        <label for="city">Cidade</label>
-                        <input type="text" id="city" name="cidade" placeholder="Busque por cidade">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="neighbor">Bairro</label>
-                        <input type="text" id="neighbor" name="bairro" placeholder="Busque por bairro">
-                    </div>
-
-                    <div class="filters-wrapper">
-                        <div class="form-group">
-                            <label for="price">Valor Máximo (R$)</label>
-                            <input type="number" id="price" name="preco" placeholder="Ex: 2000" min="0">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="rooms">Quartos</label>
-                            <input type="number" id="rooms" name="quartos" placeholder="Nº de quartos" min="1">
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn-submit">Buscar agora</button>
-                </form>
+            <div class="bg-[#fcfbf9] border border-[#dcd6c9] rounded-lg p-2.5 flex items-center">
+              <input type="range" id="price-range" name="preco_max" min="500" max="6000" value="3500" step="100" class="w-full accent-brand-green cursor-pointer">
             </div>
-        </section>
+          </div>
 
-        <!-- SEÇÃO DE DESTAQUE / BANNER -->
-        <section class="content-container">
-            <div class="banner-wrapper">
-                <div class="banner-card">
-                    <div class="banner-content">
-                        <h2 class="banner-title">Encontre acomodações verificadas no Vale</h2>
-                        <p class="banner-description">Reserve imóveis diretamente com proprietários e moradores locais de forma rápida e transparente.</p>
-                    </div>
-                    <a href="busca.html" class="btn-secondary-action">Encontre imóveis para alugar</a>
-                </div>
+          <div class="lg:col-span-2">
+            <button type="submit" class="w-full bg-brand-orange hover:bg-brand-orangeDark text-white py-2.5 px-4 rounded-lg text-sm font-extrabold shadow-md transition flex items-center justify-center gap-1.5">
+              <span class="material-symbols-outlined text-base">search</span>
+              <span>Buscar</span>
+            </button>
+          </div>
 
-                <!-- CARDS DE RECOMENDAÇÃO -->
-                <div class="highlights-grid">
-                    <div class="highlight-card">
-                        <div class="card-icon">🏠</div>
-                        <h3>Sem Burocracia</h3>
-                        <p>Negocie diretamente com quem entende do assunto.</p>
-                    </div>
-                    <div class="highlight-card">
-                        <div class="card-icon">📍</div>
-                        <h3>Localização Ideal</h3>
-                        <p>Opções nos melhores bairros e regiões da cidade.</p>
-                    </div>
-                    <div class="highlight-card">
-                        <div class="card-icon">🔒</div>
-                        <h3>Segurança Garantida</h3>
-                        <p>Anúncios verificados para a sua tranquilidade.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+        </form>
+      </div>
+    </section>
 
-    </main>
+    <!-- VITRINE DE IMÓVEIS -->
+    <section class="py-12 bg-brand-surface border-y border-[#ece7dc]">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-textPrimary mb-6">Imóveis Recém-Catalogados</h2>
+        
+        <!-- Container onde os imóveis do backend serão renderizados -->
+        <div id="vitrine-imoveis" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <p class="text-stone-500 text-sm col-span-full">Carregando imóveis...</p>
+        </div>
+      </div>
+    </section>
 
-    <!-- FOOTER -->
-    <footer class="app-footer">
-        <p>&copy; 2026 ValeMorar. Todos os direitos reservados.</p>
-    </footer>
+  </main>
 
-    <!-- SCRIPTS -->
-    <script src="../js/header.js"></script>
+  <!-- RODAPÉ -->
+  <footer class="bg-[#f4efe4] border-t border-[#dfd7c8] py-8 text-center text-xs text-[#8a7c6f]">
+    <p>&copy; 2026 Vale Morar Imóveis. Todos os direitos reservados.</p>
+  </footer>
+
+  <!-- CARREGAMENTO DE SCRIPTS (Caminhos padronizados) -->
+  <script src="../js/header.js"></script>
+  <script src="../js/home.js"></script>
 </body>
 </html>

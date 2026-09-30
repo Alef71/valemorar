@@ -1,16 +1,35 @@
-.btn-logout-header {
-    background-color: transparent;
-    border: 1px solid #dc3545;
-    color: #dc3545;
-    padding: 0.35rem 0.8rem;
-    border-radius: 4px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
+/* ==========================================================================
+   ESTILOS DO CABEÇALHO / HEADER (header.css)
+   ========================================================================== */
+
+/* Fixação e Efeito Frosted Glass no Header */
+.app-header-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background-color: rgba(251, 249, 244, 0.95); /* brand-cream com opacidade */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid #ece7dc;
+  transition: all 0.3s ease;
 }
 
-.btn-logout-header:hover {
-    background-color: #dc3545;
-    color: #ffffff;
+/* Animações e microinterações da Logo */
+.brand-logo-icon {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.brand-logo-link:hover .brand-logo-icon {
+  transform: scale(1.05);
+}
+
+/* Transições dos Links do Menu */
+.nav-link {
+  transition: color 0.2s ease-in-out;
+}
+
+/* Ajustes para o Badge CRECI e Perfil */
+.creci-badge {
+  background-color: #eaf4ee;
+  border: 1px solid #6ee7b7;
 }

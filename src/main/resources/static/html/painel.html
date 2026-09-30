@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ValeMorar - Painel do Usuário</title>
     <link rel="stylesheet" href="../css/painel.css">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
 </head>
 <body>
 
@@ -32,7 +33,7 @@
 
             <div class="profile-actions">
                 <button class="btn-secondary" id="btn-abrir-modal-perfil">Editar Perfil</button>
-                <button class="btn-secondary" id="btn-abrir-modal-endereco">📍 Gerenciar Endereço</button>
+                <button class="btn-secondary" id="btn-abrir-modal-endereco">📍 Endereço do Perfil</button>
             </div>
         </aside>
 
@@ -43,25 +44,33 @@
                 <p>Gerencie seu perfil, endereço e anúncios do sistema.</p>
             </div>
 
-            <!-- CARD DE ENDEREÇO CADASTRADO -->
+            <!-- CARD DE ENDEREÇO CADASTRADO DO PERFIL -->
             <div class="content-box">
-                <h3>Meu Endereço Cadastrado</h3>
+                <h3>Meu Endereço Pessoal</h3>
                 <div id="endereco-info-container">
                     <p class="empty-message">Nenhum endereço cadastrado no momento.</p>
                 </div>
             </div>
 
-            <!-- CARDS DE ESTATÍSTICAS -->
+            <!-- CARDS DE ESTATÍSTICAS E NOVO ANÚNCIO -->
             <div class="stats-grid">
                 <div class="stat-card">
                     <h4>Meus Anúncios</h4>
                     <p class="stat-number" id="total-anuncios">0</p>
-                    <a href="#" class="stat-link">Ver todos</a>
+                    <a href="#secao-meus-anuncios" class="stat-link">Ver todos</a>
                 </div>
                 <div class="stat-card action-card">
                     <h4>Novo Imóvel</h4>
                     <p class="stat-desc">Anuncie um imóvel para alugar ou vender.</p>
                     <button class="btn-primary" id="btn-novo-anuncio">+ Criar Anúncio</button>
+                </div>
+            </div>
+
+            <!-- LISTAGEM DOS MEUS ANÚNCIOS -->
+            <div class="content-box" id="secao-meus-anuncios" style="margin-top: 20px;">
+                <h3>Meus Anúncios Publicados</h3>
+                <div id="anuncios-info-container">
+                    <p class="empty-message">Nenhum anúncio cadastrado ainda.</p>
                 </div>
             </div>
         </section>
@@ -78,22 +87,18 @@
             <form id="form-editar-perfil">
                 <div class="form-group">
                     <label for="edit-nome">Nome Completo</label>
-                    <input type="text" id="edit-nome" minlength="3" maxlength="100" required>
+                    <input type="text" id="edit-nome" required>
                 </div>
-                
                 <div class="form-group">
-                    <label for="edit-foto-file">Foto de Perfil (Carregar do PC)</label>
+                    <label for="edit-foto-file">Foto de Perfil</label>
                     <input type="file" id="edit-foto-file" accept="image/*">
                 </div>
-
-                <!-- PRÉ-VISUALIZAÇÃO DA FOTO SELECIONADA -->
-                <div class="preview-container">
-                    <img id="edit-foto-preview" src="" alt="Pré-visualização" class="preview-avatar">
+                <div class="avatar-preview-container" style="margin-top: 10px; text-align: center;">
+                    <img id="edit-foto-preview" src="" alt="Prévia da Foto" style="max-width: 120px; max-height: 120px; border-radius: 50%; display: none; margin: 0 auto;">
                 </div>
-
-                <div class="modal-footer">
+                <div class="modal-footer" style="margin-top: 20px;">
                     <button type="button" class="btn-secondary" id="btn-cancelar-perfil">Cancelar</button>
-                    <button type="submit" class="btn-primary" id="btn-salvar-perfil">Salvar Alterações</button>
+                    <button type="submit" class="btn-primary">Salvar Alterações</button>
                 </div>
             </form>
         </div>
@@ -101,7 +106,7 @@
 
     <!-- MODAL: CADASTRAR / EDITAR ENDEREÇO -->
     <div class="modal-overlay" id="modal-endereco">
-        <div class="modal-card modal-lg">
+        <div class="modal-card">
             <div class="modal-header">
                 <h3 id="modal-endereco-titulo">Cadastrar Endereço</h3>
                 <button class="btn-close" id="btn-fechar-modal-endereco">&times;</button>
@@ -113,11 +118,10 @@
                         <input type="text" id="end-cep" placeholder="00000-000" maxlength="9" required>
                     </div>
                     <div class="form-group flex-2">
-                        <label for="end-logradouro">Logradouro / Rua</label>
+                        <label for="end-logradouro">Rua / Logradouro</label>
                         <input type="text" id="end-logradouro" required>
                     </div>
                 </div>
-
                 <div class="form-row">
                     <div class="form-group flex-1">
                         <label for="end-numero">Número</label>
@@ -125,10 +129,9 @@
                     </div>
                     <div class="form-group flex-2">
                         <label for="end-complemento">Complemento (Opcional)</label>
-                        <input type="text" id="end-complemento">
+                        <input type="text" id="end-complemento" placeholder="Apto, Bloco, etc.">
                     </div>
                 </div>
-
                 <div class="form-row">
                     <div class="form-group flex-1">
                         <label for="end-bairro">Bairro</label>
@@ -140,13 +143,139 @@
                     </div>
                     <div class="form-group flex-sm">
                         <label for="end-estado">UF</label>
-                        <input type="text" id="end-estado" maxlength="2" placeholder="SP" required>
+                        <input type="text" id="end-estado" maxlength="2" placeholder="MG" required>
+                    </div>
+                </div>
+                <div class="modal-footer" style="margin-top: 20px;">
+                    <button type="button" class="btn-secondary" id="btn-cancelar-endereco">Cancelar</button>
+                    <button type="submit" class="btn-primary">Salvar Endereço</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: CADASTRAR / EDITAR ANÚNCIO -->
+    <div class="modal-overlay" id="modal-anuncio">
+        <div class="modal-card modal-lg">
+            <div class="modal-header">
+                <h3 id="modal-anuncio-titulo">Criar Anúncio</h3>
+                <button class="btn-close" id="btn-fechar-modal-anuncio">&times;</button>
+            </div>
+            <form id="form-anuncio">
+                <!-- CAMPOS OCULTOS -->
+                <input type="hidden" id="anuncio-id">
+                <input type="hidden" id="anuncio-imovel-id">
+
+                <!-- 1. DADOS DO IMÓVEL & VALORES -->
+                <h4 style="margin-bottom: 12px; color: #333;">1. Informações do Anúncio</h4>
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label for="anuncio-modalidade">Modalidade</label>
+                        <select id="anuncio-modalidade" required>
+                            <option value="ALUGUEL">Aluguel</option>
+                            <option value="VENDA">Venda</option>
+                        </select>
+                    </div>
+                    <div class="form-group flex-1">
+                        <label for="anuncio-tipo-imovel">Tipo de Imóvel</label>
+                        <select id="anuncio-tipo-imovel" required>
+                            <option value="RESIDENCIAL">Residencial</option>
+                            <option value="APARTAMENTO">Apartamento</option>
+                            <option value="CASA">Casa</option>
+                            <option value="COMERCIAL">Comercial</option>
+                            <option value="CHACARA">Chácara</option>
+                        </select>
+                    </div>
+                    <div class="form-group flex-1">
+                        <label for="anuncio-quartos">Quartos</label>
+                        <input type="number" id="anuncio-quartos" min="0" value="1" required>
                     </div>
                 </div>
 
-                <div class="modal-footer">
-                    <button type="button" class="btn-secondary" id="btn-cancelar-endereco">Cancelar</button>
-                    <button type="submit" class="btn-primary" id="btn-salvar-endereco">Salvar Endereço</button>
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label for="anuncio-valor">Valor do Imóvel (R$)</label>
+                        <input type="number" step="0.01" id="anuncio-valor" min="0.01" placeholder="0.00" required>
+                    </div>
+                    <div class="form-group flex-1">
+                        <label for="anuncio-condominio">Condomínio (R$)</label>
+                        <input type="number" step="0.01" id="anuncio-condominio" min="0" value="0.00">
+                    </div>
+                    <div class="form-group flex-1">
+                        <label for="anuncio-iptu">IPTU (R$)</label>
+                        <input type="number" step="0.01" id="anuncio-iptu" min="0" value="0.00">
+                    </div>
+                </div>
+
+                <!-- 2. ENDEREÇO DO IMÓVEL -->
+                <h4 style="margin: 15px 0 12px; color: #333;">2. Endereço do Imóvel</h4>
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label for="anuncio-cep">CEP</label>
+                        <input type="text" id="anuncio-cep" placeholder="00000-000" maxlength="9">
+                    </div>
+                    <div class="form-group flex-2">
+                        <label for="anuncio-logradouro">Logradouro / Rua</label>
+                        <input type="text" id="anuncio-logradouro" placeholder="Rua / Avenida">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label for="anuncio-numero">Número</label>
+                        <input type="text" id="anuncio-numero" placeholder="123">
+                    </div>
+                    <div class="form-group flex-2">
+                        <label for="anuncio-complemento">Complemento (Opcional)</label>
+                        <input type="text" id="anuncio-complemento" placeholder="Apto 101, Bloco B">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label for="anuncio-bairro">Bairro</label>
+                        <input type="text" id="anuncio-bairro">
+                    </div>
+                    <div class="form-group flex-1">
+                        <label for="anuncio-cidade">Cidade</label>
+                        <input type="text" id="anuncio-cidade" maxlength="100" required>
+                    </div>
+                    <div class="form-group flex-sm">
+                        <label for="anuncio-estado">UF</label>
+                        <input type="text" id="anuncio-estado" maxlength="2" placeholder="MG">
+                    </div>
+                </div>
+
+                <!-- TAGS -->
+                <div class="form-group" style="margin-top: 10px;">
+                    <label for="anuncio-tags">Tags de Proximidade (separadas por vírgula)</label>
+                    <input type="text" id="anuncio-tags" placeholder="Ex: IFNMG, UFVJM, Centro, Hospital">
+                </div>
+
+                <!-- 3. FOTOS DO IMÓVEL -->
+                <h4 style="margin: 15px 0 12px; color: #333;">3. Fotos do Imóvel</h4>
+                <div class="form-row" style="align-items: flex-end;">
+                    <div class="form-group flex-2">
+                        <label for="foto-url-input">URL da Foto</label>
+                        <input type="url" id="foto-url-input" placeholder="https://exemplo.com/imagem.jpg" maxlength="500">
+                    </div>
+                    <div class="form-group flex-1" style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                        <input type="checkbox" id="foto-capa-checkbox" style="width: auto;">
+                        <label for="foto-capa-checkbox" style="margin: 0; cursor: pointer;">Definir como Capa</label>
+                    </div>
+                    <div class="form-group">
+                        <button type="button" id="btn-add-foto" class="btn-secondary" style="height: 38px;">+ Adicionar</button>
+                    </div>
+                </div>
+
+                <!-- CONTAINER DE LISTAGEM DE FOTOS -->
+                <div id="lista-fotos-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 10px; min-height: 50px; background: #f9f9f9; padding: 10px; border-radius: 6px; border: 1px dashed #ccc;">
+                    <p style="grid-column: 1 / -1; color: #888; font-size: 0.85em; text-align: center; margin: 0;">Nenhuma foto adicionada ainda.</p>
+                </div>
+
+                <div class="modal-footer" style="margin-top: 20px;">
+                    <button type="button" class="btn-secondary" id="btn-cancelar-anuncio">Cancelar</button>
+                    <button type="submit" class="btn-primary" id="btn-salvar-anuncio">Salvar Anúncio</button>
                 </div>
             </form>
         </div>
@@ -157,6 +286,8 @@
         <p>&copy; 2026 ValeMorar. Todos os direitos reservados.</p>
     </footer>
 
+    <!-- SCRIPTS -->
     <script src="../js/painel.js"></script>
+    <script src="../js/anuncio.js"></script>
 </body>
 </html>
