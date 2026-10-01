@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // Redireciona diretamente para o painel de controle
                     setTimeout(() => {
-                        window.location.href = 'painel.html';
+                        window.location.href = '/painel';
                     }, 1200);
 
                 } else {
@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         exibirFeedback('Conta criada com sucesso! Redirecionando para o painel...', 'sucesso');
 
                         setTimeout(() => {
-                            window.location.href = 'painel.html';
+                            window.location.href = '/painel';
                         }, 1200);
                     } else {
                         exibirFeedback('Cadastro realizado! Por favor, faça o login manual.', 'sucesso');

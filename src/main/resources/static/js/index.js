@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     );
     const API_BASE = `${API_BASE_URL}/api`;
 
-    const vitrineContainer = document.getElementById('vitrine-imoveis-container');
+    const vitrineContainer = document.getElementById('vitrine-imoveis');
     const formBusca = document.getElementById('form-busca-vitrine');
     const filtroCidade = document.getElementById('filtro-cidade');
     const filtroModalidade = document.getElementById('filtro-modalidade');
@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                     <div class="p-5 pt-0">
-                        <a href="auth.html?modo=login" class="block w-full text-center py-2.5 bg-brand-cream border border-[#dfd7c8] hover:bg-brand-gold hover:text-white hover:border-brand-gold text-brand-textPrimary font-bold rounded-xl text-xs transition">Ver Detalhes & Contato</a>
+                        <a href="/entrar?modo=login" class="block w-full text-center py-2.5 bg-brand-cream border border-[#dfd7c8] hover:bg-brand-gold hover:text-white hover:border-brand-gold text-brand-textPrimary font-bold rounded-xl text-xs transition">Ver Detalhes & Contato</a>
                     </div>
                 </div>
             `;

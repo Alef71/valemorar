@@ -46,8 +46,20 @@ public class SecurityConfig {
                                                 // Liberar requisições OPTIONS (Preflight CORS)
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                                                // Arquivos Estáticos do Front-end
-                                                .requestMatchers("/", "/*.html", "/html/**", "/css/**", "/js/**",
+                                                // Rotas Web e Arquivos Estáticos do Front-end
+                                                .requestMatchers(
+                                                                "/",
+                                                                "/entrar",
+                                                                "/painel",
+                                                                "/imoveis",
+                                                                "/index.html",
+                                                                "/auth.html",
+                                                                "/painel.html",
+                                                                "/busca.html",
+                                                                "/*.html",
+                                                                "/html/**",
+                                                                "/css/**",
+                                                                "/js/**",
                                                                 "/imagem/**")
                                                 .permitAll()
 

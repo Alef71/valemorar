@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -65,5 +66,12 @@ public class AuthController {
     public ResponseEntity<Void> redefinirSenha(@RequestBody @Valid RedefinirSenhaDTO dto) {
         service.redefinirSenha(dto);
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Logout", description = "Encerra a sessão no cliente; em JWT stateless o token deve ser descartado no front-end")
+    @ApiResponse(responseCode = "204", description = "Logout processado com sucesso")
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout() {
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
