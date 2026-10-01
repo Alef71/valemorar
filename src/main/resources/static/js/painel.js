@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Validação inicial do Token JWT
     const token = localStorage.getItem('token');
     if (!token) {
-        window.location.href = 'auth.html';
+        window.location.href = '/entrar';
         return;
     }
 
@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let anunciosEmMemoria = [];
     let fotosLista = [];
     let enderecoUsuarioMemoria = null;
+    const LIMITE_ARQUIVO = 5 * 1024 * 1024; // mesmo limite do servidor (spring.servlet.multipart)
 
     function escaparHTML(texto) {
         if (!texto) return '';
@@ -56,7 +57,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             localStorage.removeItem('usuario');
             localStorage.removeItem('token');
-            window.location.href = 'auth.html';
+            window.location.href = '/entrar';
         });
     }
 
@@ -68,7 +69,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const anunciosContainer = document.getElementById('anuncios-info-container');
     const totalAnunciosElem = document.getElementById('total-anuncios');
 
-    const inputFotoUrl = document.getElementById('foto-url-input');
+    const inputFotoArquivo = document.getElementById('foto-arquivo-input');
     const checkFotoCapa = document.getElementById('foto-capa-checkbox');
     const btnAddFoto = document.getElementById('btn-add-foto');
     const containerFotos = document.getElementById('lista-fotos-container');
@@ -79,7 +80,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function carregarUsuario() {
         const currentToken = localStorage.getItem('token');
         if (!currentToken) {
-            window.location.href = 'auth.html';
+            window.location.href = '/entrar';
             return;
         }
 
@@ -106,7 +107,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else if (res.status === 401 || res.status === 403) {
                 localStorage.removeItem('usuario');
                 localStorage.removeItem('token');
-                window.location.href = 'auth.html';
+                window.location.href = '/entrar';
                 return;
             }
         } catch (err) {
@@ -114,7 +115,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (!usuarioLogado || (!usuarioLogado.id && !usuarioLogado.email)) {
-            window.location.href = 'auth.html';
+            window.location.href = '/entrar';
             return;
         }
 
@@ -143,15 +144,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const currentToken = localStorage.getItem('token');
 
         try {
-            const res = await fetch(`${API_BASE}/enderecos/usuario/${usuarioLogado.id}`, {
+            const res = await fetch(`${API_BASE}/enderecos/me`, {
                 headers: {
                     'Authorization': `Bearer ${currentToken}`
                 }
             });
 
-            if (res.ok) {
-                const data = await res.json();
-                enderecoUsuarioMemoria = Array.isArray(data) ? data[0] : data;
+            if (res.status === 200) {
+                enderecoUsuarioMemoria = await res.json();
                 renderizarEnderecoUsuario(enderecoUsuarioMemoria);
             } else {
                 renderizarEnderecoUsuario(null);
@@ -176,6 +176,173 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <p><strong>CEP:</strong> ${escaparHTML(end.cep)}</p>
             </div>
         `;
+    }
+
+    // 1.1 MODAL DE PERFIL (nome, telefone/WhatsApp e foto)
+    const modalPerfil = document.getElementById('modal-perfil');
+    const formPerfil = document.getElementById('form-editar-perfil');
+    const inputFotoPerfil = document.getElementById('edit-foto-file');
+    const previewFotoPerfil = document.getElementById('edit-foto-preview');
+
+    function fecharModalPerfil() {
+        if (modalPerfil) modalPerfil.classList.add('hidden');
+        if (inputFotoPerfil) inputFotoPerfil.value = '';
+    }
+
+    function exibirPreview(src) {
+        if (!previewFotoPerfil) return;
+        previewFotoPerfil.src = src || '';
+        previewFotoPerfil.classList.toggle('hidden', !src);
+    }
+
+    document.getElementById('btn-abrir-modal-perfil')?.addEventListener('click', async () => {
+        document.getElementById('edit-nome').value = usuarioLogado?.nome || '';
+        exibirPreview(usuarioLogado?.fotoPerfil);
+        document.getElementById('edit-telefone').value = '';
+        document.getElementById('edit-whatsapp').value = '';
+        if (modalPerfil) modalPerfil.classList.remove('hidden');
+
+        try {
+            const res = await fetch(`${API_BASE}/locadores/me`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+            if (res.status === 200) {
+                const contato = await res.json();
+                document.getElementById('edit-telefone').value = contato.telefone || '';
+                document.getElementById('edit-whatsapp').value = contato.whatsapp || '';
+            }
+        } catch (err) {
+            console.warn('Não foi possível carregar o contato:', err);
+        }
+    });
+    document.getElementById('btn-fechar-modal-perfil')?.addEventListener('click', fecharModalPerfil);
+    document.getElementById('btn-cancelar-perfil')?.addEventListener('click', fecharModalPerfil);
+
+    inputFotoPerfil?.addEventListener('change', () => {
+        const arquivo = inputFotoPerfil.files?.[0];
+        if (!arquivo) return exibirPreview(usuarioLogado?.fotoPerfil);
+        if (arquivo.size > LIMITE_ARQUIVO) {
+            alert('A foto deve ter no máximo 5MB.');
+            inputFotoPerfil.value = '';
+            return exibirPreview(usuarioLogado?.fotoPerfil);
+        }
+        exibirPreview(URL.createObjectURL(arquivo));
+    });
+
+    if (formPerfil) {
+        formPerfil.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const botao = formPerfil.querySelector('button[type="submit"]');
+            const jsonHeaders = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            };
+            if (botao) botao.disabled = true;
+
+            try {
+                const resPerfil = await fetch(`${API_BASE}/usuarios/me`, {
+                    method: 'PUT',
+                    headers: jsonHeaders,
+                    body: JSON.stringify({ nome: document.getElementById('edit-nome').value.trim() })
+                });
+                if (!resPerfil.ok) throw new Error(await mensagemErro(resPerfil, 'Erro ao salvar o perfil.'));
+                let usuarioAtualizado = await resPerfil.json();
+
+                const resContato = await fetch(`${API_BASE}/locadores/me`, {
+                    method: 'PUT',
+                    headers: jsonHeaders,
+                    body: JSON.stringify({
+                        telefone: document.getElementById('edit-telefone').value.trim(),
+                        whatsapp: document.getElementById('edit-whatsapp').value.trim()
+                    })
+                });
+                if (!resContato.ok) throw new Error(await mensagemErro(resContato, 'Erro ao salvar telefone/WhatsApp.'));
+
+                const arquivo = inputFotoPerfil?.files?.[0];
+                if (arquivo) {
+                    usuarioAtualizado = await enviarImagem(`${API_BASE}/usuarios/me/foto`, arquivo);
+                }
+
+                usuarioLogado = { ...usuarioLogado, ...usuarioAtualizado };
+                localStorage.setItem('usuario', JSON.stringify(usuarioLogado));
+                atualizarInterfacePerfil();
+                fecharModalPerfil();
+            } catch (err) {
+                alert(err.message || 'Falha de conexão com o servidor ao salvar o perfil.');
+            } finally {
+                if (botao) botao.disabled = false;
+            }
+        });
+    }
+
+    // 2.1 MODAL DE ENDEREÇO PESSOAL
+    const modalEndereco = document.getElementById('modal-endereco');
+    const formEndereco = document.getElementById('form-endereco');
+    const camposEndereco = ['cep', 'logradouro', 'numero', 'complemento', 'bairro', 'cidade', 'estado'];
+
+    function fecharModalEndereco() {
+        if (modalEndereco) modalEndereco.classList.add('hidden');
+    }
+
+    document.getElementById('btn-abrir-modal-endereco')?.addEventListener('click', () => {
+        camposEndereco.forEach(campo => {
+            const input = document.getElementById(`end-${campo}`);
+            if (input) input.value = enderecoUsuarioMemoria?.[campo] || '';
+        });
+        if (modalEndereco) modalEndereco.classList.remove('hidden');
+    });
+    document.getElementById('btn-fechar-modal-endereco')?.addEventListener('click', fecharModalEndereco);
+    document.getElementById('btn-cancelar-endereco')?.addEventListener('click', fecharModalEndereco);
+
+    if (formEndereco) {
+        formEndereco.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = lerEndereco('end');
+            try {
+                const res = await fetch(`${API_BASE}/enderecos/me`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    enderecoUsuarioMemoria = await res.json();
+                    renderizarEnderecoUsuario(enderecoUsuarioMemoria);
+                    // Mantém a cidade do cabeçalho em sincronia
+                    usuarioLogado.cidade = enderecoUsuarioMemoria.cidade;
+                    usuarioLogado.estado = enderecoUsuarioMemoria.estado;
+                    localStorage.setItem('usuario', JSON.stringify(usuarioLogado));
+                    fecharModalEndereco();
+                } else {
+                    alert(await mensagemErro(res, 'Erro ao salvar endereço. Verifique os dados.'));
+                }
+            } catch (err) {
+                alert('Falha de conexão com o servidor ao salvar endereço.');
+            }
+        });
+    }
+
+    // Lê os campos de endereço de um formulário pelo prefixo dos IDs (end-*, anuncio-*)
+    function lerEndereco(prefixo) {
+        const valor = (campo) => document.getElementById(`${prefixo}-${campo}`)?.value.trim() || '';
+        return {
+            cep: valor('cep'),
+            logradouro: valor('logradouro'),
+            numero: valor('numero'),
+            complemento: valor('complemento') || null,
+            bairro: valor('bairro'),
+            cidade: valor('cidade'),
+            estado: valor('estado').toUpperCase()
+        };
+    }
+
+    // Erros do backend: { erro } (regras de negócio) ou { campo: mensagem } (validação)
+    async function mensagemErro(res, padrao) {
+        if (res.status === 403) return 'Você não tem permissão para esta ação.';
+        const corpo = await res.json().catch(() => ({}));
+        return corpo.erro || corpo.message || Object.values(corpo).filter(v => typeof v === 'string').join('\n') || padrao;
     }
 
     // 3. BUSCAR ANÚNCIOS
@@ -259,7 +426,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function alterarStatus(id, novoStatus) {
         const currentToken = localStorage.getItem('token');
         try {
-            const response = await fetch(`${API_BASE}/anuncios/${id}/status?status=${novoStatus}`, {
+            const response = await fetch(`${API_BASE}/anuncios/${id}/status?status=${encodeURIComponent(novoStatus)}`, {
                 method: 'PATCH',
                 headers: { 'Authorization': `Bearer ${currentToken}` }
             });
@@ -267,7 +434,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 alert('Status alterado com sucesso!');
                 carregarMeusAnuncios();
             } else {
-                alert('Erro ao alterar status.');
+                alert(await mensagemErro(response, 'Erro ao alterar status.'));
             }
         } catch (e) {
             console.error('Erro:', e);
@@ -322,7 +489,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (item) abrirModalAnuncio(item);
             } else if (btn.classList.contains('btn-status-anuncio')) {
                 const statusAtual = btn.getAttribute('data-status');
-                const novoStatus = prompt('Digite o novo status (ATIVO, ALUGADO, INDISPONIVEL):', statusAtual || 'ALUGADO');
+                const novoStatus = prompt('Digite o novo status (ATIVO, PAUSADO, ALUGADO, INDISPONIVEL, FINALIZADO):', statusAtual || 'ALUGADO');
                 if (novoStatus) alterarStatus(id, novoStatus.toUpperCase());
             } else if (btn.classList.contains('btn-renovar-anuncio')) {
                 if (confirm('Deseja renovar este anúncio por mais 90 dias?')) renovarAnuncio(id);
@@ -333,18 +500,49 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // 5. GERENCIAMENTO DE FOTOS
+    // Envia um arquivo e devolve a URL salva no servidor (ex.: /uploads/anuncios/uuid.jpg)
+    async function enviarImagem(url, arquivo) {
+        const corpo = new FormData();
+        corpo.append('arquivo', arquivo);
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+            body: corpo
+        });
+        if (!res.ok) throw new Error(await mensagemErro(res, `Não foi possível enviar "${arquivo.name}".`));
+        return res.json();
+    }
+
+
     if (btnAddFoto) {
-        btnAddFoto.addEventListener('click', () => {
-            const url = inputFotoUrl?.value.trim();
-            if (!url) return alert('Informe uma URL de imagem válida.');
+        btnAddFoto.addEventListener('click', async () => {
+            const arquivos = [...(inputFotoArquivo?.files || [])];
+            if (arquivos.length === 0) return alert('Selecione ao menos uma imagem.');
 
-            const isCapa = checkFotoCapa?.checked;
-            if (isCapa) fotosLista.forEach(f => f.capa = false);
+            const grandes = arquivos.filter(a => a.size > LIMITE_ARQUIVO);
+            if (grandes.length) return alert(`Arquivo(s) acima de 5MB: ${grandes.map(a => a.name).join(', ')}`);
 
-            fotosLista.push({ url, capa: isCapa });
-            if (inputFotoUrl) inputFotoUrl.value = '';
-            if (checkFotoCapa) checkFotoCapa.checked = false;
-            renderizarFotos();
+            const textoOriginal = btnAddFoto.textContent;
+            btnAddFoto.disabled = true;
+            btnAddFoto.textContent = 'Enviando...';
+            try {
+                const isCapa = checkFotoCapa?.checked;
+                for (const [i, arquivo] of arquivos.entries()) {
+                    const { url } = await enviarImagem(`${API_BASE}/uploads/anuncios`, arquivo);
+                    // "Definir como capa" vale para a primeira imagem do lote
+                    const capa = Boolean(isCapa && i === 0);
+                    if (capa) fotosLista.forEach(f => f.capa = false);
+                    fotosLista.push({ url, capa });
+                    renderizarFotos();
+                }
+                if (inputFotoArquivo) inputFotoArquivo.value = '';
+                if (checkFotoCapa) checkFotoCapa.checked = false;
+            } catch (err) {
+                alert(err.message);
+            } finally {
+                btnAddFoto.disabled = false;
+                btnAddFoto.textContent = textoOriginal;
+            }
         });
     }
 
@@ -384,14 +582,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (btnFecharModal) btnFecharModal.onclick = fecharModal;
     if (btnCancelarModal) btnCancelarModal.onclick = fecharModal;
 
-    function abrirModalAnuncio(anuncio = null) {
+    async function abrirModalAnuncio(anuncio = null) {
         const tituloElem = document.getElementById('modal-anuncio-titulo');
         if (tituloElem) tituloElem.innerText = anuncio ? 'Editar Anúncio' : 'Criar Anúncio';
         
         document.getElementById('anuncio-id').value = anuncio?.id || '';
-        document.getElementById('anuncio-imovel-id').value = anuncio?.imovelId || (window.crypto?.randomUUID ? crypto.randomUUID() : String(Date.now()));
+        document.getElementById('anuncio-imovel-id').value = anuncio?.imovelId || '';
 
-        document.getElementById('anuncio-cidade').value = anuncio?.cidade || '';
+        let endereco = {};
+        if (anuncio?.enderecoId) {
+            const res = await fetch(`${API_BASE}/enderecos/${anuncio.enderecoId}`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            }).catch(() => null);
+            if (res?.ok) endereco = await res.json();
+        }
+        ['cep', 'logradouro', 'numero', 'complemento', 'bairro', 'estado'].forEach(campo => {
+            const input = document.getElementById(`anuncio-${campo}`);
+            if (input) input.value = endereco[campo] || '';
+        });
+        window.selecionarCidade(document.getElementById('anuncio-cidade'), endereco.cidade);
+        // Todas as cidades da lista são de MG
+        const inputEstado = document.getElementById('anuncio-estado');
+        if (inputEstado && !inputEstado.value) inputEstado.value = 'MG';
+
         document.getElementById('anuncio-modalidade').value = anuncio?.modalidade || 'ALUGUEL';
         document.getElementById('anuncio-tipo-imovel').value = anuncio?.tipoImovel || 'RESIDENCIAL';
         document.getElementById('anuncio-quartos').value = anuncio?.quartos ?? 1;
@@ -400,7 +613,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('anuncio-iptu').value = anuncio?.valorIptu ?? 0;
         document.getElementById('anuncio-tags').value = anuncio?.tags ? anuncio.tags.join(', ') : '';
 
-        if (inputFotoUrl) inputFotoUrl.value = '';
+        if (inputFotoArquivo) inputFotoArquivo.value = '';
         if (checkFotoCapa) checkFotoCapa.checked = false;
 
         fotosLista = anuncio?.fotos ? [...anuncio.fotos] : [];
@@ -416,7 +629,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const currentToken = localStorage.getItem('token');
             const id = document.getElementById('anuncio-id')?.value;
-            const imovelId = document.getElementById('anuncio-imovel-id')?.value || (window.crypto?.randomUUID ? crypto.randomUUID() : String(Date.now()));
             const tagsInput = document.getElementById('anuncio-tags')?.value;
             const tagsArray = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t.length > 0) : [];
 
@@ -426,9 +638,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             const payload = {
-                imovelId: imovelId,
-                anuncianteId: usuarioLogado.id,
-                cidade: document.getElementById('anuncio-cidade')?.value.trim(),
+                endereco: lerEndereco('anuncio'),
                 tipoImovel: document.getElementById('anuncio-tipo-imovel')?.value,
                 quartos: parseInt(document.getElementById('anuncio-quartos')?.value, 10) || 0,
                 tags: tagsArray,
@@ -436,12 +646,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 modalidade: document.getElementById('anuncio-modalidade')?.value,
                 valorCondominio: parseFloat(document.getElementById('anuncio-condominio')?.value) || 0,
                 valorIptu: parseFloat(document.getElementById('anuncio-iptu')?.value) || 0,
-                status: 'ATIVO',
-                fotos: fotosLista
+                fotos: fotosLista.map(f => ({ url: f.url, capa: Boolean(f.capa) }))
             };
 
             const isUpdate = Boolean(id);
-            const url = isUpdate ? `${API_BASE}/anuncios/${id}` : `${API_BASE}/anuncios`;
+            const url = isUpdate ? `${API_BASE}/anuncios/${id}/publicacao` : `${API_BASE}/anuncios/publicacao`;
             const method = isUpdate ? 'PUT' : 'POST';
 
             try {
@@ -459,8 +668,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     fecharModal();
                     carregarMeusAnuncios();
                 } else {
-                    const erroBody = await response.json().catch(() => ({}));
-                    alert(erroBody.message || erroBody.erro || 'Erro ao salvar anúncio. Verifique os dados fornecidos.');
+                    alert(await mensagemErro(response, 'Erro ao salvar anúncio. Verifique os dados fornecidos.'));
                 }
             } catch (err) {
                 alert('Falha de conexão com o servidor ao tentar salvar anúncio.');
@@ -469,5 +677,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Inicialização
+    window.preencherSelectCidades(document.getElementById('anuncio-cidade'));
     carregarUsuario();
+
+    // Botão "Anunciar" do cabeçalho: /painel?acao=anunciar abre o modal de novo anúncio
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('acao') === 'anunciar') {
+        abrirModalAnuncio(null);
+        params.delete('acao');
+        const query = params.toString();
+        history.replaceState(null, '', window.location.pathname + (query ? `?${query}` : ''));
+    }
 });

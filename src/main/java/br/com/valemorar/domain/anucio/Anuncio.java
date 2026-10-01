@@ -1,5 +1,6 @@
 package br.com.valemorar.domain.anucio;
 
+import br.com.valemorar.domain.anucio.enums.StatusAnuncioEnum;
 import br.com.valemorar.domain.imovel.Imovel;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -48,8 +49,9 @@ public class Anuncio {
     @Column(name = "total_avaliacoes")
     private Integer totalAvaliacoes;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status; // Ex: ATIVO, PAUSADO, FINALIZADO
+    private StatusAnuncioEnum status;
 
     @Column(name = "publicado_em")
     private LocalDateTime publicadoEm;

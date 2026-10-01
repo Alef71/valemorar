@@ -8,7 +8,8 @@ import java.util.UUID;
 
 public record DenunciaCreateDTO(
 
-                @NotNull(message = "O ID do denunciante é obrigatório") UUID denuncianteId,
+                // Opcional: a denúncia é sempre do usuário autenticado
+                UUID denuncianteId,
 
                 @NotNull(message = "O ID do anúncio é obrigatório") UUID anuncioId,
 

@@ -73,12 +73,4 @@ public class JwtTokenProvider {
                 .getPayload();
         return claims.getSubject();
     }
-
-    public String extrairEmailGoogle(String idToken) {
-        return "usuario.google@gmail.com";
-    }
-
-    public String extrairNomeGoogle(String idToken) {
-        return "Usuário Google";
-    }
 }

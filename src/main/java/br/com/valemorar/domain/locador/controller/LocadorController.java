@@ -1,5 +1,6 @@
 package br.com.valemorar.domain.locador.controller;
 
+import br.com.valemorar.domain.locador.dto.LocadorContatoDTO;
 import br.com.valemorar.domain.locador.dto.LocadorCreateDTO;
 import br.com.valemorar.domain.locador.dto.LocadorResponseDTO;
 import br.com.valemorar.domain.locador.service.LocadorService;
@@ -26,6 +27,25 @@ public class LocadorController {
 
     public LocadorController(LocadorService service) {
         this.service = service;
+    }
+
+    @Operation(summary = "Meu cadastro de locador", description = "Telefone e WhatsApp do usuário autenticado")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Cadastro encontrado"),
+            @ApiResponse(responseCode = "204", description = "Usuário ainda não cadastrou contato")
+    })
+    @GetMapping("/me")
+    public ResponseEntity<LocadorResponseDTO> meuCadastro() {
+        return service.buscarMeuCadastro()
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
+    }
+
+    @Operation(summary = "Salvar meu contato", description = "Cria ou atualiza telefone e WhatsApp do usuário autenticado")
+    @ApiResponse(responseCode = "200", description = "Contato salvo com sucesso")
+    @PutMapping("/me")
+    public ResponseEntity<LocadorResponseDTO> salvarMeuContato(@RequestBody @Valid LocadorContatoDTO dto) {
+        return ResponseEntity.ok(service.salvarMeuContato(dto));
     }
 
     @Operation(summary = "Criar perfil de locador", description = "Cadastra um novo perfil de locador no sistema")

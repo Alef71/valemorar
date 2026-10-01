@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -88,11 +89,11 @@ public class DenunciaController {
             @ApiResponse(responseCode = "400", description = "Dados inválidos ou denúncia não encontrada")
     })
     @PatchMapping("/{id}/resolver")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DenunciaResponseDTO> resolverDenuncia(
             @PathVariable UUID id,
-            @RequestParam UUID resolvidoPor,
             @RequestParam String status) {
-        return ResponseEntity.ok(service.resolverDenuncia(id, resolvidoPor, status));
+        return ResponseEntity.ok(service.resolverDenuncia(id, status));
     }
 
     @Operation(summary = "Deletar denúncia", description = "Remove uma denúncia do sistema pelo seu UUID")

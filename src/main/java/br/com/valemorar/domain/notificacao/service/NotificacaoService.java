@@ -4,6 +4,7 @@ import br.com.valemorar.domain.notificacao.Notificacao;
 import br.com.valemorar.domain.notificacao.dto.NotificacaoCreateDTO;
 import br.com.valemorar.domain.notificacao.dto.NotificacaoResponseDTO;
 import br.com.valemorar.domain.notificacao.repository.NotificacaoRepository;
+import br.com.valemorar.infra.SecurityUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -46,11 +47,13 @@ public class NotificacaoService {
     public NotificacaoResponseDTO buscarPorId(UUID id) {
         Notificacao entity = repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Notificação não encontrada"));
+        SecurityUtils.exigirDonoOuAdmin(entity.getUsuarioId());
         return NotificacaoResponseDTO.fromEntity(entity);
     }
 
     @Transactional(readOnly = true)
     public List<NotificacaoResponseDTO> buscarPorUsuario(UUID usuarioId) {
+        SecurityUtils.exigirDonoOuAdmin(usuarioId);
         return repository.findByUsuarioIdOrderByCriadoEmDesc(usuarioId)
                 .stream()
                 .map(NotificacaoResponseDTO::fromEntity)
@@ -59,6 +62,7 @@ public class NotificacaoService {
 
     @Transactional(readOnly = true)
     public List<NotificacaoResponseDTO> buscarNaoLidasPorUsuario(UUID usuarioId) {
+        SecurityUtils.exigirDonoOuAdmin(usuarioId);
         return repository.findByUsuarioIdAndLidaFalseOrderByCriadoEmDesc(usuarioId)
                 .stream()
                 .map(NotificacaoResponseDTO::fromEntity)
@@ -69,6 +73,7 @@ public class NotificacaoService {
     public NotificacaoResponseDTO marcarComoLida(UUID id) {
         Notificacao entity = repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Notificação não encontrada"));
+        SecurityUtils.exigirDonoOuAdmin(entity.getUsuarioId());
 
         entity.setLida(true);
         Notificacao atualizado = repository.save(entity);
@@ -77,14 +82,15 @@ public class NotificacaoService {
 
     @Transactional
     public void marcarTodasComoLidasPorUsuario(UUID usuarioId) {
+        SecurityUtils.exigirDonoOuAdmin(usuarioId);
         repository.marcarTodasComoLidasPorUsuario(usuarioId);
     }
 
     @Transactional
     public void deletar(UUID id) {
-        if (!repository.existsById(id)) {
-            throw new IllegalArgumentException("Notificação não encontrada");
-        }
-        repository.deleteById(id);
+        Notificacao entity = repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Notificação não encontrada"));
+        SecurityUtils.exigirDonoOuAdmin(entity.getUsuarioId());
+        repository.delete(entity);
     }
 }

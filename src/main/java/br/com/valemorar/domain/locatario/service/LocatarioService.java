@@ -4,6 +4,7 @@ import br.com.valemorar.domain.locatario.Locatario;
 import br.com.valemorar.domain.locatario.dto.LocatarioCreateDTO;
 import br.com.valemorar.domain.locatario.dto.LocatarioResponseDTO;
 import br.com.valemorar.domain.locatario.repository.LocatarioRepository;
+import br.com.valemorar.infra.SecurityUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,12 +24,13 @@ public class LocatarioService {
 
     @Transactional
     public LocatarioResponseDTO criar(LocatarioCreateDTO dto) {
-        if (repository.existsById(dto.usuarioId())) {
+        UUID usuarioId = SecurityUtils.resolverDono(dto.usuarioId());
+        if (repository.existsById(usuarioId)) {
             throw new IllegalArgumentException("Já existe um cadastro de locatário para este usuário");
         }
 
         Locatario entity = new Locatario();
-        entity.setUsuarioId(dto.usuarioId());
+        entity.setUsuarioId(usuarioId);
         entity.setCriadoEm(LocalDateTime.now());
 
         Locatario salvo = repository.save(entity);
@@ -37,12 +39,14 @@ public class LocatarioService {
 
     @Transactional(readOnly = true)
     public Page<LocatarioResponseDTO> listarTodos(Pageable pageable) {
+        SecurityUtils.exigirAdmin();
         return repository.findAll(pageable)
                 .map(LocatarioResponseDTO::fromEntity);
     }
 
     @Transactional(readOnly = true)
     public LocatarioResponseDTO buscarPorId(UUID usuarioId) {
+        SecurityUtils.exigirDonoOuAdmin(usuarioId);
         Locatario entity = repository.findById(usuarioId)
                 .orElseThrow(() -> new IllegalArgumentException("Locatário não encontrado"));
         return LocatarioResponseDTO.fromEntity(entity);
@@ -50,6 +54,7 @@ public class LocatarioService {
 
     @Transactional
     public void deletar(UUID usuarioId) {
+        SecurityUtils.exigirDonoOuAdmin(usuarioId);
         if (!repository.existsById(usuarioId)) {
             throw new IllegalArgumentException("Locatário não encontrado");
         }

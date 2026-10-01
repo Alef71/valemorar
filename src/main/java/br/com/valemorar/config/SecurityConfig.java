@@ -46,19 +46,18 @@ public class SecurityConfig {
                                                 // Liberar requisições OPTIONS (Preflight CORS)
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                                                // Arquivos Estáticos do Front-end
-                                                .requestMatchers("/", "/*.html", "/html/**", "/css/**", "/js/**",
-                                                                "/imagem/**")
+                                                // Rotas Web, redirecionamentos legados e Arquivos Estáticos
+                                                .requestMatchers("/", "/entrar", "/painel", "/imoveis", "/anuncios/*",
+                                                                "/favicon.ico", "/error", "/*.html", "/html/**",
+                                                                "/css/**", "/js/**", "/imagem/**", "/uploads/**")
                                                 .permitAll()
 
                                                 // Endpoints Públicos da API
                                                 .requestMatchers("/api/auth/**").permitAll()
                                                 .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
+                                                // Contato do anunciante exige login; precisa vir antes do GET público de anúncios
+                                                .requestMatchers(HttpMethod.GET, "/api/anuncios/*/contato").authenticated()
                                                 .requestMatchers(HttpMethod.GET, "/api/anuncios", "/api/anuncios/**")
-                                                .permitAll()
-
-                                                // LIBERADO: Leitura de Endereços/Cidades no Cabeçalho e Vitrine
-                                                .requestMatchers(HttpMethod.GET, "/api/enderecos", "/api/enderecos/**")
                                                 .permitAll()
 
                                                 // Swagger / Docs

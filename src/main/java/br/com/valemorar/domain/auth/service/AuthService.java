@@ -8,6 +8,7 @@ import br.com.valemorar.domain.usuario.enums.PerfilEnum;
 import br.com.valemorar.domain.usuario.enums.StatusUsuarioEnum;
 import br.com.valemorar.domain.usuario.repository.UsuarioRepository;
 import br.com.valemorar.infra.EmailService;
+import br.com.valemorar.infra.GoogleTokenVerifier;
 import br.com.valemorar.infra.JwtTokenProvider;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,18 +25,21 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final EmailService emailService;
+    private final GoogleTokenVerifier googleTokenVerifier;
 
     public AuthService(
             UsuarioRepository usuarioRepository,
             TokenRecuperacaoRepository tokenRepository,
             PasswordEncoder passwordEncoder,
             JwtTokenProvider jwtTokenProvider,
-            EmailService emailService) {
+            EmailService emailService,
+            GoogleTokenVerifier googleTokenVerifier) {
         this.usuarioRepository = usuarioRepository;
         this.tokenRepository = tokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
         this.emailService = emailService;
+        this.googleTokenVerifier = googleTokenVerifier;
     }
 
     @Transactional(readOnly = true)
@@ -63,8 +67,9 @@ public class AuthService {
 
     @Transactional
     public AuthResponseDTO loginGoogle(GoogleLoginDTO dto) {
-        String emailGoogle = jwtTokenProvider.extrairEmailGoogle(dto.idToken());
-        String nomeGoogle = jwtTokenProvider.extrairNomeGoogle(dto.idToken());
+        GoogleTokenVerifier.GoogleUsuario google = googleTokenVerifier.verificar(dto.idToken());
+        String emailGoogle = google.email();
+        String nomeGoogle = google.nome();
 
         Usuario usuario = usuarioRepository.findByEmail(emailGoogle)
                 .orElseGet(() -> {
@@ -78,6 +83,10 @@ public class AuthService {
                     novoUsuario.setAtualizadoEm(LocalDateTime.now());
                     return usuarioRepository.save(novoUsuario);
                 });
+
+        if (usuario.getStatus() == StatusUsuarioEnum.INATIVO || usuario.getStatus() == StatusUsuarioEnum.BLOQUEADO) {
+            throw new IllegalStateException("Conta desativada ou bloqueada");
+        }
 
         String tokenJwt = jwtTokenProvider.gerarToken(usuario);
         return new AuthResponseDTO(

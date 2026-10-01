@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -52,6 +53,7 @@ public class SessaoController {
     @Operation(summary = "Listar todas as sessões", description = "Retorna uma página com todas as sessões registradas")
     @ApiResponse(responseCode = "200", description = "Página de sessões retornada com sucesso")
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<SessaoResponseDTO>> listarTodos(@PageableDefault(size = 20) Pageable pageable) {
         return ResponseEntity.ok(service.listarTodos(pageable));
     }

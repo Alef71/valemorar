@@ -41,11 +41,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const inicialSegura = escaparHTML(inicial);
 
             container.innerHTML = `
-                <a href="painel.html" class="bg-brand-green text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1 hover:bg-brand-greenSoft transition">
+                <a href="/painel?acao=anunciar" class="bg-brand-green text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1 hover:bg-brand-greenSoft transition">
                     <span class="material-symbols-outlined text-base">add_home</span> Anunciar
                 </a>
 
-                <a href="painel.html" class="flex items-center gap-2 pl-3 border-l border-[#dfd9cc] hover:opacity-80 transition">
+                <a href="/painel" class="flex items-center gap-2 pl-3 border-l border-[#dfd9cc] hover:opacity-80 transition">
                     <div class="w-8 h-8 rounded-full bg-brand-green text-white flex items-center justify-center font-bold text-xs shadow-xs">
                         ${inicialSegura}
                     </div>
@@ -63,15 +63,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Evento de Logout
             document.getElementById('btn-header-logout')?.addEventListener('click', () => {
                 localStorage.removeItem('usuario');
-                window.location.href = 'index.html';
+                localStorage.removeItem('token');
+                window.location.href = '/';
             });
         } else {
             // USUÁRIO DESLOGADO
             container.innerHTML = `
-                <a href="auth.html" class="text-brand-textSecondary hover:text-brand-green text-xs font-semibold px-3 py-2 transition">
+                <a href="/entrar" class="text-brand-textSecondary hover:text-brand-green text-xs font-semibold px-3 py-2 transition">
                     Entrar
                 </a>
-                <a href="auth.html?modo=cadastro" class="bg-brand-gold text-white text-xs font-bold px-3.5 py-2 rounded-lg shadow-xs hover:bg-brand-earthLight transition">
+                <a href="/entrar?modo=cadastro" class="bg-brand-gold text-white text-xs font-bold px-3.5 py-2 rounded-lg shadow-xs hover:bg-brand-earthLight transition">
                     Criar Conta
                 </a>
             `;
@@ -87,15 +88,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (usuario?.cidade) {
         atualizarCidadeHeader(usuario.cidade, usuario.estado);
-    } else if (usuario && usuario.id) {
+    } else if (usuario && usuario.id && localStorage.getItem('token')) {
         try {
-            // Rota ajustada para carregar apenas o endereço do próprio usuário logado
-            const response = await fetch(`${API_BASE_URL}/api/enderecos/usuario/${usuario.id}`, {
-                credentials: 'include'
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/api/enderecos/me`, {
+                headers: { 'Authorization': `Bearer ${token}` }
             });
-            if (response.ok) {
-                const data = await response.json();
-                const endereco = Array.isArray(data) ? data[0] : data;
+            if (response.status === 200) {
+                const endereco = await response.json();
                 if (endereco && endereco.cidade) {
                     atualizarCidadeHeader(endereco.cidade, endereco.estado);
                     usuario.cidade = endereco.cidade;

@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -16,4 +17,6 @@ public interface EnderecoRepository extends JpaRepository<Endereco, UUID> {
     Page<Endereco> findByCep(String cep, Pageable pageable);
 
     Page<Endereco> findByEstadoIgnoreCase(String estado, Pageable pageable);
+
+    Optional<Endereco> findByUsuarioIdAndPessoalTrue(UUID usuarioId);
 }
