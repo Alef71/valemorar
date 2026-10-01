@@ -4,12 +4,9 @@ import br.com.valemorar.domain.notificacao.Notificacao;
 import br.com.valemorar.domain.notificacao.dto.NotificacaoCreateDTO;
 import br.com.valemorar.domain.notificacao.dto.NotificacaoResponseDTO;
 import br.com.valemorar.domain.notificacao.repository.NotificacaoRepository;
-import br.com.valemorar.domain.usuario.Usuario;
-import br.com.valemorar.domain.usuario.enums.PerfilEnum;
 import br.com.valemorar.infra.SecurityUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,13 +47,13 @@ public class NotificacaoService {
     public NotificacaoResponseDTO buscarPorId(UUID id) {
         Notificacao entity = repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Notificação não encontrada"));
-        validarAcessoUsuario(entity.getUsuarioId());
+        SecurityUtils.exigirDonoOuAdmin(entity.getUsuarioId());
         return NotificacaoResponseDTO.fromEntity(entity);
     }
 
     @Transactional(readOnly = true)
     public List<NotificacaoResponseDTO> buscarPorUsuario(UUID usuarioId) {
-        validarAcessoUsuario(usuarioId);
+        SecurityUtils.exigirDonoOuAdmin(usuarioId);
         return repository.findByUsuarioIdOrderByCriadoEmDesc(usuarioId)
                 .stream()
                 .map(NotificacaoResponseDTO::fromEntity)
@@ -65,7 +62,7 @@ public class NotificacaoService {
 
     @Transactional(readOnly = true)
     public List<NotificacaoResponseDTO> buscarNaoLidasPorUsuario(UUID usuarioId) {
-        validarAcessoUsuario(usuarioId);
+        SecurityUtils.exigirDonoOuAdmin(usuarioId);
         return repository.findByUsuarioIdAndLidaFalseOrderByCriadoEmDesc(usuarioId)
                 .stream()
                 .map(NotificacaoResponseDTO::fromEntity)
@@ -76,7 +73,7 @@ public class NotificacaoService {
     public NotificacaoResponseDTO marcarComoLida(UUID id) {
         Notificacao entity = repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Notificação não encontrada"));
-        validarAcessoUsuario(entity.getUsuarioId());
+        SecurityUtils.exigirDonoOuAdmin(entity.getUsuarioId());
 
         entity.setLida(true);
         Notificacao atualizado = repository.save(entity);
@@ -85,7 +82,7 @@ public class NotificacaoService {
 
     @Transactional
     public void marcarTodasComoLidasPorUsuario(UUID usuarioId) {
-        validarAcessoUsuario(usuarioId);
+        SecurityUtils.exigirDonoOuAdmin(usuarioId);
         repository.marcarTodasComoLidasPorUsuario(usuarioId);
     }
 
@@ -93,22 +90,7 @@ public class NotificacaoService {
     public void deletar(UUID id) {
         Notificacao entity = repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Notificação não encontrada"));
-        validarAcessoUsuario(entity.getUsuarioId());
+        SecurityUtils.exigirDonoOuAdmin(entity.getUsuarioId());
         repository.delete(entity);
-    }
-
-    private UUID getUsuarioAutenticadoId() {
-        return SecurityUtils.getUsuarioAutenticado().getId();
-    }
-
-    private boolean isAdmin() {
-        Usuario usuario = SecurityUtils.getUsuarioAutenticado();
-        return PerfilEnum.ROLE_ADMIN.equals(usuario.getPerfil());
-    }
-
-    private void validarAcessoUsuario(UUID usuarioId) {
-        if (!isAdmin() && !getUsuarioAutenticadoId().equals(usuarioId)) {
-            throw new AccessDeniedException("Você não tem permissão para acessar notificações de outro usuário");
-        }
     }
 }

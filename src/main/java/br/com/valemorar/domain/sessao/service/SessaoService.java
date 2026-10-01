@@ -4,12 +4,9 @@ import br.com.valemorar.domain.sessao.Sessao;
 import br.com.valemorar.domain.sessao.dto.SessaoCreateDTO;
 import br.com.valemorar.domain.sessao.dto.SessaoResponseDTO;
 import br.com.valemorar.domain.sessao.repository.SessaoRepository;
-import br.com.valemorar.domain.usuario.Usuario;
-import br.com.valemorar.domain.usuario.enums.PerfilEnum;
 import br.com.valemorar.infra.SecurityUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,10 +25,7 @@ public class SessaoService {
 
     @Transactional
     public SessaoResponseDTO criar(SessaoCreateDTO dto) {
-        UUID usuarioAutenticadoId = getUsuarioAutenticadoId();
-        if (dto.usuarioId() != null && !dto.usuarioId().equals(usuarioAutenticadoId) && !isAdmin()) {
-            throw new AccessDeniedException("Você não tem permissão para criar sessão para outro usuário");
-        }
+        UUID usuarioAutenticadoId = SecurityUtils.resolverDono(dto.usuarioId());
 
         Sessao entity = new Sessao();
         entity.setUsuarioId(usuarioAutenticadoId);
@@ -47,9 +41,7 @@ public class SessaoService {
 
     @Transactional(readOnly = true)
     public Page<SessaoResponseDTO> listarTodos(Pageable pageable) {
-        if (!isAdmin()) {
-            throw new AccessDeniedException("Apenas administradores podem listar todas as sessões");
-        }
+        SecurityUtils.exigirAdmin();
         return repository.findAll(pageable)
                 .map(SessaoResponseDTO::fromEntity);
     }
@@ -58,13 +50,13 @@ public class SessaoService {
     public SessaoResponseDTO buscarPorId(UUID id) {
         Sessao entity = repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Sessão não encontrada"));
-        validarAcessoUsuario(entity.getUsuarioId());
+        SecurityUtils.exigirDonoOuAdmin(entity.getUsuarioId());
         return SessaoResponseDTO.fromEntity(entity);
     }
 
     @Transactional(readOnly = true)
     public List<SessaoResponseDTO> buscarPorUsuario(UUID usuarioId) {
-        validarAcessoUsuario(usuarioId);
+        SecurityUtils.exigirDonoOuAdmin(usuarioId);
         return repository.findByUsuarioIdOrderByCriadoEmDesc(usuarioId)
                 .stream()
                 .map(SessaoResponseDTO::fromEntity)
@@ -75,7 +67,7 @@ public class SessaoService {
     public SessaoResponseDTO revogarSessao(UUID id) {
         Sessao entity = repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Sessão não encontrada"));
-        validarAcessoUsuario(entity.getUsuarioId());
+        SecurityUtils.exigirDonoOuAdmin(entity.getUsuarioId());
 
         entity.setRevogadoEm(LocalDateTime.now());
         Sessao atualizado = repository.save(entity);
@@ -84,7 +76,7 @@ public class SessaoService {
 
     @Transactional
     public void revogarTodasDoUsuario(UUID usuarioId) {
-        validarAcessoUsuario(usuarioId);
+        SecurityUtils.exigirDonoOuAdmin(usuarioId);
         repository.revogarTodasDoUsuario(usuarioId);
     }
 
@@ -92,22 +84,7 @@ public class SessaoService {
     public void deletar(UUID id) {
         Sessao entity = repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Sessão não encontrada"));
-        validarAcessoUsuario(entity.getUsuarioId());
+        SecurityUtils.exigirDonoOuAdmin(entity.getUsuarioId());
         repository.delete(entity);
-    }
-
-    private UUID getUsuarioAutenticadoId() {
-        return SecurityUtils.getUsuarioAutenticado().getId();
-    }
-
-    private boolean isAdmin() {
-        Usuario usuario = SecurityUtils.getUsuarioAutenticado();
-        return PerfilEnum.ROLE_ADMIN.equals(usuario.getPerfil());
-    }
-
-    private void validarAcessoUsuario(UUID usuarioId) {
-        if (!isAdmin() && !getUsuarioAutenticadoId().equals(usuarioId)) {
-            throw new AccessDeniedException("Você não tem permissão para acessar esta sessão");
-        }
     }
 }

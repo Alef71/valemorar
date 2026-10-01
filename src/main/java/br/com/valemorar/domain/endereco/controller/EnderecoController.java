@@ -28,7 +28,26 @@ public class EnderecoController {
         this.service = service;
     }
 
-    @Operation(summary = "Criar um endereço", description = "Cadastra um novo endereço no sistema")
+    @Operation(summary = "Meu endereço pessoal", description = "Retorna o endereço do perfil do usuário autenticado")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Endereço encontrado"),
+            @ApiResponse(responseCode = "204", description = "Usuário ainda não cadastrou endereço")
+    })
+    @GetMapping("/me")
+    public ResponseEntity<EnderecoResponseDTO> meuEndereco() {
+        return service.buscarMeuEnderecoPessoal()
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
+    }
+
+    @Operation(summary = "Salvar meu endereço pessoal", description = "Cria ou atualiza o endereço do perfil do usuário autenticado")
+    @ApiResponse(responseCode = "200", description = "Endereço salvo com sucesso")
+    @PutMapping("/me")
+    public ResponseEntity<EnderecoResponseDTO> salvarMeuEndereco(@RequestBody @Valid EnderecoCreateDTO dto) {
+        return ResponseEntity.ok(service.salvarMeuEnderecoPessoal(dto));
+    }
+
+    @Operation(summary = "Criar um endereço", description = "Cadastra um novo endereço de imóvel para o usuário autenticado")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Endereço criado com sucesso"),
             @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos")
@@ -38,7 +57,7 @@ public class EnderecoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(dto));
     }
 
-    @Operation(summary = "Listar todos os endereços", description = "Retorna uma página com todos os endereços cadastrados")
+    @Operation(summary = "Listar todos os endereços", description = "Retorna uma página com todos os endereços cadastrados (apenas administradores)")
     @ApiResponse(responseCode = "200", description = "Página retornada com sucesso")
     @GetMapping
     public ResponseEntity<Page<EnderecoResponseDTO>> listarTodos(@PageableDefault(size = 10) Pageable pageable) {

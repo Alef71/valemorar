@@ -7,10 +7,12 @@ import br.com.valemorar.domain.usuario.dto.UsuarioUpdateDTO;
 import br.com.valemorar.domain.usuario.enums.PerfilEnum;
 import br.com.valemorar.domain.usuario.enums.StatusUsuarioEnum;
 import br.com.valemorar.domain.usuario.repository.UsuarioRepository;
+import br.com.valemorar.infra.ArmazenamentoArquivos;
 import br.com.valemorar.infra.SecurityUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,10 +23,13 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ArmazenamentoArquivos armazenamento;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
+    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder,
+            ArmazenamentoArquivos armazenamento) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
+        this.armazenamento = armazenamento;
     }
 
     @Transactional
@@ -74,10 +79,27 @@ public class UsuarioService {
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
         usuarioLogado.setNome(dto.nome());
-        usuarioLogado.setFotoPerfil(dto.fotoPerfil());
+        if (dto.fotoPerfil() != null) {
+            usuarioLogado.setFotoPerfil(dto.fotoPerfil());
+        }
         usuarioLogado.setAtualizadoEm(LocalDateTime.now());
 
         Usuario atualizado = usuarioRepository.save(usuarioLogado);
+        return UsuarioResponseDTO.fromEntity(atualizado);
+    }
+
+    /** Troca a foto de perfil pelo arquivo enviado e remove a anterior do armazenamento. */
+    @Transactional
+    public UsuarioResponseDTO atualizarFotoPerfil(MultipartFile arquivo) {
+        Usuario usuarioLogado = usuarioRepository.findById(SecurityUtils.getUsuarioAutenticadoId())
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+
+        String fotoAnterior = usuarioLogado.getFotoPerfil();
+        usuarioLogado.setFotoPerfil(armazenamento.salvarImagem(arquivo, ArmazenamentoArquivos.Pasta.USUARIOS));
+        usuarioLogado.setAtualizadoEm(LocalDateTime.now());
+
+        Usuario atualizado = usuarioRepository.save(usuarioLogado);
+        armazenamento.remover(fotoAnterior);
         return UsuarioResponseDTO.fromEntity(atualizado);
     }
 

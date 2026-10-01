@@ -43,8 +43,8 @@
   </script>
 
   <!-- CSS Externos do Projeto -->
-  <link rel="stylesheet" href="../css/header.css">
-  <link rel="stylesheet" href="../css/index.css">
+  <link rel="stylesheet" href="/css/header.css">
+  <link rel="stylesheet" href="/css/index.css">
 </head>
 <body class="bg-brand-cream text-brand-textPrimary font-sans antialiased flex flex-col min-h-screen">
 
@@ -54,7 +54,7 @@
       
       <!-- LOGO COM CAMINHO CORRIGIDO PARA index.html -->
       <a href="/" class="brand-logo-link flex items-center gap-3 group focus:outline-none">
-        <img src="../imagem/vale%20morar.jpeg" alt="Vale Morar" class="h-10 w-auto object-contain rounded-md">
+        <img src="/imagem/vale%20morar.jpeg" alt="Vale Morar" class="h-10 w-auto object-contain rounded-md">
         
         <div id="header-user-city" class="hidden xl:flex items-center pl-3 border-l border-[#dfd9cc] text-[11px] font-bold tracking-widest text-brand-textSecondary uppercase">
           <!-- Preenchido via JS (header.js) -->
@@ -64,9 +64,9 @@
       <!-- Links do Menu -->
       <nav class="hidden lg:flex items-center gap-6 text-sm font-medium text-brand-textSecondary">
         <a href="#cidades" class="nav-link text-brand-green font-bold border-b-2 border-brand-green pb-0.5">Explorar Cidades</a>
-        <a href="/imoveis?modalidade=residencial" class="nav-link hover:text-brand-green">Aluguel Residencial</a>
-        <a href="/imoveis?modalidade=comercial" class="nav-link hover:text-brand-green">Aluguel Comercial</a>
-        <a href="/imoveis?modalidade=sitios" class="nav-link hover:text-brand-green">Sítios & Chácaras</a>
+        <a href="/imoveis?tipoImovel=RESIDENCIAL" class="nav-link hover:text-brand-green">Aluguel Residencial</a>
+        <a href="/imoveis?tipoImovel=COMERCIAL" class="nav-link hover:text-brand-green">Aluguel Comercial</a>
+        <a href="/imoveis?tipoImovel=CHACARA" class="nav-link hover:text-brand-green">Sítios & Chácaras</a>
       </nav>
 
       <!-- ÁREA DINÂMICA DO USUÁRIO (Preenchida pelo header.js) -->
@@ -97,7 +97,7 @@
 
       <!-- BOX DE BUSCA INTEGRADA -->
       <div class="mt-8 bg-white border border-[#dfd7c8] rounded-2xl shadow-xl p-4 sm:p-6 max-w-5xl mx-auto">
-        <form id="form-busca-vitrine" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 items-end" action="/imoveis" method="GET">
+        <form id="form-busca-vitrine" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 items-end">
           
           <div class="lg:col-span-4">
             <label class="block text-xs font-bold text-brand-textSecondary mb-1.5">Cidade do Vale</label>
@@ -133,13 +133,33 @@
     </section>
 
     <!-- VITRINE DE IMÓVEIS -->
-    <section class="py-12 bg-white border-y border-[#dfd7c8]">
+    <section id="vitrine" class="py-12 bg-white border-y border-[#dfd7c8] scroll-mt-20">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-textPrimary mb-6">Imóveis Recém-Catalogados</h2>
-        
+
+        <!-- Resumo do resultado + ordenação -->
+        <div class="flex flex-wrap items-end justify-between gap-4 mb-8">
+          <div>
+            <h2 id="vitrine-total" class="text-2xl sm:text-3xl font-extrabold text-brand-textPrimary">Imóveis</h2>
+            <p id="vitrine-subtitulo" class="text-sm sm:text-base text-brand-textSecondary mt-0.5">para alugar no Vale do Jequitinhonha</p>
+          </div>
+          <label class="inline-flex items-center gap-2 bg-[#f1ede4] hover:bg-[#ebe5d9] rounded-full pl-4 pr-2 py-2 text-sm font-bold text-brand-textPrimary cursor-pointer transition">
+            <span class="material-symbols-outlined text-lg">swap_vert</span>
+            <span class="sr-only">Ordenar por</span>
+            <select id="vitrine-ordem" class="bg-transparent font-bold focus:outline-none cursor-pointer pr-1">
+              <option value="publicadoEm,desc">Mais recentes</option>
+              <option value="valor,asc">Menor preço</option>
+              <option value="valor,desc">Maior preço</option>
+            </select>
+          </label>
+        </div>
+
         <!-- Container onde os imóveis do backend serão renderizados -->
-        <div id="vitrine-imoveis" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div id="vitrine-imoveis-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
           <p class="text-brand-textSecondary text-sm col-span-full">Carregando imóveis...</p>
+        </div>
+
+        <div class="text-center mt-10">
+          <button id="vitrine-carregar-mais" type="button" class="hidden px-6 py-2.5 rounded-full border border-[#dcd6c9] bg-white hover:bg-brand-cream text-sm font-bold text-brand-textPrimary transition disabled:opacity-50">Carregar mais imóveis</button>
         </div>
       </div>
     </section>
@@ -152,7 +172,8 @@
   </footer>
 
   <!-- CARREGAMENTO DE SCRIPTS -->
-  <script src="../js/header.js"></script>
-  <script src="../js/index.js"></script>
+  <script src="/js/cidades.js"></script>
+  <script src="/js/header.js"></script>
+  <script src="/js/index.js"></script>
 </body>
 </html>

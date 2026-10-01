@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const inicialSegura = escaparHTML(inicial);
 
             container.innerHTML = `
-                <a href="/painel" class="bg-brand-green text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1 hover:bg-brand-greenSoft transition">
+                <a href="/painel?acao=anunciar" class="bg-brand-green text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1 hover:bg-brand-greenSoft transition">
                     <span class="material-symbols-outlined text-base">add_home</span> Anunciar
                 </a>
 
@@ -88,5 +88,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (usuario?.cidade) {
         atualizarCidadeHeader(usuario.cidade, usuario.estado);
+    } else if (usuario && usuario.id && localStorage.getItem('token')) {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/api/enderecos/me`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.status === 200) {
+                const endereco = await response.json();
+                if (endereco && endereco.cidade) {
+                    atualizarCidadeHeader(endereco.cidade, endereco.estado);
+                    usuario.cidade = endereco.cidade;
+                    usuario.estado = endereco.estado;
+                    localStorage.setItem('usuario', JSON.stringify(usuario));
+                }
+            }
+        } catch (err) {
+            // Falha tratada para não quebrar a interface
+        }
     }
 });

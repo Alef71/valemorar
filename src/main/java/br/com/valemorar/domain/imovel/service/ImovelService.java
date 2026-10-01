@@ -1,9 +1,11 @@
 package br.com.valemorar.domain.imovel.service;
 
+import br.com.valemorar.domain.endereco.service.EnderecoService;
 import br.com.valemorar.domain.imovel.Imovel;
 import br.com.valemorar.domain.imovel.dto.ImovelCreateDTO;
 import br.com.valemorar.domain.imovel.dto.ImovelResponseDTO;
 import br.com.valemorar.domain.imovel.repository.ImovelRepository;
+import br.com.valemorar.infra.SecurityUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -15,15 +17,20 @@ import java.util.UUID;
 @Service
 public class ImovelService {
 
-    private final ImovelRepository imovelRepository;
+    private static final String MENSAGEM_NAO_ENCONTRADO = "Imóvel não encontrado";
 
-    public ImovelService(ImovelRepository imovelRepository) {
+    private final ImovelRepository imovelRepository;
+    private final EnderecoService enderecoService;
+
+    public ImovelService(ImovelRepository imovelRepository, EnderecoService enderecoService) {
         this.imovelRepository = imovelRepository;
+        this.enderecoService = enderecoService;
     }
 
     @Transactional
     public ImovelResponseDTO criar(ImovelCreateDTO dto) {
         Imovel imovel = new Imovel();
+        imovel.setLocadorId(SecurityUtils.resolverDono(dto.locadorId()));
         preencherDadosImovel(imovel, dto);
         imovel.setCriadoEm(LocalDateTime.now());
         imovel.setAtualizadoEm(LocalDateTime.now());
@@ -41,7 +48,7 @@ public class ImovelService {
     @Transactional(readOnly = true)
     public ImovelResponseDTO buscarPorId(UUID id) {
         Imovel imovel = imovelRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Imóvel não encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException(MENSAGEM_NAO_ENCONTRADO));
         return ImovelResponseDTO.fromEntity(imovel);
     }
 
@@ -59,8 +66,7 @@ public class ImovelService {
 
     @Transactional
     public ImovelResponseDTO atualizar(UUID id, ImovelCreateDTO dto) {
-        Imovel imovel = imovelRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Imóvel não encontrado"));
+        Imovel imovel = buscarProprio(id);
 
         preencherDadosImovel(imovel, dto);
         imovel.setAtualizadoEm(LocalDateTime.now());
@@ -71,14 +77,20 @@ public class ImovelService {
 
     @Transactional
     public void deletar(UUID id) {
-        if (!imovelRepository.existsById(id)) {
-            throw new IllegalArgumentException("Imóvel não encontrado");
-        }
-        imovelRepository.deleteById(id);
+        imovelRepository.delete(buscarProprio(id));
+    }
+
+    /** Busca um imóvel garantindo que pertence ao usuário autenticado (ou que ele é admin). */
+    public Imovel buscarProprio(UUID id) {
+        Imovel imovel = imovelRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(MENSAGEM_NAO_ENCONTRADO));
+        SecurityUtils.exigirDonoOuAdmin(imovel.getLocadorId());
+        return imovel;
     }
 
     private void preencherDadosImovel(Imovel imovel, ImovelCreateDTO dto) {
-        imovel.setLocadorId(dto.locadorId());
+        // O endereço precisa pertencer ao mesmo usuário
+        enderecoService.buscarProprio(dto.enderecoId());
         imovel.setEnderecoId(dto.enderecoId());
         imovel.setTitulo(dto.titulo());
         imovel.setDescricao(dto.descricao());

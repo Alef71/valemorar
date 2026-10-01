@@ -5,12 +5,9 @@ import br.com.valemorar.domain.denuncia.dto.DenunciaCreateDTO;
 import br.com.valemorar.domain.denuncia.dto.DenunciaResponseDTO;
 import br.com.valemorar.domain.denuncia.enums.StatusDenunciaEnum;
 import br.com.valemorar.domain.denuncia.repository.DenunciaRepository;
-import br.com.valemorar.domain.usuario.Usuario;
-import br.com.valemorar.domain.usuario.enums.PerfilEnum;
 import br.com.valemorar.infra.SecurityUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,10 +25,7 @@ public class DenunciaService {
 
     @Transactional
     public DenunciaResponseDTO criar(DenunciaCreateDTO dto) {
-        UUID usuarioAutenticadoId = getUsuarioAutenticadoId();
-        if (dto.denuncianteId() != null && !usuarioAutenticadoId.equals(dto.denuncianteId()) && !isAdmin()) {
-            throw new AccessDeniedException("Você não tem permissão para registrar denúncia para outro usuário");
-        }
+        UUID usuarioAutenticadoId = SecurityUtils.resolverDono(dto.denuncianteId());
 
         Denuncia entity = new Denuncia();
         entity.setDenuncianteId(usuarioAutenticadoId);
@@ -47,7 +41,7 @@ public class DenunciaService {
 
     @Transactional(readOnly = true)
     public Page<DenunciaResponseDTO> listarTodos(Pageable pageable) {
-        validarAdmin();
+        SecurityUtils.exigirAdmin();
         return repository.findAll(pageable)
                 .map(DenunciaResponseDTO::fromEntity);
     }
@@ -56,13 +50,13 @@ public class DenunciaService {
     public DenunciaResponseDTO buscarPorId(UUID id) {
         Denuncia entity = repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Denúncia não encontrada"));
-        validarAcessoDenuncia(entity);
+        SecurityUtils.exigirDonoOuAdmin(entity.getDenuncianteId());
         return DenunciaResponseDTO.fromEntity(entity);
     }
 
     @Transactional(readOnly = true)
     public Page<DenunciaResponseDTO> buscarPorStatus(String status, Pageable pageable) {
-        validarAdmin();
+        SecurityUtils.exigirAdmin();
         String statusNormalizado = normalizarStatus(status).name();
         return repository.findByStatus(statusNormalizado, pageable)
                 .map(DenunciaResponseDTO::fromEntity);
@@ -70,21 +64,21 @@ public class DenunciaService {
 
     @Transactional(readOnly = true)
     public Page<DenunciaResponseDTO> buscarPorAnuncio(UUID anuncioId, Pageable pageable) {
-        validarAdmin();
+        SecurityUtils.exigirAdmin();
         return repository.findByAnuncioId(anuncioId, pageable)
                 .map(DenunciaResponseDTO::fromEntity);
     }
 
     @Transactional(readOnly = true)
     public Page<DenunciaResponseDTO> buscarPorDenunciante(UUID denuncianteId, Pageable pageable) {
-        validarAcessoUsuario(denuncianteId);
+        SecurityUtils.exigirDonoOuAdmin(denuncianteId);
         return repository.findByDenuncianteId(denuncianteId, pageable)
                 .map(DenunciaResponseDTO::fromEntity);
     }
 
     @Transactional
     public DenunciaResponseDTO resolverDenuncia(UUID id, String novoStatus) {
-        validarAdmin();
+        SecurityUtils.exigirAdmin();
         Denuncia entity = repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Denúncia não encontrada"));
 
@@ -94,7 +88,7 @@ public class DenunciaService {
         }
 
         entity.setStatus(statusResolvido.name());
-        entity.setResolvidoPor(getUsuarioAutenticadoId());
+        entity.setResolvidoPor(SecurityUtils.getUsuarioAutenticadoId());
         entity.setResolvidoEm(LocalDateTime.now());
 
         Denuncia atualizado = repository.save(entity);
@@ -105,35 +99,8 @@ public class DenunciaService {
     public void deletar(UUID id) {
         Denuncia entity = repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Denúncia não encontrada"));
-        validarAcessoDenuncia(entity);
+        SecurityUtils.exigirDonoOuAdmin(entity.getDenuncianteId());
         repository.delete(entity);
-    }
-
-    private UUID getUsuarioAutenticadoId() {
-        return SecurityUtils.getUsuarioAutenticado().getId();
-    }
-
-    private boolean isAdmin() {
-        Usuario usuario = SecurityUtils.getUsuarioAutenticado();
-        return PerfilEnum.ROLE_ADMIN.equals(usuario.getPerfil());
-    }
-
-    private void validarAdmin() {
-        if (!isAdmin()) {
-            throw new AccessDeniedException("Apenas administradores podem acessar este recurso");
-        }
-    }
-
-    private void validarAcessoUsuario(UUID usuarioId) {
-        if (!isAdmin() && !getUsuarioAutenticadoId().equals(usuarioId)) {
-            throw new AccessDeniedException("Você não tem permissão para acessar denúncias de outro usuário");
-        }
-    }
-
-    private void validarAcessoDenuncia(Denuncia denuncia) {
-        if (!isAdmin() && !getUsuarioAutenticadoId().equals(denuncia.getDenuncianteId())) {
-            throw new AccessDeniedException("Você não tem permissão para acessar esta denúncia");
-        }
     }
 
     private StatusDenunciaEnum normalizarStatus(String status) {

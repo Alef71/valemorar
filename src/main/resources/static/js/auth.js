@@ -27,6 +27,11 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleViews();
     }
 
+    // ?redirect=/anuncios/... volta para a página de origem após o login.
+    // Só aceita caminhos internos ("/x", nunca "//host" ou URL absoluta) para evitar open redirect.
+    const redirectParam = urlParams.get('redirect');
+    const destinoAposLogin = redirectParam && /^\/(?![\/\\])/.test(redirectParam) ? redirectParam : '/painel';
+
     // TROCA DE TELAS (LOGIN / CADASTRO)
     if (btnIrCadastro) {
         btnIrCadastro.addEventListener('click', (e) => {
@@ -97,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // Redireciona diretamente para o painel de controle
                     setTimeout(() => {
-                        window.location.href = '/painel';
+                        window.location.href = destinoAposLogin;
                     }, 1200);
 
                 } else {
@@ -171,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         exibirFeedback('Conta criada com sucesso! Redirecionando para o painel...', 'sucesso');
 
                         setTimeout(() => {
-                            window.location.href = '/painel';
+                            window.location.href = destinoAposLogin;
                         }, 1200);
                     } else {
                         exibirFeedback('Cadastro realizado! Por favor, faça o login manual.', 'sucesso');

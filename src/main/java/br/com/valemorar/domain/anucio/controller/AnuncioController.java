@@ -1,6 +1,8 @@
 package br.com.valemorar.domain.anucio.controller;
 
+import br.com.valemorar.domain.anucio.dto.AnuncianteContatoDTO;
 import br.com.valemorar.domain.anucio.dto.AnuncioCreateDTO;
+import br.com.valemorar.domain.anucio.dto.AnuncioPublicacaoDTO;
 import br.com.valemorar.domain.anucio.dto.AnuncioResponseDTO;
 import br.com.valemorar.domain.anucio.service.AnuncioService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,25 +44,51 @@ public class AnuncioController {
         return ResponseEntity.status(HttpStatus.CREATED).body(anuncioService.criar(dto));
     }
 
-    @Operation(summary = "Listar todos os anúncios", description = "Retorna uma página com todos os anúncios cadastrados")
+    @Operation(summary = "Publicar anúncio completo", description = "Cria endereço, imóvel, fotos e anúncio em uma única transação (fluxo do painel)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Anúncio publicado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos")
+    })
+    @PostMapping("/publicacao")
+    public ResponseEntity<AnuncioResponseDTO> publicar(@RequestBody @Valid AnuncioPublicacaoDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(anuncioService.publicar(dto));
+    }
+
+    @Operation(summary = "Atualizar anúncio completo", description = "Atualiza endereço, imóvel, fotos e anúncio em uma única transação (fluxo do painel)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Anúncio atualizado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos ou anúncio não encontrado"),
+            @ApiResponse(responseCode = "403", description = "Anúncio pertence a outro usuário")
+    })
+    @PutMapping("/{id}/publicacao")
+    public ResponseEntity<AnuncioResponseDTO> atualizarPublicacao(@PathVariable UUID id,
+            @RequestBody @Valid AnuncioPublicacaoDTO dto) {
+        return ResponseEntity.ok(anuncioService.atualizarPublicacao(id, dto));
+    }
+
+    @Operation(summary = "Listar todos os anúncios", description = "Retorna uma página com os anúncios ativos (vitrine pública)")
     @ApiResponse(responseCode = "200", description = "Página retornada com sucesso")
     @GetMapping
     public ResponseEntity<Page<AnuncioResponseDTO>> listarTodos(@PageableDefault(size = 10) Pageable pageable) {
         return ResponseEntity.ok(anuncioService.listarTodos(pageable));
     }
 
-    @Operation(summary = "Buscar anúncios com filtros avançados", description = "Filtra anúncios por tipo de imóvel, faixa de preço, número de quartos e tags de proximidade (RF07 e RF08)")
+    @Operation(summary = "Buscar anúncios com filtros avançados", description = "Filtra anúncios ativos por cidade, bairro/referência, tipo de imóvel, faixa de preço, número de quartos e tags de proximidade (RF07 e RF08)")
     @ApiResponse(responseCode = "200", description = "Busca realizada com sucesso")
     @GetMapping("/busca")
     public ResponseEntity<Page<AnuncioResponseDTO>> buscarComFiltros(
             @Parameter(description = "Tipo de imóvel ex: RESIDENCIAL, COMERCIAL, CHACARA") @RequestParam(required = false) String tipoImovel,
+            @Parameter(description = "Cidade (nome exato, sem diferenciar maiúsculas) ex: Araçuaí") @RequestParam(required = false) String cidade,
+            @Parameter(description = "Trecho do bairro ou de uma tag de referência ex: centro, ufvjm") @RequestParam(required = false) String referencia,
             @Parameter(description = "Valor mínimo do aluguel/venda") @RequestParam(required = false) BigDecimal precoMin,
             @Parameter(description = "Valor máximo do aluguel/venda") @RequestParam(required = false) BigDecimal precoMax,
             @Parameter(description = "Número mínimo de quartos") @RequestParam(required = false) Integer quartos,
             @Parameter(description = "Tags de pontos de interesse ex: IFNMG, UFVJM (RF07)") @RequestParam(required = false) List<String> tags,
-            @PageableDefault(size = 10) Pageable pageable) {
+            // Ordenação aceita: publicadoEm (padrão, mais recentes) ou valor; ex.: ?sort=valor,asc
+            @PageableDefault(size = 12, sort = "publicadoEm", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity
-                .ok(anuncioService.buscarComFiltros(tipoImovel, precoMin, precoMax, quartos, tags, pageable));
+                .ok(anuncioService.buscarComFiltros(tipoImovel, precoMin, precoMax, quartos, cidade, referencia, tags,
+                        pageable));
     }
 
     @Operation(summary = "Buscar anúncio por ID", description = "Busca os detalhes de um anúncio específico pelo seu UUID")
@@ -70,6 +99,17 @@ public class AnuncioController {
     @GetMapping("/{id}")
     public ResponseEntity<AnuncioResponseDTO> buscarPorId(@PathVariable UUID id) {
         return ResponseEntity.ok(anuncioService.buscarPorId(id));
+    }
+
+    @Operation(summary = "Contato do anunciante", description = "Nome, e-mail, telefone e WhatsApp do anunciante. Exige usuário autenticado")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Contato retornado com sucesso"),
+            @ApiResponse(responseCode = "403", description = "Usuário não autenticado"),
+            @ApiResponse(responseCode = "400", description = "Anúncio não encontrado")
+    })
+    @GetMapping("/{id}/contato")
+    public ResponseEntity<AnuncianteContatoDTO> buscarContato(@PathVariable UUID id) {
+        return ResponseEntity.ok(anuncioService.buscarContatoAnunciante(id));
     }
 
     @Operation(summary = "Buscar anúncios por anunciante", description = "Retorna os anúncios publicados por um anunciante específico")
