@@ -27,6 +27,9 @@ public class FotoImovel {
     private Boolean capa;
     private Integer ordem;
 
+    /** SHA-256 do arquivo (ou da URL, se externa); preenchido pela revisão de anúncios. */
+    private String hash;
+
     @Column(name = "criado_em")
     private LocalDateTime criadoEm;
 }

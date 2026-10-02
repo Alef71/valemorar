@@ -34,7 +34,10 @@ public record AnuncioResponseDTO(
         String status,
         LocalDateTime publicadoEm,
         LocalDateTime expiraEm,
-        LocalDateTime atualizadoEm) {
+        LocalDateTime atualizadoEm,
+        String motivoRevisao,
+        BigDecimal indiceValor,
+        BigDecimal economiaMercado) {
 
     public static AnuncioResponseDTO fromEntity(Anuncio anuncio, Endereco endereco, List<FotoImovelResponseDTO> fotos) {
         Imovel imovel = anuncio.getImovel();
@@ -61,6 +64,9 @@ public record AnuncioResponseDTO(
                 anuncio.getStatus() != null ? anuncio.getStatus().name() : null,
                 anuncio.getPublicadoEm(),
                 anuncio.getExpiraEm(),
-                anuncio.getAtualizadoEm());
+                anuncio.getAtualizadoEm(),
+                anuncio.getMotivoRevisao(),
+                anuncio.getIndiceValor(),
+                anuncio.getEconomiaMercado());
     }
 }

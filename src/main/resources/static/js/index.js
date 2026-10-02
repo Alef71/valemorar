@@ -132,7 +132,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const local = item.bairro || item.cidade || 'Vale do Jequitinhonha';
 
         const novo = item.publicadoEm && (Date.now() - new Date(item.publicadoEm)) < DIAS_ANUNCIO_NOVO * 86400000;
-        const selos = [novo ? 'Anúncio novo' : null, tipo].filter(Boolean)
+        // economiaMercado: quanto está abaixo do preço de mercado estimado (mediana por quarto na cidade)
+        const economia = parseFloat(item.economiaMercado || 0);
+        const oferta = economia >= 50 ? `${moeda(economia)} abaixo do mercado` : null;
+        const selos = [oferta, novo ? 'Anúncio novo' : null, tipo].filter(Boolean)
             .map(s => `<span class="bg-white/95 text-brand-textPrimary text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">${escaparHTML(s)}</span>`)
             .join('');
 

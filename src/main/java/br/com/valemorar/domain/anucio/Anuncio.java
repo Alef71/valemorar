@@ -61,4 +61,16 @@ public class Anuncio {
 
     @Column(name = "atualizado_em")
     private LocalDateTime atualizadoEm;
+
+    /** Motivos da última reprovação na revisão automática (um por linha). */
+    @Column(name = "motivo_revisao", columnDefinition = "TEXT")
+    private String motivoRevisao;
+
+    /** Mediana do preço/quarto dos comparáveis ÷ preço/quarto deste anúncio (> 1 = abaixo do mercado). */
+    @Column(name = "indice_valor")
+    private BigDecimal indiceValor;
+
+    /** Quanto o anúncio está abaixo (positivo) ou acima (negativo) do preço de mercado estimado. */
+    @Column(name = "economia_mercado")
+    private BigDecimal economiaMercado;
 }

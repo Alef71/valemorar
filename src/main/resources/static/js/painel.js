@@ -393,13 +393,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             const tipoSeguro = escaparHTML(anuncio.tipoImovel || 'RESIDENCIAL');
             const modalidadeSegura = escaparHTML(anuncio.modalidade || 'ALUGUEL');
             const statusSeguro = escaparHTML(anuncio.status || 'ATIVO');
+            const rotuloStatus = { IN_REVIEW: 'EM ANÁLISE', MANUAL_REVIEW_REQUIRED: 'REVISÃO MANUAL' }[anuncio.status] || statusSeguro;
+            const motivoRevisao = anuncio.motivoRevisao
+                ? `<p class="text-xs text-red-700 bg-red-50 rounded p-2 mb-2 whitespace-pre-line"><strong>Pendências da revisão:</strong>\n${escaparHTML(anuncio.motivoRevisao)}</p>`
+                : '';
 
             return `
                 <div class="anuncio-card border border-[#dfd7c8] p-4 rounded-xl mb-4 bg-white shadow-sm">
                     <div class="flex justify-between items-center mb-2">
                         <h4 class="font-bold text-brand-textPrimary">${cidadeSegura} - ${tipoSeguro} (${modalidadeSegura})</h4>
-                        <span class="status-badge px-2 py-1 rounded text-xs font-bold bg-gray-100 text-brand-textPrimary">${statusSeguro}</span>
+                        <span class="status-badge px-2 py-1 rounded text-xs font-bold bg-gray-100 text-brand-textPrimary">${rotuloStatus}</span>
                     </div>
+                    ${motivoRevisao}
                     <p class="text-xs text-brand-textSecondary mb-2">
                         <strong>Valor:</strong> R$ ${parseFloat(anuncio.valor || 0).toFixed(2)} | 
                         <strong>Condomínio:</strong> R$ ${parseFloat(anuncio.valorCondominio || 0).toFixed(2)} | 
@@ -664,7 +669,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
 
                 if (response.ok || response.status === 201) {
-                    alert(`Anúncio ${isUpdate ? 'atualizado' : 'criado'} com sucesso!`);
+                    const salvo = await response.json();
+                    alert(salvo.status === 'IN_REVIEW'
+                        ? `Anúncio ${isUpdate ? 'atualizado' : 'criado'}! Ele entra no ar após uma revisão automática (alguns minutos).`
+                        : `Anúncio ${isUpdate ? 'atualizado' : 'criado'} com sucesso!`);
                     fecharModal();
                     carregarMeusAnuncios();
                 } else {
