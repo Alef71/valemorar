@@ -7,7 +7,15 @@ public enum StatusAnuncioEnum {
     PAUSADO,
     ALUGADO,
     INDISPONIVEL,
-    FINALIZADO;
+    FINALIZADO,
+    /** Recém-criado ou editado: aguardando a revisão automática (RevisaoAnuncioService). */
+    IN_REVIEW,
+    /** Reprovado pela revisão automática: só um admin pode liberar. */
+    MANUAL_REVIEW_REQUIRED;
+
+    public boolean emRevisao() {
+        return this == IN_REVIEW || this == MANUAL_REVIEW_REQUIRED;
+    }
 
     public static StatusAnuncioEnum from(String valor) {
         try {

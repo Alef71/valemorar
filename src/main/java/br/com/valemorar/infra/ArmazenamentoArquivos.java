@@ -7,10 +7,14 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.HexFormat;
 import java.util.UUID;
 
 /**
@@ -66,6 +70,29 @@ public class ArmazenamentoArquivos {
             Files.deleteIfExists(alvo);
         } catch (IOException ignored) {
             // Arquivo órfão não impede a operação principal
+        }
+    }
+
+    /**
+     * SHA-256 (hex) do arquivo salvo em /uploads/; para URLs externas, da própria URL.
+     * Retorna null se o arquivo local não existir ou estiver fora da raiz.
+     */
+    public String hash(String url) {
+        try {
+            MessageDigest sha = MessageDigest.getInstance("SHA-256");
+            if (url.startsWith(PREFIXO_URL)) {
+                Path alvo = raiz.resolve(url.substring(PREFIXO_URL.length())).normalize();
+                if (!alvo.startsWith(raiz) || !Files.isRegularFile(alvo)) {
+                    return null;
+                }
+                sha.update(Files.readAllBytes(alvo));
+            } else {
+                // ponytail: URL externa compara só o endereço; baixar a imagem exigiria proteção contra SSRF
+                sha.update(url.getBytes(StandardCharsets.UTF_8));
+            }
+            return HexFormat.of().formatHex(sha.digest());
+        } catch (IOException | NoSuchAlgorithmException e) {
+            return null;
         }
     }
 

@@ -11,6 +11,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,6 +32,22 @@ public interface AnuncioRepository extends JpaRepository<Anuncio, UUID> {
     Page<Anuncio> findByAnuncianteId(UUID anuncianteId, Pageable pageable);
 
     boolean existsByImovelIdAndStatus(UUID imovelId, StatusAnuncioEnum status);
+
+    boolean existsByImovelIdAndStatusIn(UUID imovelId, Collection<StatusAnuncioEnum> status);
+
+    /** Fila da revisão automática: os mais antigos primeiro. */
+    @EntityGraph(attributePaths = { "tags", "imovel" })
+    List<Anuncio> findTop50ByStatusOrderByAtualizadoEmAsc(StatusAnuncioEnum status);
+
+    long countByAnuncianteIdAndPublicadoEmAfter(UUID anuncianteId, LocalDateTime desde);
+
+    /** Preço por quarto dos anúncios ativos comparáveis (mesma cidade e modalidade). */
+    @Query("SELECT a.valor / i.quartos FROM Anuncio a JOIN a.imovel i WHERE " +
+            "a.status = br.com.valemorar.domain.anucio.enums.StatusAnuncioEnum.ATIVO AND a.id <> :anuncioId " +
+            "AND UPPER(a.modalidade) = UPPER(:modalidade) AND i.quartos > 0 " +
+            "AND EXISTS (SELECT 1 FROM Endereco e WHERE e.id = i.enderecoId AND LOWER(e.cidade) = LOWER(:cidade))")
+    List<BigDecimal> precosPorQuartoComparaveis(@Param("anuncioId") UUID anuncioId,
+            @Param("modalidade") String modalidade, @Param("cidade") String cidade);
 
     @EntityGraph(attributePaths = { "tags", "imovel" })
     Page<Anuncio> findByStatus(StatusAnuncioEnum status, Pageable pageable);

@@ -45,6 +45,8 @@ public class AnuncioService {
 
     private static final String MENSAGEM_NAO_ENCONTRADO = "Anúncio não encontrado";
     private static final int DIAS_VALIDADE = 90;
+    private static final List<StatusAnuncioEnum> STATUS_OCUPANDO_IMOVEL = List.of(
+            StatusAnuncioEnum.ATIVO, StatusAnuncioEnum.IN_REVIEW, StatusAnuncioEnum.MANUAL_REVIEW_REQUIRED);
 
     private final AnuncioRepository anuncioRepository;
     private final ImovelService imovelService;
@@ -70,11 +72,9 @@ public class AnuncioService {
     @Transactional
     public AnuncioResponseDTO criar(AnuncioCreateDTO dto) {
         Imovel imovel = imovelService.buscarProprio(dto.imovelId());
-        StatusAnuncioEnum statusInicial = dto.status() != null ? dto.status() : StatusAnuncioEnum.ATIVO;
 
-        if (statusInicial == StatusAnuncioEnum.ATIVO
-                && anuncioRepository.existsByImovelIdAndStatus(imovel.getId(), StatusAnuncioEnum.ATIVO)) {
-            throw new IllegalArgumentException("Já existe um anúncio ativo cadastrado para este imóvel");
+        if (anuncioRepository.existsByImovelIdAndStatusIn(imovel.getId(), STATUS_OCUPANDO_IMOVEL)) {
+            throw new IllegalArgumentException("Já existe um anúncio ativo ou em análise para este imóvel");
         }
 
         Anuncio anuncio = new Anuncio();
@@ -85,7 +85,8 @@ public class AnuncioService {
         anuncio.setTags(normalizarTags(dto.tags()));
         anuncio.setNotaMedia(BigDecimal.ZERO);
         anuncio.setTotalAvaliacoes(0);
-        anuncio.setStatus(statusInicial);
+        // Todo anúncio novo passa pela revisão automática (RevisaoAnuncioService) antes de ir ao ar
+        anuncio.setStatus(StatusAnuncioEnum.IN_REVIEW);
         anuncio.setPublicadoEm(LocalDateTime.now());
         anuncio.setExpiraEm(dto.expiraEm() != null ? dto.expiraEm() : LocalDateTime.now().plusDays(DIAS_VALIDADE));
         anuncio.setAtualizadoEm(LocalDateTime.now());
@@ -101,7 +102,7 @@ public class AnuncioService {
         salvarFotos(imovel.id(), dto.fotos());
 
         return criar(new AnuncioCreateDTO(imovel.id(), dto.valor(), dto.modalidade(), dto.tags(),
-                StatusAnuncioEnum.ATIVO, null));
+                null, null));
     }
 
     /** Atualiza um anúncio completo (endereço + imóvel + fotos + anúncio) de forma atômica. */
@@ -118,6 +119,7 @@ public class AnuncioService {
         anuncio.setValor(dto.valor());
         anuncio.setModalidade(dto.modalidade());
         anuncio.setTags(normalizarTags(dto.tags()));
+        voltarParaRevisao(anuncio);
         anuncio.setAtualizadoEm(LocalDateTime.now());
         return paraDTO(anuncioRepository.save(anuncio));
     }
@@ -191,8 +193,9 @@ public class AnuncioService {
         anuncio.setTags(normalizarTags(dto.tags()));
 
         if (dto.status() != null) {
-            anuncio.setStatus(dto.status());
+            mudarStatus(anuncio, dto.status());
         }
+        voltarParaRevisao(anuncio);
         if (dto.expiraEm() != null) {
             anuncio.setExpiraEm(dto.expiraEm());
         }
@@ -205,7 +208,7 @@ public class AnuncioService {
     public AnuncioResponseDTO alterarStatus(UUID id, String status) {
         Anuncio anuncio = buscarProprio(id);
 
-        anuncio.setStatus(StatusAnuncioEnum.from(status));
+        mudarStatus(anuncio, StatusAnuncioEnum.from(status));
         anuncio.setAtualizadoEm(LocalDateTime.now());
 
         return paraDTO(anuncioRepository.save(anuncio));
@@ -216,7 +219,7 @@ public class AnuncioService {
         Anuncio anuncio = buscarProprio(id);
 
         anuncio.setExpiraEm(LocalDateTime.now().plusDays(DIAS_VALIDADE));
-        anuncio.setStatus(StatusAnuncioEnum.ATIVO);
+        mudarStatus(anuncio, StatusAnuncioEnum.ATIVO);
         anuncio.setAtualizadoEm(LocalDateTime.now());
 
         return paraDTO(anuncioRepository.save(anuncio));
@@ -225,6 +228,35 @@ public class AnuncioService {
     @Transactional
     public void deletar(UUID id) {
         anuncioRepository.delete(buscarProprio(id));
+    }
+
+    /** Fila da revisão manual (admin): reprovados pela revisão automática, com os motivos em motivoRevisao. */
+    @Transactional(readOnly = true)
+    public Page<AnuncioResponseDTO> listarRevisaoManual(Pageable pageable) {
+        SecurityUtils.exigirAdmin();
+        return paraDTO(anuncioRepository.findByStatus(StatusAnuncioEnum.MANUAL_REVIEW_REQUIRED, pageable));
+    }
+
+    /** Só admin tira um anúncio da revisão (aprovar = ATIVO) ou o coloca direto em revisão manual. */
+    private void mudarStatus(Anuncio anuncio, StatusAnuncioEnum novo) {
+        if (novo == anuncio.getStatus()) {
+            return;
+        }
+        if ((anuncio.getStatus().emRevisao() || novo == StatusAnuncioEnum.MANUAL_REVIEW_REQUIRED)
+                && !SecurityUtils.isAdmin()) {
+            throw new IllegalArgumentException("Anúncio em análise: aguarde a revisão para alterar o status");
+        }
+        if (novo == StatusAnuncioEnum.ATIVO) {
+            anuncio.setMotivoRevisao(null);
+        }
+        anuncio.setStatus(novo);
+    }
+
+    /** Edição de anúncio no ar volta para a revisão automática (evita trocar o conteúdo depois de aprovado). */
+    private void voltarParaRevisao(Anuncio anuncio) {
+        if (anuncio.getStatus() == StatusAnuncioEnum.ATIVO && !SecurityUtils.isAdmin()) {
+            anuncio.setStatus(StatusAnuncioEnum.IN_REVIEW);
+        }
     }
 
     private Anuncio buscarProprio(UUID id) {

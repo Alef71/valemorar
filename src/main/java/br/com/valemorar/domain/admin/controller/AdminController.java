@@ -1,6 +1,8 @@
 package br.com.valemorar.domain.admin.controller;
 
 import br.com.valemorar.domain.admin.service.AdminService;
+import br.com.valemorar.domain.anucio.dto.AnuncioResponseDTO;
+import br.com.valemorar.domain.anucio.service.AnuncioService;
 import br.com.valemorar.domain.notificacao.dto.NotificacaoCreateDTO;
 import br.com.valemorar.domain.notificacao.dto.NotificacaoResponseDTO;
 import br.com.valemorar.domain.usuario.dto.UsuarioResponseDTO;
@@ -24,9 +26,11 @@ import java.util.UUID;
 public class AdminController {
 
     private final AdminService adminService;
+    private final AnuncioService anuncioService;
 
-    public AdminController(AdminService adminService) {
+    public AdminController(AdminService adminService, AnuncioService anuncioService) {
         this.adminService = adminService;
+        this.anuncioService = anuncioService;
     }
 
     @Operation(summary = "Listar todos os usuários")
@@ -53,6 +57,14 @@ public class AdminController {
     public ResponseEntity<Void> deletarUsuario(@PathVariable UUID id) {
         adminService.deletarUsuario(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Anúncios aguardando revisão manual",
+            description = "Reprovados pela revisão automática (motivos em motivoRevisao). Aprove com PATCH /api/anuncios/{id}/status?status=ATIVO")
+    @GetMapping("/anuncios/revisao")
+    public ResponseEntity<Page<AnuncioResponseDTO>> listarRevisaoManual(
+            @PageableDefault(size = 10, sort = "atualizadoEm") Pageable pageable) {
+        return ResponseEntity.ok(anuncioService.listarRevisaoManual(pageable));
     }
 
     @Operation(summary = "Enviar notificação")

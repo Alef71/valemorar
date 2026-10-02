@@ -14,4 +14,6 @@ public interface ImovelRepository extends JpaRepository<Imovel, UUID> {
     Page<Imovel> findByLocadorId(UUID locadorId, Pageable pageable);
 
     Page<Imovel> findByTipoImovelIgnoreCase(String tipoImovel, Pageable pageable);
+
+    boolean existsByDescricaoAndLocadorIdNot(String descricao, UUID locadorId);
 }
