@@ -145,10 +145,13 @@
 
         <div class="bg-white border border-[#dfd7c8] rounded-2xl p-6 shadow-md sticky top-24 space-y-6">
           <div>
-            <span class="text-xs font-bold text-stone-500 uppercase tracking-wider">Valor do Aluguel</span>
+            <span id="imovel-tipo-preco" class="text-xs font-bold text-stone-500 uppercase tracking-wider">Valor anunciado</span>
             <p id="imovel-preco" class="text-3xl font-extrabold text-brand-green">R$ 0,00</p>
             <p id="imovel-condominio" class="text-xs text-brand-textSecondary font-semibold mt-1 hidden">
               + R$ <span id="val-condominio">0</span>/mês de condomínio
+            </p>
+            <p id="imovel-iptu" class="text-xs text-brand-textSecondary font-semibold mt-1 hidden">
+              IPTU: R$ <span id="val-iptu">0</span>
             </p>
           </div>
 
@@ -164,34 +167,28 @@
               </div>
               <div>
                 <p id="proprietario-nome" class="font-bold text-sm text-brand-textPrimary">Carregando...</p>
-                <p id="proprietario-tipo" class="text-xs text-stone-500">Anunciante Verificado</p>
+                <p id="proprietario-tipo" class="text-xs text-stone-500">Anunciante</p>
               </div>
             </div>
 
-            <div class="space-y-2 pt-2">
-              <div class="flex items-center gap-2 p-3 bg-[#fcfbf9] border border-[#dfd7c8] rounded-xl text-xs">
-                <span class="material-symbols-outlined text-brand-green text-base">mail</span>
-                <div class="overflow-hidden">
-                  <p class="text-[10px] text-stone-500 font-bold uppercase">E-mail de Contato</p>
-                  <a id="proprietario-email" href="#" class="font-bold text-brand-textPrimary hover:underline block truncate">
-                    Carregando e-mail...
-                  </a>
-                </div>
-              </div>
+            <div id="contato-indisponivel" class="hidden text-xs text-stone-600 bg-[#fcfbf9] border border-[#dfd7c8] rounded-xl p-3">
+              <span id="contato-mensagem"></span>
+              <a id="link-login-contato" href="auth.html" class="hidden text-brand-green font-bold underline ml-1">Entrar</a>
+            </div>
 
-              <a id="btn-whatsapp" href="#" target="_blank" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-sm">
+            <div class="space-y-2 pt-2">
+              <a id="btn-whatsapp" href="#" target="_blank" rel="noopener noreferrer" class="hidden w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 px-4 rounded-xl text-xs transition items-center justify-center gap-2 shadow-sm">
                 <span class="material-symbols-outlined text-base">chat</span>
                 <span>Falar via WhatsApp</span>
               </a>
             </div>
 
-            <form id="form-contato-direto" class="space-y-3 pt-4 border-t border-stone-100">
-              <h4 class="text-xs font-bold text-stone-700">Enviar Mensagem ao Proprietário</h4>
+            <form id="form-contato-direto" class="hidden space-y-3 pt-4 border-t border-stone-100">
+              <h4 class="text-xs font-bold text-stone-700">Enviar mensagem ao anunciante</h4>
               <input type="text" id="msg-nome" placeholder="Seu Nome" required class="w-full bg-[#fcfbf9] border border-[#dcd6c9] rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-green">
-              <input type="email" id="msg-email" placeholder="Seu E-mail" required class="w-full bg-[#fcfbf9] border border-[#dcd6c9] rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-green">
               <textarea id="msg-texto" rows="3" placeholder="Tenho interesse neste imóvel. Podemos agendar uma visita?" required class="w-full bg-[#fcfbf9] border border-[#dcd6c9] rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-green"></textarea>
               <button type="submit" class="w-full bg-brand-gold hover:bg-brand-earthLight text-white font-extrabold py-2.5 rounded-xl text-xs uppercase tracking-wider transition">
-                Enviar E-mail
+                Enviar pelo WhatsApp
               </button>
             </form>
 

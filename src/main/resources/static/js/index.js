@@ -5,336 +5,183 @@ document.addEventListener('DOMContentLoaded', () => {
             : window.location.origin
     );
     const API_BASE = `${API_BASE_URL}/api`;
-
-    const vitrineContainer = document.getElementById('vitrine-imoveis');
+    const vitrineContainer = document.getElementById('lista-anuncios');
     const formBusca = document.getElementById('form-busca-vitrine');
-    const filtroCidade = document.getElementById('filtro-cidade');
-    const filtroBairro = document.getElementById('filtro-bairro');
     const priceRange = document.getElementById('price-range');
     const priceVal = document.getElementById('price-val');
     const totalResultados = document.getElementById('total-resultados');
+    const imagemPadrao = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800&auto=format&fit=crop';
 
-    const IMAGEM_PADRAO = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800&auto=format&fit=crop';
-
-    // Lista Oficial das 51 Cidades do Vale do Jequitinhonha
-    const CIDADES_JEQUITINHONHA = [
-        'Almenara', 'Angelândia', 'Araçuaí', 'Aricanduva', 'Berilo', 
-        'Cachoeira de Pajeú', 'Capelinha', 'Caraí', 'Carbonita', 'Catuji', 
-        'Chapada do Norte', 'Comercinho', 'Coronel Murta', 'Couto de Magalhães de Minas', 
-        'Datas', 'Diamantina', 'Divisópolis', 'Felício dos Santos', 'Felisburgo', 
-        'Francisco Badaró', 'Gouveia', 'Itamarandiba', 'Itaobim', 'Itinga', 
-        'Jequitinhonha', 'Joaíma', 'Jordânia', 'José Gonçalves de Minas', 'Leme do Prado', 
-        'Mata Verde', 'Medina', 'Minas Novas', 'Novo Cruzeiro', 'Padre Paraíso', 
-        'Palmópolis', 'Pedra Azul', 'Ponto dos Volantes', 'Presidente Kubitschek', 
-        'Rubim', 'Salto da Divisa', 'Santa Maria do Salto', 'Santo Antônio do Itambé', 
-        'Santo Antônio do Jacinto', 'São Gonçalo do Rio Preto', 'Senador Modestino Gonçalves', 
-        'Serro', 'Turmalina', 'Veredinha', 'Virgem da Lapa'
-    ];
-
-    // Estados dos Filtros Avançados
     let filtroTipoSelecionado = '';
-    let filtroQuartosSelecionado = '';
-    let todosAnunciosMemoria = [];
+    let filtroQuartosSelecionado = 0;
+    let anuncios = [];
 
-    // Função para sanitização de HTML contra XSS
-    function escaparHTML(str) {
-        if (str === null || str === undefined) return '';
-        return String(str)
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
+    function escaparHTML(valor) {
+        return String(valor ?? '').replace(/[&<>'"]/g, caractere => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#39;',
+            '"': '&quot;'
+        })[caractere]);
     }
 
-    // NORMALIZAÇÃO DE TEXTO INFALÍVEL
-    function normalizarTexto(texto) {
-        if (!texto) return '';
-        if (typeof texto === 'object') {
-            texto = texto.nome || texto.cidade || texto.descricao || '';
-        }
-        return String(texto)
-            .toLowerCase()
+    function normalizarTexto(valor) {
+        return String(valor ?? '')
+            .toLocaleLowerCase('pt-BR')
             .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .trim();
+            .replace(/[\u0300-\u036f]/g, '');
     }
 
-    // Helper ultra defensivo para extrair dados do anúncio
-    function extrairDadosAnuncio(item) {
-        if (!item) return {};
-
-        const enderecoObj = item.endereco || item.imovel?.endereco || {};
-
-        const cidadeBruta = item.cidade 
-            || enderecoObj.cidade 
-            || item.imovel?.cidade 
-            || item.enderecoCidade 
-            || '';
-
-        const bairroBruto = item.bairro 
-            || enderecoObj.bairro 
-            || item.imovel?.bairro 
-            || item.enderecoBairro 
-            || '';
-
-        const logradouroBruto = item.logradouro 
-            || enderecoObj.logradouro 
-            || item.imovel?.logradouro 
-            || '';
-
-        return {
-            cidade: typeof cidadeBruta === 'object' ? (cidadeBruta.nome || cidadeBruta.cidade || '') : String(cidadeBruta),
-            bairro: typeof bairroBruto === 'object' ? (bairroBruto.nome || bairroBruto.bairro || '') : String(bairroBruto),
-            logradouro: typeof logradouroBruto === 'object' ? (logradouroBruto.nome || logradouroBruto.logradouro || '') : String(logradouroBruto),
-            titulo: item.titulo || item.imovel?.titulo || '',
-            descricao: item.descricao || item.imovel?.descricao || '',
-            tipoImovel: item.tipoImovel || item.imovel?.tipoImovel || 'Imóvel',
-            quartos: item.quartos ?? item.imovel?.quartos ?? 0,
-            valor: parseFloat(item.valor || item.imovel?.valor || 0),
-            valorCondominio: parseFloat(item.valorCondominio || item.imovel?.valorCondominio || 0),
-            modalidade: item.modalidade || item.imovel?.modalidade || 'Disponível',
-            tags: item.tags || item.imovel?.tags || []
-        };
-    }
-
-    // 1. ATUALIZA TEXTO DO SLIDER DE PREÇO EM TEMPO REAL
-    if (priceRange && priceVal) {
-        priceRange.addEventListener('input', (e) => {
-            const valor = parseFloat(e.target.value);
-            priceVal.innerText = valor.toLocaleString('pt-BR');
-            aplicarFiltrosEExibir();
-        });
-    }
-
-    // 2. CONFIGURA AS ABAS DE CATEGORIA
-    document.querySelectorAll('.btn-aba-tipo').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.btn-aba-tipo').forEach(b => {
-                b.classList.remove('bg-brand-green', 'text-white');
-                b.classList.add('bg-stone-100', 'text-stone-600');
-            });
-            btn.classList.remove('bg-stone-100', 'text-stone-600');
-            btn.classList.add('bg-brand-green', 'text-white');
-
-            filtroTipoSelecionado = btn.getAttribute('data-tipo') || '';
-            aplicarFiltrosEExibir();
-        });
-    });
-
-    // 3. CONFIGURA BOTÕES DE QUARTOS
-    document.querySelectorAll('.btn-quartos').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.btn-quartos').forEach(b => {
-                b.classList.remove('bg-brand-green', 'text-white');
-                b.classList.add('text-stone-600');
-            });
-            btn.classList.remove('text-stone-600');
-            btn.classList.add('bg-brand-green', 'text-white');
-
-            filtroQuartosSelecionado = btn.getAttribute('data-quartos') || '';
-            aplicarFiltrosEExibir();
-        });
-    });
-
-    // 4. POPULA O SELECT DE CIDADES
-    function carregarCidadesDisponiveis(anuncios) {
-        if (!filtroCidade) return;
-
-        const cidadesSet = new Set(CIDADES_JEQUITINHONHA);
-
-        anuncios.forEach(rawItem => {
-            const dados = extrairDadosAnuncio(rawItem);
-            if (dados.cidade && dados.cidade.trim().length > 0) {
-                cidadesSet.add(dados.cidade.trim());
-            }
-        });
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const cidadeAtual = urlParams.get('cidade') || filtroCidade.value;
-
-        const cidadesOrdenadas = Array.from(cidadesSet).sort((a, b) => a.localeCompare(b, 'pt-BR'));
-
-        filtroCidade.innerHTML = '<option value="">Todas as Cidades</option>' +
-            cidadesOrdenadas.map(cidade => `
-                <option value="${escaparHTML(cidade)}">${escaparHTML(cidade)}</option>
-            `).join('');
-
-        if (cidadeAtual) {
-            filtroCidade.value = cidadeAtual;
-        }
-    }
-
-    // 5. CARREGA TODOS OS ANÚNCIOS DO BACKEND
-    async function carregarAnunciosBackend() {
+    async function carregarAnuncios() {
         if (!vitrineContainer) return;
+
         vitrineContainer.innerHTML = '<p class="col-span-full text-center text-sm text-brand-textSecondary py-8">Carregando imóveis...</p>';
 
         try {
-            const res = await fetch(`${API_BASE}/anuncios`);
-            if (!res.ok) throw new Error('Erro ao buscar imóveis');
+            const todos = [];
+            let pagina = 0;
+            let totalPaginas = 1;
 
-            const data = await res.json();
-            todosAnunciosMemoria = data.content || data || [];
+            while (pagina < totalPaginas) {
+                const parametros = new URLSearchParams({ page: String(pagina), size: '100' });
+                const resposta = await fetch(`${API_BASE}/anuncios?${parametros}`);
+                if (!resposta.ok) {
+                    throw new Error(`Não foi possível carregar os anúncios (HTTP ${resposta.status}).`);
+                }
 
-            carregarCidadesDisponiveis(todosAnunciosMemoria);
+                const resultado = await resposta.json();
+                if (Array.isArray(resultado)) {
+                    todos.push(...resultado);
+                    break;
+                }
+
+                if (!Array.isArray(resultado.content)) {
+                    throw new Error('A API retornou um formato inesperado para a lista de anúncios.');
+                }
+
+                todos.push(...resultado.content);
+                totalPaginas = Number.isInteger(resultado.totalPages) ? resultado.totalPages : pagina + 1;
+                pagina += 1;
+            }
+
+            anuncios = todos;
             aplicarFiltrosEExibir();
-        } catch (err) {
-            console.error(err);
+        } catch (erro) {
+            console.error('Erro ao carregar anúncios:', erro);
             vitrineContainer.innerHTML = '<p class="col-span-full text-center text-sm text-red-600 py-8">Não foi possível carregar os imóveis no momento.</p>';
+            if (totalResultados) totalResultados.innerText = 'Falha ao carregar';
         }
     }
 
-    // 6. FILTRAGEM LOCAL COMPLETA
     function aplicarFiltrosEExibir() {
-        if (!todosAnunciosMemoria) return;
+        if (!vitrineContainer) return;
 
-        const cidadeFiltroNorm = normalizarTexto(filtroCidade?.value);
-        const bairroFiltroNorm = normalizarTexto(filtroBairro?.value);
-        const precoMaxFiltro = parseFloat(priceRange?.value || 10000);
-        const minQuartos = parseInt(filtroQuartosSelecionado, 10) || 0;
+        const precoMaximo = Number(priceRange?.value || Number.POSITIVE_INFINITY);
+        const filtrados = anuncios.filter(anuncio => {
+            const tipo = normalizarTexto(anuncio.tipoImovel);
+            const tipoFiltro = normalizarTexto(filtroTipoSelecionado);
+            const valor = Number(anuncio.valor);
+            const quartos = Number(anuncio.quartos || 0);
 
-        const imoveisFiltrados = todosAnunciosMemoria.filter(rawItem => {
-            const item = extrairDadosAnuncio(rawItem);
-            const cidadeItemNorm = normalizarTexto(item.cidade);
-
-            if (cidadeFiltroNorm) {
-                if (!cidadeItemNorm.includes(cidadeFiltroNorm) && !cidadeFiltroNorm.includes(cidadeItemNorm)) {
-                    return false;
-                }
-            }
-
-            if (bairroFiltroNorm) {
-                const buscaTextoNorm = normalizarTexto(`${item.bairro} ${item.logradouro} ${item.titulo} ${item.descricao}`);
-                if (!buscaTextoNorm.includes(bairroFiltroNorm)) {
-                    return false;
-                }
-            }
-
-            if (item.valor > precoMaxFiltro) return false;
-
-            if (filtroTipoSelecionado) {
-                const tipoAnuncioNorm = normalizarTexto(item.tipoImovel);
-                const tipoFiltroNorm = normalizarTexto(filtroTipoSelecionado);
-                if (!tipoAnuncioNorm.includes(tipoFiltroNorm)) return false;
-            }
-
-            if (minQuartos > 0 && item.quartos < minQuartos) {
-                return false;
-            }
-
-            return true;
+            return (!tipoFiltro || tipo.includes(tipoFiltro))
+                && (!Number.isFinite(precoMaximo) || valor <= precoMaximo)
+                && quartos >= filtroQuartosSelecionado;
         });
 
         if (totalResultados) {
-            totalResultados.innerText = `${imoveisFiltrados.length} imóvel(is) encontrado(s)`;
+            totalResultados.innerText = `${filtrados.length} anúncio(s) encontrado(s)`;
         }
 
-        renderizarVitrine(imoveisFiltrados);
+        renderizarAnuncios(filtrados);
     }
 
-    // 7. RENDERIZA OS CARDS DOS IMÓVEIS COM REDIRECIONAMENTO POR ID
-    function renderizarVitrine(imoveis) {
+    function renderizarAnuncios(lista) {
         if (!vitrineContainer) return;
 
-        if (imoveis.length === 0) {
-            vitrineContainer.innerHTML = '<p class="col-span-full text-center text-sm text-stone-500 py-12">Nenhum imóvel encontrado com os filtros selecionados.</p>';
+        if (lista.length === 0) {
+            vitrineContainer.innerHTML = '<p class="col-span-full text-center text-sm text-stone-500 py-12">Nenhum anúncio encontrado com os filtros selecionados.</p>';
             return;
         }
 
-        vitrineContainer.innerHTML = imoveis.map(rawItem => {
-            const item = extrairDadosAnuncio(rawItem);
-            const id = rawItem.id || rawItem.imovel?.id || '';
-            const fotoCapa = (rawItem.fotos && rawItem.fotos.find(f => f.capa)?.url) || (rawItem.fotos && rawItem.fotos[0]?.url) || IMAGEM_PADRAO;
-            
-            const cidade = escaparHTML(item.cidade || 'Vale do Jequitinhonha');
-            const tipo = escaparHTML(item.tipoImovel);
-            const modalidade = escaparHTML(item.modalidade);
-            const valor = item.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
-            const tags = item.tags && item.tags.length > 0 
-                ? item.tags.map(t => `<span class="bg-brand-cream border border-[#dfd7c8] text-brand-brown text-[10px] font-bold px-2 py-0.5 rounded-md">${escaparHTML(t)}</span>`).join('') 
+        vitrineContainer.innerHTML = lista.map(anuncio => {
+            const tipo = escaparHTML(anuncio.tipoImovel || 'Imóvel');
+            const modalidade = escaparHTML(anuncio.modalidade || 'Disponível');
+            const valor = Number(anuncio.valor || 0).toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            });
+            const tags = Array.isArray(anuncio.tags)
+                ? anuncio.tags.map(tag => `<span class="bg-brand-cream border border-[#dfd7c8] text-brand-brown text-[10px] font-bold px-2 py-0.5 rounded-md">${escaparHTML(tag)}</span>`).join('')
                 : '';
 
             return `
-                <div class="bg-white border border-[#dfd7c8] rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition duration-300 flex flex-col justify-between group">
+                <article class="bg-white border border-[#dfd7c8] rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition duration-300 flex flex-col justify-between group">
                     <div>
                         <div class="relative h-48 w-full bg-stone-100 overflow-hidden">
-                            <img src="${escaparHTML(fotoCapa)}" alt="${tipo}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.onerror=null; this.src='${IMAGEM_PADRAO}';">
+                            <img src="${imagemPadrao}" alt="Imagem ilustrativa de imóvel" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                             <span class="absolute top-3 left-3 bg-brand-green text-white text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">${modalidade}</span>
                         </div>
                         <div class="p-5 space-y-2">
-                            <h3 class="font-bold text-base text-brand-textPrimary line-clamp-1">${tipo} em ${cidade}</h3>
+                            <h3 class="font-bold text-base text-brand-textPrimary line-clamp-1">${tipo}</h3>
                             <p class="text-2xl font-extrabold text-brand-green">${valor}</p>
                             <p class="text-xs text-brand-textSecondary flex items-center gap-2">
-                                <span>Quartos: <strong>${item.quartos}</strong></span>
-                                ${item.valorCondominio > 0 ? `<span>• Cond: R$ ${item.valorCondominio.toFixed(0)}</span>` : ''}
+                                <span>Quartos: <strong>${Number(anuncio.quartos || 0)}</strong></span>
+                                ${Number(anuncio.valorCondominio || 0) > 0
+                                    ? `<span>• Condomínio: ${Number(anuncio.valorCondominio).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>`
+                                    : ''}
                             </p>
                             <div class="flex flex-wrap gap-1 pt-2">${tags}</div>
                         </div>
                     </div>
                     <div class="p-5 pt-0">
-                        <a href="detalhes-imovel.html?id=${id}" class="block w-full text-center py-2.5 bg-brand-cream border border-[#dfd7c8] hover:bg-brand-gold hover:text-white hover:border-brand-gold text-brand-textPrimary font-bold rounded-xl text-xs transition">
-                            Ver Detalhes & Contato
+                        <a href="detalhes-imovel.html?id=${encodeURIComponent(anuncio.id)}" class="block w-full text-center py-2.5 bg-brand-cream border border-[#dfd7c8] hover:bg-brand-gold hover:text-white hover:border-brand-gold text-brand-textPrimary font-bold rounded-xl text-xs transition">
+                            Ver detalhes e contato
                         </a>
                     </div>
-                </div>
+                </article>
             `;
         }).join('');
     }
 
-    // 8. EVENTOS DE CLIQUE NOS CARDS DE CIDADES
-    function configurarCliqueCardsCidades() {
-        document.querySelectorAll('.card-cidade').forEach(card => {
-            card.addEventListener('click', () => {
-                const cidadeNome = card.getAttribute('data-cidade');
-                if (filtroCidade && cidadeNome) {
-                    filtroCidade.value = cidadeNome;
-
-                    const elementoBusca = document.getElementById('form-busca-vitrine') 
-                        || document.querySelector('.mt-8.bg-white') 
-                        || document.querySelector('main');
-
-                    if (elementoBusca) {
-                        elementoBusca.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-
-                    aplicarFiltrosEExibir();
-                }
+    document.querySelectorAll('.btn-aba-tipo').forEach(botao => {
+        botao.addEventListener('click', () => {
+            document.querySelectorAll('.btn-aba-tipo').forEach(item => {
+                item.classList.remove('bg-brand-green', 'text-white');
+                item.classList.add('bg-stone-100', 'text-stone-600');
             });
+            botao.classList.remove('bg-stone-100', 'text-stone-600');
+            botao.classList.add('bg-brand-green', 'text-white');
+            filtroTipoSelecionado = botao.dataset.tipo || '';
+            aplicarFiltrosEExibir();
         });
+    });
 
-        // Botão "Ver todas as cidades atendidas"
-        document.getElementById('btn-ver-todas-cidades')?.addEventListener('click', () => {
-            if (filtroCidade) {
-                filtroCidade.value = '';
-                const elementoBusca = document.getElementById('form-busca-vitrine') || document.querySelector('main');
-                if (elementoBusca) {
-                    elementoBusca.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-                filtroCidade.focus();
-                aplicarFiltrosEExibir();
-            }
+    document.querySelectorAll('.btn-quartos').forEach(botao => {
+        botao.addEventListener('click', () => {
+            document.querySelectorAll('.btn-quartos').forEach(item => {
+                item.classList.remove('bg-brand-green', 'text-white');
+                item.classList.add('text-stone-600');
+            });
+            botao.classList.remove('text-stone-600');
+            botao.classList.add('bg-brand-green', 'text-white');
+            filtroQuartosSelecionado = Number(botao.dataset.quartos || 0);
+            aplicarFiltrosEExibir();
         });
-    }
+    });
 
-    // 9. EVENTOS DE FORMULÁRIO DE PESQUISA
-    if (formBusca) {
-        formBusca.addEventListener('submit', (e) => {
-            e.preventDefault();
+    if (priceRange && priceVal) {
+        priceRange.addEventListener('input', () => {
+            priceVal.innerText = Number(priceRange.value).toLocaleString('pt-BR');
             aplicarFiltrosEExibir();
         });
     }
 
-    if (filtroCidade) {
-        filtroCidade.addEventListener('change', aplicarFiltrosEExibir);
-    }
+    formBusca?.addEventListener('submit', evento => {
+        evento.preventDefault();
+        aplicarFiltrosEExibir();
+        document.getElementById('vitrine-imoveis')?.scrollIntoView({ behavior: 'smooth' });
+    });
 
-    if (filtroBairro) {
-        filtroBairro.addEventListener('input', aplicarFiltrosEExibir);
-    }
-
-    // Inicialização da Vitrine e Configurações
-    carregarAnunciosBackend();
-    configurarCliqueCardsCidades();
+    carregarAnuncios();
 });

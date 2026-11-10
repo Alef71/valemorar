@@ -59,16 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Logout
     const btnLogout = document.getElementById('btn-logout');
     if (btnLogout) {
-        btnLogout.addEventListener('click', async () => {
-            const currentToken = localStorage.getItem('token');
-            try {
-                await fetch(`${API_BASE}/auth/logout`, { 
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${currentToken}` }
-                });
-            } catch (e) {
-                console.warn('Erro ao deslogar:', e);
-            }
+        btnLogout.addEventListener('click', () => {
             localStorage.removeItem('usuario');
             localStorage.removeItem('token');
             window.location.href = 'auth.html';
@@ -135,51 +126,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // 2. BUSCAR E RENDERIZAR ENDEREÇO DO USUÁRIO
-    async function carregarEnderecoUsuario() {
+    function carregarEnderecoUsuario() {
         if (!usuarioLogado || !usuarioLogado.id) return;
 
         const cacheLocal = localStorage.getItem(`enderecoUsuario_${usuarioLogado.id}`);
         if (cacheLocal) {
             try {
                 enderecoUsuarioMemoria = JSON.parse(cacheLocal);
-                if (enderecoUsuarioMemoria && enderecoUsuarioMemoria.logradouro) {
+                if (enderecoUsuarioMemoria?.logradouro) {
                     renderizarEnderecoUsuario(enderecoUsuarioMemoria);
                     return;
                 }
-            } catch (e) {
-                console.warn('Erro ao ler endereço do cache:', e);
+            } catch (error) {
+                console.warn('Erro ao ler endereço do cache:', error);
             }
         }
 
-        if (usuarioLogado.endereco && usuarioLogado.endereco.logradouro) {
-            enderecoUsuarioMemoria = usuarioLogado.endereco;
-            renderizarEnderecoUsuario(enderecoUsuarioMemoria);
-            return;
-        }
-
-        const currentToken = localStorage.getItem('token');
-        try {
-            const res = await fetch(`${API_BASE}/enderecos/usuario/${usuarioLogado.id}`, {
-                headers: { 'Authorization': `Bearer ${currentToken}` }
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                const end = Array.isArray(data) ? data[0] : data;
-                if (end && end.logradouro) {
-                    enderecoUsuarioMemoria = end;
-                    localStorage.setItem(`enderecoUsuario_${usuarioLogado.id}`, JSON.stringify(enderecoUsuarioMemoria));
-                    renderizarEnderecoUsuario(enderecoUsuarioMemoria);
-                    return;
-                }
-            }
-        } catch (err) {
-            console.warn('Busca de endereço via API não retornou dados, verificando estado local.');
-        }
-
-        if (!enderecoUsuarioMemoria || !enderecoUsuarioMemoria.logradouro) {
-            renderizarEnderecoUsuario(null);
-        }
+        renderizarEnderecoUsuario(null);
     }
 
     function renderizarEnderecoUsuario(end) {
@@ -291,7 +254,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // 4. CADASTRAR / EDITAR ENDEREÇO
+    // 4. SALVAR ENDEREÇO LOCAL DO PERFIL
     if (btnAbrirEndereco) {
         btnAbrirEndereco.addEventListener('click', () => {
             if (enderecoUsuarioMemoria) {
@@ -314,12 +277,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (btnCancelarEndereco) btnCancelarEndereco.onclick = fecharModalEndereco;
 
     if (formEndereco) {
-        formEndereco.addEventListener('submit', async (e) => {
+        formEndereco.addEventListener('submit', (e) => {
             e.preventDefault();
-            const currentToken = localStorage.getItem('token');
 
-            let cepVal = document.getElementById('end-cep')?.value.trim() || '';
-
+            const cepVal = document.getElementById('end-cep')?.value.trim() || '';
             const payload = {
                 logradouro: document.getElementById('end-logradouro')?.value.trim(),
                 numero: document.getElementById('end-numero')?.value.trim(),
@@ -330,45 +291,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 cep: cepVal
             };
 
-            const isUpdate = Boolean(enderecoUsuarioMemoria?.id);
-            const url = isUpdate 
-                ? `${API_BASE}/enderecos/${enderecoUsuarioMemoria.id}` 
-                : `${API_BASE}/enderecos`;
-            const method = isUpdate ? 'PUT' : 'POST';
-
             try {
-                const res = await fetch(url, {
-                    method: method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${currentToken}`
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                if (res.ok || res.status === 201) {
-                    const enderecoSalvo = await res.json().catch(() => null);
-                    
-                    if (enderecoSalvo && enderecoSalvo.logradouro) {
-                        enderecoUsuarioMemoria = enderecoSalvo;
-                    } else {
-                        enderecoUsuarioMemoria = { ...payload, id: enderecoUsuarioMemoria?.id || null };
-                    }
-
-                    if (usuarioLogado?.id) {
-                        localStorage.setItem(`enderecoUsuario_${usuarioLogado.id}`, JSON.stringify(enderecoUsuarioMemoria));
-                    }
-
-                    renderizarEnderecoUsuario(enderecoUsuarioMemoria);
-                    alert(`Endereço ${isUpdate ? 'atualizado' : 'cadastrado'} com sucesso!`);
-                    fecharModalEndereco();
-                } else {
-                    const erro = await res.json().catch(() => ({}));
-                    alert(erro.message || 'Erro ao salvar endereço. Verifique se todos os campos obrigatórios foram preenchidos.');
+                if (!usuarioLogado?.id) {
+                    throw new Error('Não foi possível identificar o usuário para salvar o endereço.');
                 }
-            } catch (err) {
-                console.error(err);
-                alert('Erro de conexão ao salvar endereço.');
+
+                localStorage.setItem(`enderecoUsuario_${usuarioLogado.id}`, JSON.stringify(payload));
+                enderecoUsuarioMemoria = payload;
+                renderizarEnderecoUsuario(enderecoUsuarioMemoria);
+                alert('Endereço salvo apenas neste navegador.');
+                fecharModalEndereco();
+            } catch (error) {
+                console.error('Erro ao salvar o endereço local do perfil:', error);
+                alert(error.message || 'Não foi possível salvar o endereço neste navegador.');
             }
         });
     }

@@ -1,13 +1,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const container = document.getElementById('user-header-actions');
     const headerCityElem = document.getElementById('header-user-city');
-    const API_BASE_URL = window.API_BASE_URL || (
-        ['localhost', '127.0.0.1'].includes(window.location.hostname)
-            ? 'http://localhost:8080'
-            : window.location.origin
-    );
-    const token = localStorage.getItem('token');
-
     // Função para sanitizar HTML (Evita XSS)
     function escaparHTML(texto) {
         if (!texto) return '';
@@ -126,74 +119,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // C) Busca na API via endpoint do usuário autenticado
-        if (token) {
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/enderecos/usuario/${usuario.id}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    const endereco = Array.isArray(data) ? data[0] : data;
-                    if (endereco && endereco.cidade) {
-                        atualizarCidadeHeader(endereco.cidade, endereco.estado);
-                        localStorage.setItem(`enderecoUsuario_${usuario.id}`, JSON.stringify(endereco));
-                        return;
-                    }
-                }
-            } catch (err) {
-                console.warn('Erro ao buscar endereço para o header:', err);
-            }
-        }
-
-        atualizarCidadeHeader('JEQUITINHONHA', 'MG');
-    }
-
-    // 5. ROLAGEM SUAVE AO CLICAR EM LINKS DO MENU SUPERIOR DENTRO DA INDEX
-    function configurarScrollMenuNav() {
-        const isIndexPage = window.location.pathname.endsWith('index.html') 
-            || window.location.pathname === '/' 
-            || window.location.pathname === '';
-
-        const navLinks = document.querySelectorAll('header nav a');
-
-        navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                const href = link.getAttribute('href') || '';
-
-                if (isIndexPage && !href.startsWith('http') && !href.includes('painel.html') && !href.includes('auth.html')) {
-                    e.preventDefault();
-
-                    // Elemento alvo da busca (Card de Filtros)
-                    const alvoBusca = document.getElementById('form-busca-vitrine') 
-                        || document.querySelector('.mt-8.bg-white') 
-                        || document.querySelector('main');
-
-                    if (alvoBusca) {
-                        alvoBusca.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    } else {
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }
-
-                    // Aciona a aba ou filtro correspondente na index
-                    if (href.includes('modalidade=comercial')) {
-                        const btnComercial = document.querySelector('.btn-aba-tipo[data-tipo="COMERCIAL"]');
-                        if (btnComercial) btnComercial.click();
-                    } else if (href.includes('modalidade=sitios')) {
-                        const btnSitio = document.querySelector('.btn-aba-tipo[data-tipo="SITIO"]');
-                        if (btnSitio) btnSitio.click();
-                    } else if (href.includes('modalidade=residencial')) {
-                        const btnTodos = document.querySelector('.btn-aba-tipo[data-tipo=""]');
-                        if (btnTodos) btnTodos.click();
-                    } else if (href.includes('cidades') || href.includes('cidade')) {
-                        const selectCidade = document.getElementById('filtro-cidade');
-                        if (selectCidade) selectCidade.focus();
-                    }
-                }
-            });
-        });
+        atualizarCidadeHeader('VALE DO JEQUITINHONHA', 'MG');
     }
 
     carregarCidadeEndereco();
-    configurarScrollMenuNav();
 });

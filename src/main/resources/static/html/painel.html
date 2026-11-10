@@ -94,6 +94,7 @@
             <!-- CARD DE ENDEREÇO CADASTRADO DO PERFIL -->
             <div class="content-box bg-white p-6 rounded-2xl border border-[#dfd7c8] shadow-sm">
                 <h3 class="text-lg font-bold text-brand-textPrimary mb-3">Meu Endereço Pessoal</h3>
+                <p class="text-xs text-brand-textSecondary mb-3">Este endereço fica salvo apenas neste navegador e não é enviado ao servidor.</p>
                 <div id="endereco-info-container">
                     <p class="empty-message text-sm text-brand-textSecondary">Nenhum endereço cadastrado no momento.</p>
                 </div>
@@ -160,9 +161,10 @@
     <div class="modal-overlay hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" id="modal-endereco">
         <div class="modal-card bg-white rounded-2xl max-w-lg w-full p-6 border border-[#dfd7c8] shadow-2xl">
             <div class="modal-header flex justify-between items-center mb-4">
-                <h3 id="modal-endereco-titulo" class="text-lg font-bold text-brand-textPrimary">Cadastrar Endereço</h3>
+                <h3 id="modal-endereco-titulo" class="text-lg font-bold text-brand-textPrimary">Endereço do Perfil</h3>
                 <button class="btn-close text-xl font-bold text-brand-textSecondary" id="btn-fechar-modal-endereco">&times;</button>
             </div>
+            <p class="text-xs text-brand-textSecondary mb-4">O endereço será salvo apenas neste navegador. Ele não será associado à sua conta no servidor.</p>
             <form id="form-endereco" class="space-y-4">
                 <div class="form-row grid grid-cols-3 gap-3">
                     <div class="form-group col-span-1">
@@ -220,9 +222,20 @@
                 <!-- CAMPOS OCULTOS -->
                 <input type="hidden" id="anuncio-id">
                 <input type="hidden" id="anuncio-imovel-id">
+                <input type="hidden" id="anuncio-endereco-id">
 
                 <!-- 1. DADOS DO IMÓVEL & VALORES -->
                 <h4 class="text-xs font-bold text-brand-green uppercase tracking-wider border-b border-[#dfd7c8] pb-1">1. Negócio & Categoria</h4>
+                <div class="form-row grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="form-group">
+                        <label for="anuncio-titulo" class="block text-xs font-bold text-brand-textSecondary mb-1">Título do imóvel</label>
+                        <input type="text" id="anuncio-titulo" maxlength="150" required placeholder="Ex: Casa próxima ao centro" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                    </div>
+                    <div class="form-group">
+                        <label for="anuncio-descricao" class="block text-xs font-bold text-brand-textSecondary mb-1">Descrição</label>
+                        <textarea id="anuncio-descricao" maxlength="2000" rows="2" placeholder="Descreva o imóvel" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm"></textarea>
+                    </div>
+                </div>
                 <div class="form-row grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div class="form-group">
                         <label for="anuncio-modalidade" class="block text-xs font-bold text-brand-textSecondary mb-1">Modalidade</label>
@@ -263,25 +276,25 @@
                 <div class="form-row grid grid-cols-3 gap-3">
                     <div class="form-group col-span-1">
                         <label for="anuncio-cep" class="block text-xs font-bold text-brand-textSecondary mb-1">CEP</label>
-                        <input type="text" id="anuncio-cep" placeholder="35160-000" maxlength="9" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                        <input type="text" id="anuncio-cep" placeholder="35160-000" maxlength="9" pattern="[0-9]{5}-?[0-9]{3}" required class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
                     </div>
                     <div class="form-group col-span-2">
                         <label for="anuncio-logradouro" class="block text-xs font-bold text-brand-textSecondary mb-1">Rua / Logradouro</label>
-                        <input type="text" id="anuncio-logradouro" placeholder="Ex: Av. Castelo Branco" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                        <input type="text" id="anuncio-logradouro" placeholder="Ex: Av. Castelo Branco" maxlength="255" required class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
                     </div>
                 </div>
                 <div class="form-row grid grid-cols-5 gap-3">
                     <div class="form-group col-span-1">
                         <label for="anuncio-numero" class="block text-xs font-bold text-brand-textSecondary mb-1">Número</label>
-                        <input type="text" id="anuncio-numero" placeholder="100" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                        <input type="text" id="anuncio-numero" placeholder="100" maxlength="20" required class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
                     </div>
                     <div class="form-group col-span-2">
                         <label for="anuncio-complemento" class="block text-xs font-bold text-brand-textSecondary mb-1">Complemento</label>
-                        <input type="text" id="anuncio-complemento" placeholder="Apto 201" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                        <input type="text" id="anuncio-complemento" placeholder="Apto 201" maxlength="100" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
                     </div>
                     <div class="form-group col-span-2">
                         <label for="anuncio-bairro" class="block text-xs font-bold text-brand-textSecondary mb-1">Bairro</label>
-                        <input type="text" id="anuncio-bairro" placeholder="Horto" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                        <input type="text" id="anuncio-bairro" placeholder="Horto" maxlength="100" required class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
                     </div>
                 </div>
                 <div class="form-row grid grid-cols-3 gap-3">
@@ -293,7 +306,7 @@
                     </div>
                     <div class="form-group col-span-1">
                         <label for="anuncio-estado" class="block text-xs font-bold text-brand-textSecondary mb-1">Estado (UF)</label>
-                        <input type="text" id="anuncio-estado" placeholder="MG" maxlength="2" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm uppercase">
+                        <input type="text" id="anuncio-estado" placeholder="MG" minlength="2" maxlength="2" required class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm uppercase">
                     </div>
                 </div>
 
@@ -321,15 +334,15 @@
                 <div class="form-row grid grid-cols-3 gap-3">
                     <div class="form-group">
                         <label for="anuncio-area-total" class="block text-xs font-bold text-brand-textSecondary mb-1">Área Total (m²)</label>
-                        <input type="number" id="anuncio-area-total" placeholder="75" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                        <input type="number" id="anuncio-area-total" placeholder="75" min="0.1" step="0.1" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
                     </div>
                     <div class="form-group">
                         <label for="anuncio-area-construida" class="block text-xs font-bold text-brand-textSecondary mb-1">Área Útil (m²)</label>
-                        <input type="number" id="anuncio-area-construida" placeholder="60" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                        <input type="number" id="anuncio-area-construida" placeholder="60" min="0.1" step="0.1" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
                     </div>
                     <div class="form-group">
                         <label for="anuncio-andar" class="block text-xs font-bold text-brand-textSecondary mb-1">Andar</label>
-                        <input type="number" id="anuncio-andar" value="0" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                        <input type="number" id="anuncio-andar" value="0" min="0" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
                     </div>
                 </div>
 
@@ -350,7 +363,7 @@
                 <!-- 4. FOTOS DO ANÚNCIO -->
                 <h4 class="text-xs font-bold text-brand-green uppercase tracking-wider border-b border-[#dfd7c8] pb-1 pt-2">4. Fotos do Imóvel</h4>
                 <div class="form-row flex items-center gap-2">
-                    <input type="url" id="foto-url-input" placeholder="Cole a URL da imagem (http...)" class="flex-1 px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                    <input type="url" id="foto-url-input" maxlength="500" placeholder="Cole a URL da imagem (http...)" class="flex-1 px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
                     <label class="flex items-center gap-1 text-xs text-brand-textSecondary">
                         <input type="checkbox" id="foto-capa-checkbox"> Capa
                     </label>
