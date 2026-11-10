@@ -27,7 +27,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const response = await fetch(`${API_BASE}${caminho}`, { headers });
         if (!response.ok) {
-            throw new Error(`Falha ao carregar ${caminho} (HTTP ${response.status}).`);
+            const error = new Error(`Falha ao carregar ${caminho} (HTTP ${response.status}).`);
+            error.status = response.status;
+            throw error;
         }
         return response.json();
     }
@@ -85,7 +87,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 locador = consultas[2].value;
             } else {
                 erroDetalhes = consultas[2].reason;
-                console.error('Não foi possível carregar os dados de contato:', consultas[2].reason);
+                if (erroDetalhes.status === 400) {
+                    console.info('O anunciante ainda não possui um perfil de locador cadastrado.');
+                } else {
+                    console.error('Não foi possível carregar os dados de contato:', consultas[2].reason);
+                }
             }
         } catch (error) {
             erroDetalhes = error;
@@ -96,11 +102,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderizarDetalhes(anuncio, imovel, endereco, fotos, locador, erroDetalhes);
 
     function renderizarDetalhes(dadosAnuncio, dadosImovel, dadosEndereco, fotosImovel, dadosLocador, falhaDetalhes) {
-        const tipo = dadosImovel?.tipoImovel || dadosAnuncio.tipoImovel || 'Imóvel';
+        const imovel = dadosAnuncio.imovel || dadosAnuncio;
+        const enderecoAnuncio = dadosAnuncio.endereco || imovel.endereco || dadosAnuncio;
+        const tipo = dadosImovel?.tipoImovel || imovel.tipoImovel || 'Imóvel';
         const modalidade = dadosAnuncio.modalidade || 'Disponível';
         const modalidadeNormalizada = modalidade.toLocaleUpperCase('pt-BR');
-        const titulo = dadosImovel?.titulo || `${tipo} para ${modalidade.toLocaleLowerCase('pt-BR')}`;
-        const descricao = dadosImovel?.descricao || 'O anunciante não informou uma descrição.';
+        const titulo = dadosImovel?.titulo || imovel.titulo || `${tipo} para ${modalidade.toLocaleLowerCase('pt-BR')}`;
+        const descricao = dadosImovel?.descricao || imovel.descricao || 'O anunciante não informou uma descrição.';
         const preco = Number(dadosAnuncio.valor || 0);
 
         document.getElementById('imovel-titulo').innerText = titulo;
@@ -115,27 +123,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             modalidadeNormalizada === 'VENDA' ? 'Valor de venda' : 'Valor anunciado';
 
         const enderecoElem = document.getElementById('imovel-endereco');
-        if (dadosEndereco) {
-            const partes = [
-                dadosEndereco.logradouro && `${dadosEndereco.logradouro}${dadosEndereco.numero ? `, ${dadosEndereco.numero}` : ''}`,
-                dadosEndereco.bairro,
-                [dadosEndereco.cidade, dadosEndereco.estado].filter(Boolean).join(' - ')
-            ].filter(Boolean);
-            enderecoElem.innerHTML = `
-                <span class="material-symbols-outlined text-sm text-brand-green">location_on</span>
-                <span>${escaparHTML(partes.join(' • ') || 'Localização não informada')}</span>
-            `;
-        } else {
-            const mensagemEndereco = !token
-                ? 'Entre para consultar a localização cadastrada.'
-                : 'A localização não está disponível.';
-            enderecoElem.innerHTML = `
-                <span class="material-symbols-outlined text-sm text-brand-green">location_on</span>
-                <span>${escaparHTML(mensagemEndereco)}</span>
-            `;
-        }
+        const enderecoCompleto = dadosEndereco || enderecoAnuncio;
+        const logradouro = [
+            enderecoCompleto.logradouro,
+            enderecoCompleto.numero
+        ].filter(Boolean).join(', ');
+        const partesEndereco = [
+            logradouro
+                ? `${logradouro}${enderecoCompleto.complemento ? ` - ${enderecoCompleto.complemento}` : ''}`
+                : '',
+            enderecoCompleto.bairro,
+            [enderecoCompleto.cidade, enderecoCompleto.estado].filter(Boolean).join(' - '),
+            enderecoCompleto.cep ? `CEP ${enderecoCompleto.cep}` : ''
+        ].filter(Boolean);
+        enderecoElem.innerText = partesEndereco.join(', ') || 'Localização não informada.';
 
-        document.getElementById('spec-quartos').innerText = dadosImovel?.quartos ?? dadosAnuncio.quartos ?? '-';
+        document.getElementById('spec-quartos').innerText = dadosImovel?.quartos ?? imovel.quartos ?? '-';
         document.getElementById('spec-banheiros').innerText = dadosImovel?.banheiros ?? '-';
         document.getElementById('spec-vagas').innerText = dadosImovel?.vagasGaragem ?? '-';
         document.getElementById('spec-area').innerText = dadosImovel?.areaTotal ? `${dadosImovel.areaTotal} m²` : '-';
@@ -187,6 +190,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (loadingState) loadingState.classList.add('hidden');
         if (conteudoImovel) conteudoImovel.classList.remove('hidden');
+        if (window.location.hash === '#contato') {
+            document.getElementById('contato')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
     }
 
     function configurarContato(dadosLocador, titulo, falhaDetalhes) {
@@ -210,9 +216,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (!telefone) {
-            mensagemAviso.innerText = falhaDetalhes
-                ? 'Não foi possível carregar os dados de contato. Verifique sua sessão e tente novamente.'
-                : 'O anunciante ainda não cadastrou telefone ou WhatsApp.';
+            mensagemAviso.innerText = falhaDetalhes?.status === 400
+                ? 'O perfil de contato deste anunciante ainda não está cadastrado.'
+                : falhaDetalhes
+                    ? 'Não foi possível carregar os dados de contato. Verifique sua sessão e tente novamente.'
+                    : 'O anunciante ainda não cadastrou telefone ou WhatsApp.';
             aviso.classList.remove('hidden');
             return;
         }

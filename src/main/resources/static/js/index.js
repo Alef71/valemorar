@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const formBusca = document.getElementById('form-busca-vitrine');
     const priceRange = document.getElementById('price-range');
     const priceVal = document.getElementById('price-val');
+    const cidadeBusca = document.getElementById('cidade-busca');
     const totalResultados = document.getElementById('total-resultados');
     const imagemPadrao = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800&auto=format&fit=crop';
 
@@ -31,6 +32,44 @@ document.addEventListener('DOMContentLoaded', () => {
             .toLocaleLowerCase('pt-BR')
             .normalize('NFD')
             .replace(/[\u0300-\u036f]/g, '');
+    }
+
+    function obterEnderecoAnuncio(anuncio) {
+        const imovel = anuncio.imovel || anuncio;
+        const enderecoAnuncio = anuncio.endereco || imovel.endereco || {};
+        let enderecoSalvo = {};
+        try {
+            const cache = localStorage.getItem(`enderecoAnuncio_${anuncio.id}`);
+            if (cache) {
+                const enderecoParseado = JSON.parse(cache);
+                if (!enderecoParseado || typeof enderecoParseado !== 'object') {
+                    throw new Error('O endereço salvo possui um formato inválido.');
+                }
+                enderecoSalvo = enderecoParseado;
+            }
+        } catch (erro) {
+            console.warn(`Não foi possível ler o endereço local do anúncio ${anuncio.id}:`, erro);
+        }
+
+        const obterCampo = campo => {
+            if (Object.prototype.hasOwnProperty.call(enderecoAnuncio, campo)) {
+                return enderecoAnuncio[campo];
+            }
+            if (Object.prototype.hasOwnProperty.call(anuncio, campo)) {
+                return anuncio[campo];
+            }
+            return enderecoSalvo[campo];
+        };
+
+        return {
+            logradouro: obterCampo('logradouro'),
+            numero: obterCampo('numero'),
+            complemento: obterCampo('complemento'),
+            bairro: obterCampo('bairro'),
+            cidade: obterCampo('cidade'),
+            estado: obterCampo('estado'),
+            cep: obterCampo('cep')
+        };
     }
 
     async function carregarAnuncios() {
@@ -78,14 +117,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!vitrineContainer) return;
 
         const precoMaximo = Number(priceRange?.value || Number.POSITIVE_INFINITY);
+        const cidadeSelecionada = normalizarTexto(cidadeBusca?.value);
         const filtrados = anuncios.filter(anuncio => {
-            const tipo = normalizarTexto(anuncio.tipoImovel);
+            const imovel = anuncio.imovel || anuncio;
+            const tipo = normalizarTexto(imovel.tipoImovel || anuncio.tipoImovel);
             const tipoFiltro = normalizarTexto(filtroTipoSelecionado);
             const valor = Number(anuncio.valor);
-            const quartos = Number(anuncio.quartos || 0);
+            const quartos = Number(imovel.quartos ?? anuncio.quartos ?? 0);
+            const cidadeAnuncio = normalizarTexto(obterEnderecoAnuncio(anuncio).cidade);
 
             return (!tipoFiltro || tipo.includes(tipoFiltro))
                 && (!Number.isFinite(precoMaximo) || valor <= precoMaximo)
+                && (!cidadeSelecionada || cidadeAnuncio === cidadeSelecionada)
                 && quartos >= filtroQuartosSelecionado;
         });
 
@@ -105,39 +148,76 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         vitrineContainer.innerHTML = lista.map(anuncio => {
-            const tipo = escaparHTML(anuncio.tipoImovel || 'Imóvel');
-            const modalidade = escaparHTML(anuncio.modalidade || 'Disponível');
-            const valor = Number(anuncio.valor || 0).toLocaleString('pt-BR', {
+            const imovel = anuncio.imovel || anuncio;
+            const endereco = obterEnderecoAnuncio(anuncio);
+            const modalidadeOriginal = String(anuncio.modalidade || 'Disponível');
+            const modalidade = escaparHTML(modalidadeOriginal);
+            const tipoOriginal = String(imovel.tipoImovel || anuncio.tipoImovel || 'Imóvel')
+                .replace(/_/g, ' ')
+                .toLocaleLowerCase('pt-BR');
+            const tipo = escaparHTML(tipoOriginal.charAt(0).toLocaleUpperCase('pt-BR') + tipoOriginal.slice(1));
+            const titulo = imovel.titulo || anuncio.titulo || tipo;
+            const descricao = imovel.descricao || anuncio.descricao || '';
+            const preco = Number(anuncio.valor || 0).toLocaleString('pt-BR', {
                 style: 'currency',
                 currency: 'BRL'
             });
+            const quartos = imovel.quartos ?? anuncio.quartos;
+            const valorCondominioInformado = anuncio.valorCondominio;
+            const valorCondominio = valorCondominioInformado == null ? null : Number(valorCondominioInformado);
+            const valorIptu = Number(anuncio.valorIptu || 0);
+            const logradouro = [endereco.logradouro, endereco.numero].filter(Boolean).join(', ');
+            const complemento = endereco.complemento ? ` - ${endereco.complemento}` : '';
+            const cidadeEstado = [endereco.cidade, endereco.estado].filter(Boolean).join(' - ');
+            const localizacao = [
+                logradouro ? `${logradouro}${complemento}` : '',
+                endereco.bairro,
+                cidadeEstado,
+                endereco.cep ? `CEP ${endereco.cep}` : ''
+            ].filter(Boolean).join(', ');
+            const atributos = [
+                quartos != null ? `<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm text-brand-green">bed</span>${Number(quartos)} quartos</span>` : ''
+            ].filter(Boolean);
             const tags = Array.isArray(anuncio.tags)
-                ? anuncio.tags.map(tag => `<span class="bg-brand-cream border border-[#dfd7c8] text-brand-brown text-[10px] font-bold px-2 py-0.5 rounded-md">${escaparHTML(tag)}</span>`).join('')
+                ? anuncio.tags.slice(0, 2).map(tag => `<span class="bg-brand-cream border border-[#dfd7c8] text-brand-brown text-[10px] font-bold px-2 py-0.5 rounded-md">${escaparHTML(tag)}</span>`).join('')
                 : '';
+            const estado = anuncio.status
+                ? `<span class="absolute top-3 right-3 bg-white/95 text-brand-textPrimary text-[10px] font-bold px-2.5 py-1 rounded-md">${escaparHTML(anuncio.status)}</span>`
+                : '';
+            const custoAdicional = [
+                valorIptu > 0 ? `IPTU: ${valorIptu.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}` : '',
+                valorCondominio > 0
+                    ? `Condomínio: ${valorCondominio.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`
+                    : valorCondominio === 0 ? 'Sem taxa de condomínio' : ''
+            ].filter(Boolean).join(' • ');
+            const imagem = imagemPadrao;
+            const linkDetalhes = `detalhes-imovel.html?id=${encodeURIComponent(anuncio.id)}`;
 
             return `
-                <article class="bg-white border border-[#dfd7c8] rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition duration-300 flex flex-col justify-between group">
-                    <div>
-                        <div class="relative h-48 w-full bg-stone-100 overflow-hidden">
-                            <img src="${imagemPadrao}" alt="Imagem ilustrativa de imóvel" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                            <span class="absolute top-3 left-3 bg-brand-green text-white text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">${modalidade}</span>
+                <article class="bg-brand-cream border border-[#ebe5db] rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition duration-300 flex flex-col group">
+                    <a href="${linkDetalhes}" class="relative h-56 w-full bg-stone-100 overflow-hidden block" aria-label="Ver ${tipo}">
+                        <img src="${imagem}" alt="Imagem ilustrativa de imóvel" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <span class="absolute top-3 left-3 bg-brand-green text-white text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">${modalidade}</span>
+                        ${estado}
+                    </a>
+                    <div class="p-4 flex flex-col flex-1">
+                        <div class="flex items-start justify-between gap-3">
+                            <p class="text-lg font-extrabold text-brand-green">${preco}${modalidadeOriginal.toLocaleUpperCase('pt-BR') === 'ALUGUEL' ? '<span class="text-xs font-medium text-brand-textSecondary"> /mês</span>' : ''}</p>
+                            ${valorCondominio === 0 ? '<span class="shrink-0 bg-orange-100 text-orange-800 text-[10px] font-bold px-2 py-1 rounded-md">Sem condomínio</span>' : ''}
                         </div>
-                        <div class="p-5 space-y-2">
-                            <h3 class="font-bold text-base text-brand-textPrimary line-clamp-1">${tipo}</h3>
-                            <p class="text-2xl font-extrabold text-brand-green">${valor}</p>
-                            <p class="text-xs text-brand-textSecondary flex items-center gap-2">
-                                <span>Quartos: <strong>${Number(anuncio.quartos || 0)}</strong></span>
-                                ${Number(anuncio.valorCondominio || 0) > 0
-                                    ? `<span>• Condomínio: ${Number(anuncio.valorCondominio).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>`
-                                    : ''}
-                            </p>
-                            <div class="flex flex-wrap gap-1 pt-2">${tags}</div>
+                        ${custoAdicional ? `<p class="text-[11px] text-brand-textSecondary mt-1">${escaparHTML(custoAdicional)}</p>` : ''}
+                        <h3 class="font-serif text-xl leading-tight text-brand-textPrimary mt-2">${escaparHTML(titulo)}</h3>
+                        ${descricao ? `<p class="text-xs text-brand-textSecondary mt-1">${escaparHTML(descricao)}</p>` : ''}
+                        <p class="text-xs text-brand-textSecondary mt-2 flex items-center gap-1 min-h-5">
+                            <span class="material-symbols-outlined text-sm text-brand-gold">location_on</span>
+                            <span>${escaparHTML(localizacao || 'Localização não informada')}</span>
+                        </p>
+                        ${atributos.length ? `<div class="grid grid-cols-1 gap-x-2 gap-y-2 border-y border-[#eee8de] py-3 mt-3 text-[11px] text-brand-textSecondary">${atributos.join('')}</div>` : ''}
+                        ${tags ? `<div class="flex flex-wrap gap-1 mt-3">${tags}</div>` : ''}
+                        <div class="grid grid-cols-2 gap-2 mt-auto pt-4">
+                            <a href="${linkDetalhes}" class="text-center py-2.5 bg-brand-cream hover:bg-[#e9e3d8] text-brand-textPrimary font-bold rounded-lg text-xs transition">Ver detalhes</a>
+                            <a href="${linkDetalhes}#contato" class="text-center py-2.5 bg-brand-green hover:bg-brand-greenSoft text-white font-bold rounded-lg text-xs transition flex items-center justify-center gap-1"><span class="material-symbols-outlined text-sm">chat</span>Contatar</a>
                         </div>
-                    </div>
-                    <div class="p-5 pt-0">
-                        <a href="detalhes-imovel.html?id=${encodeURIComponent(anuncio.id)}" class="block w-full text-center py-2.5 bg-brand-cream border border-[#dfd7c8] hover:bg-brand-gold hover:text-white hover:border-brand-gold text-brand-textPrimary font-bold rounded-xl text-xs transition">
-                            Ver detalhes e contato
-                        </a>
                     </div>
                 </article>
             `;
@@ -176,6 +256,8 @@ document.addEventListener('DOMContentLoaded', () => {
             aplicarFiltrosEExibir();
         });
     }
+
+    cidadeBusca?.addEventListener('change', aplicarFiltrosEExibir);
 
     formBusca?.addEventListener('submit', evento => {
         evento.preventDefault();

@@ -41,7 +41,7 @@ public class AnuncioController {
         return ResponseEntity.status(HttpStatus.CREATED).body(anuncioService.criar(dto));
     }
 
-    @Operation(summary = "Listar todos os anúncios", description = "Retorna uma página com todos os anúncios cadastrados")
+    @Operation(summary = "Listar todos os anúncios", description = "Retorna uma página de anúncios com endereço completo do imóvel; essas informações são públicas")
     @ApiResponse(responseCode = "200", description = "Página retornada com sucesso")
     @GetMapping
     public ResponseEntity<Page<AnuncioResponseDTO>> listarTodos(@PageableDefault(size = 10) Pageable pageable) {

@@ -49,7 +49,7 @@
 <body class="bg-brand-cream text-brand-textPrimary font-sans antialiased flex flex-col min-h-screen">
 
   <!-- CABEÇALHO / HEADER -->
-  <header class="app-header-sticky px-4 sm:px-6 lg:px-12 py-3.5 border-b border-[#dfd7c8] bg-white/90 backdrop-blur-md sticky top-0 z-50">
+  <header class="app-header-sticky px-4 sm:px-6 lg:px-12 py-3.5 border-b border-[#dfd7c8] bg-brand-cream/90 backdrop-blur-md sticky top-0 z-50">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
       
       <!-- LOGO + CIDADE DINÂMICA -->
@@ -97,7 +97,7 @@
       </div>
 
       <!-- CARD DE BUSCA AVANÇADA -->
-      <div class="mt-8 bg-white border border-[#dfd7c8] rounded-3xl shadow-xl p-5 sm:p-7 max-w-5xl mx-auto">
+      <div class="mt-8 bg-brand-cream border border-[#dfd7c8] rounded-3xl shadow-xl p-5 sm:p-7 max-w-5xl mx-auto">
         <form id="form-busca-vitrine" class="space-y-5">
           
           <!-- Abas Superiores de Categoria/Tipo -->
@@ -120,7 +120,7 @@
           </div>
 
           <!-- Filtros disponíveis no contrato público de anúncios -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end pt-1">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 items-end pt-1">
             <div>
               <div class="flex justify-between items-center mb-1">
                 <label class="text-xs font-bold text-stone-600">Até R$</label>
@@ -129,6 +129,62 @@
               <div class="bg-[#fcfbf9] border border-[#dcd6c9] rounded-xl p-2 flex items-center h-[42px]">
                 <input type="range" id="price-range" name="preco_max" min="500" max="10000" value="3500" step="250" class="w-full cursor-pointer accent-brand-green">
               </div>
+            </div>
+
+            <div>
+              <label for="cidade-busca" class="block text-xs font-bold text-stone-600 mb-1">Cidade do Vale</label>
+              <select id="cidade-busca" name="cidade" class="w-full h-[42px] rounded-xl border border-[#dcd6c9] bg-[#fcfbf9] px-3 text-sm text-brand-textPrimary focus:border-brand-green focus:outline-none focus:ring-1 focus:ring-brand-green">
+                <option value="">Todas as cidades</option>
+                <option>Almenara</option>
+                <option>Angelândia</option>
+                <option>Araçuaí</option>
+                <option>Aricanduva</option>
+                <option>Berilo</option>
+                <option>Cachoeira de Pajeú</option>
+                <option>Capelinha</option>
+                <option>Caraí</option>
+                <option>Carbonita</option>
+                <option>Catuji</option>
+                <option>Chapada do Norte</option>
+                <option>Comercinho</option>
+                <option>Coronel Murta</option>
+                <option>Couto de Magalhães de Minas</option>
+                <option>Datas</option>
+                <option>Diamantina</option>
+                <option>Divisópolis</option>
+                <option>Felício dos Santos</option>
+                <option>Felisburgo</option>
+                <option>Francisco Badaró</option>
+                <option>Gouveia</option>
+                <option>Itamarandiba</option>
+                <option>Itaobim</option>
+                <option>Itinga</option>
+                <option>Jequitinhonha</option>
+                <option>Joaíma</option>
+                <option>Jordânia</option>
+                <option>José Gonçalves de Minas</option>
+                <option>Leme do Prado</option>
+                <option>Mata Verde</option>
+                <option>Medina</option>
+                <option>Minas Novas</option>
+                <option>Novo Cruzeiro</option>
+                <option>Padre Paraíso</option>
+                <option>Palmópolis</option>
+                <option>Pedra Azul</option>
+                <option>Ponto dos Volantes</option>
+                <option>Presidente Kubitschek</option>
+                <option>Rubim</option>
+                <option>Salto da Divisa</option>
+                <option>Santa Maria do Salto</option>
+                <option>Santo Antônio do Itambé</option>
+                <option>Santo Antônio do Jacinto</option>
+                <option>São Gonçalo do Rio Preto</option>
+                <option>Senador Modestino Gonçalves</option>
+                <option>Serro</option>
+                <option>Turmalina</option>
+                <option>Veredinha</option>
+                <option>Virgem da Lapa</option>
+              </select>
             </div>
 
             <!-- Quartos -->
@@ -146,7 +202,7 @@
             </div>
 
             <!-- Botão de Busca -->
-            <div class="sm:col-span-2 mt-2">
+            <div class="sm:col-span-2 lg:col-span-3 mt-2">
               <button type="submit" class="w-full bg-brand-gold hover:bg-brand-earthLight text-white py-3 px-6 rounded-xl text-xs font-extrabold shadow-md transition flex items-center justify-center gap-2 uppercase tracking-wider">
                 <span class="material-symbols-outlined text-base">search</span>
                 <span>Buscar Imóveis</span>
@@ -205,6 +261,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
         <!-- Card 1: Diamantina -->
+        <a href="cidade.html?nome=Diamantina" class="block rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-green" aria-label="Conheça Diamantina">
         <div class="card-cidade group relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition duration-500 min-h-[340px] flex flex-col justify-end p-5 text-white" data-cidade="Diamantina">
           <div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition duration-700" style="background-image: url('../imagem/diamantina.png');"></div>
           <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/30"></div>
@@ -220,8 +277,10 @@
             </div>
           </div>
         </div>
+        </a>
 
         <!-- Card 2: Araçuaí -->
+        <a href="cidade.html?nome=Ara%C3%A7ua%C3%AD" class="block rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-green" aria-label="Conheça Araçuaí">
         <div class="card-cidade group relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition duration-500 min-h-[340px] flex flex-col justify-end p-5 text-white" data-cidade="Araçuaí">
           <div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition duration-700" style="background-image: url('../imagem/aracuai.png');"></div>
           <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/30"></div>
@@ -237,8 +296,10 @@
             </div>
           </div>
         </div>
+        </a>
 
         <!-- Card 3: Almenara -->
+        <a href="cidade.html?nome=Almenara" class="block rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-green" aria-label="Conheça Almenara">
         <div class="card-cidade group relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition duration-500 min-h-[340px] flex flex-col justify-end p-5 text-white" data-cidade="Almenara">
           <div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition duration-700" style="background-image: url('../imagem/jequitionha.png');"></div>
           <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/30"></div>
@@ -254,8 +315,10 @@
             </div>
           </div>
         </div>
+        </a>
 
         <!-- Card 4: Capelinha -->
+        <a href="cidade.html?nome=Capelinha" class="block rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-green" aria-label="Conheça Capelinha">
         <div class="card-cidade group relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition duration-500 min-h-[340px] flex flex-col justify-end p-5 text-white" data-cidade="Capelinha">
           <div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition duration-700" style="background-image: url('../imagem/capelinha.png');"></div>
           <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/30"></div>
@@ -271,8 +334,10 @@
             </div>
           </div>
         </div>
+        </a>
 
         <!-- Card 5: Pedra Azul -->
+        <a href="cidade.html?nome=Pedra%20Azul" class="block rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-green" aria-label="Conheça Pedra Azul">
         <div class="card-cidade group relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition duration-500 min-h-[340px] flex flex-col justify-end p-5 text-white" data-cidade="Pedra Azul">
           <div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition duration-700" style="background-image: url('../imagem/pedra%20azul.png');"></div>
           <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/30"></div>
@@ -288,8 +353,10 @@
             </div>
           </div>
         </div>
+        </a>
 
         <!-- Card 6: Minas Novas -->
+        <a href="cidade.html?nome=Minas%20Novas" class="block rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-green" aria-label="Conheça Minas Novas">
         <div class="card-cidade group relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition duration-500 min-h-[340px] flex flex-col justify-end p-5 text-white" data-cidade="Minas Novas">
           <div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition duration-700" style="background-image: url('../imagem/minas%20novas.png');"></div>
           <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/30"></div>
@@ -304,6 +371,7 @@
               <span class="text-emerald-400">Conheça a região</span>
             </div>
           </div>
+          </a>
         </div>
 
       </div>
@@ -396,7 +464,7 @@
     </section>
 
     <!-- VITRINE DE IMÓVEIS -->
-    <section class="py-12 bg-white border-y border-[#dfd7c8]">
+    <section class="py-12 bg-brand-cream border-y border-[#dfd7c8]">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
         <div id="vitrine-imoveis" class="flex justify-between items-end mb-6">
           <div>

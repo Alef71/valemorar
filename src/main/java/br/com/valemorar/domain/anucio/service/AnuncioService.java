@@ -4,6 +4,8 @@ import br.com.valemorar.domain.anucio.Anuncio;
 import br.com.valemorar.domain.anucio.dto.AnuncioCreateDTO;
 import br.com.valemorar.domain.anucio.dto.AnuncioResponseDTO;
 import br.com.valemorar.domain.anucio.repository.AnuncioRepository;
+import br.com.valemorar.domain.endereco.Endereco;
+import br.com.valemorar.domain.endereco.repository.EnderecoRepository;
 import br.com.valemorar.domain.imovel.Imovel;
 import br.com.valemorar.domain.imovel.repository.ImovelRepository;
 import br.com.valemorar.infra.SecurityUtils;
@@ -16,8 +18,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class AnuncioService {
@@ -29,10 +36,15 @@ public class AnuncioService {
 
     private final AnuncioRepository anuncioRepository;
     private final ImovelRepository imovelRepository;
+    private final EnderecoRepository enderecoRepository;
 
-    public AnuncioService(AnuncioRepository anuncioRepository, ImovelRepository imovelRepository) {
+    public AnuncioService(
+            AnuncioRepository anuncioRepository,
+            ImovelRepository imovelRepository,
+            EnderecoRepository enderecoRepository) {
         this.anuncioRepository = anuncioRepository;
         this.imovelRepository = imovelRepository;
+        this.enderecoRepository = enderecoRepository;
     }
 
     @Transactional
@@ -61,34 +73,32 @@ public class AnuncioService {
         anuncio.setAtualizadoEm(LocalDateTime.now());
 
         Anuncio salvo = anuncioRepository.save(anuncio);
-        return AnuncioResponseDTO.fromEntity(salvo);
+        return toResponse(salvo);
     }
 
     @Transactional(readOnly = true)
     public Page<AnuncioResponseDTO> listarTodos(Pageable pageable) {
-        return anuncioRepository.findAll(pageable)
-                .map(AnuncioResponseDTO::fromEntity);
+        return toResponsePage(anuncioRepository.findAll(pageable));
     }
 
     @Transactional(readOnly = true)
     public Page<AnuncioResponseDTO> buscarComFiltros(String tipoImovel, BigDecimal precoMin, BigDecimal precoMax,
             Integer quartos, List<String> tags, Pageable pageable) {
-        return anuncioRepository.buscarComFiltros(tipoImovel, precoMin, precoMax, quartos, tags, pageable)
-                .map(AnuncioResponseDTO::fromEntity);
+        return toResponsePage(
+                anuncioRepository.buscarComFiltros(tipoImovel, precoMin, precoMax, quartos, tags, pageable));
     }
 
     @Transactional(readOnly = true)
     public AnuncioResponseDTO buscarPorId(UUID id) {
         Anuncio anuncio = anuncioRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(MENSAGEM_NAO_ENCONTRADO));
-        return AnuncioResponseDTO.fromEntity(anuncio);
+        return toResponse(anuncio);
     }
 
     @Transactional(readOnly = true)
     public Page<AnuncioResponseDTO> buscarPorAnunciante(UUID anuncianteId, Pageable pageable) {
         validarAcessoAnunciante(anuncianteId);
-        return anuncioRepository.findByAnuncianteId(anuncianteId, pageable)
-                .map(AnuncioResponseDTO::fromEntity);
+        return toResponsePage(anuncioRepository.findByAnuncianteId(anuncianteId, pageable));
     }
 
     @Transactional
@@ -115,7 +125,7 @@ public class AnuncioService {
         anuncio.setAtualizadoEm(LocalDateTime.now());
 
         Anuncio atualizado = anuncioRepository.save(anuncio);
-        return AnuncioResponseDTO.fromEntity(atualizado);
+        return toResponse(atualizado);
     }
 
     @Transactional
@@ -128,7 +138,7 @@ public class AnuncioService {
         anuncio.setAtualizadoEm(LocalDateTime.now());
 
         Anuncio atualizado = anuncioRepository.save(anuncio);
-        return AnuncioResponseDTO.fromEntity(atualizado);
+        return toResponse(atualizado);
     }
 
     @Transactional
@@ -142,7 +152,7 @@ public class AnuncioService {
         anuncio.setAtualizadoEm(LocalDateTime.now());
 
         Anuncio atualizado = anuncioRepository.save(anuncio);
-        return AnuncioResponseDTO.fromEntity(atualizado);
+        return toResponse(atualizado);
     }
 
     @Transactional
@@ -155,6 +165,32 @@ public class AnuncioService {
 
     private UUID getUsuarioAutenticadoId() {
         return SecurityUtils.getUsuarioAutenticado().getId();
+    }
+
+    private Page<AnuncioResponseDTO> toResponsePage(Page<Anuncio> anuncios) {
+        Set<UUID> enderecoIds = anuncios.getContent().stream()
+                .map(Anuncio::getImovel)
+                .filter(Objects::nonNull)
+                .map(Imovel::getEnderecoId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Map<UUID, Endereco> enderecos = new HashMap<>();
+        enderecoRepository.findAllById(enderecoIds)
+                .forEach(endereco -> enderecos.put(endereco.getId(), endereco));
+
+        return anuncios.map(anuncio -> {
+            Imovel imovel = anuncio.getImovel();
+            Endereco endereco = imovel != null ? enderecos.get(imovel.getEnderecoId()) : null;
+            return AnuncioResponseDTO.fromEntity(anuncio, endereco);
+        });
+    }
+
+    private AnuncioResponseDTO toResponse(Anuncio anuncio) {
+        Imovel imovel = anuncio.getImovel();
+        Endereco endereco = imovel != null
+                ? enderecoRepository.findById(imovel.getEnderecoId()).orElse(null)
+                : null;
+        return AnuncioResponseDTO.fromEntity(anuncio, endereco);
     }
 
     private void validarAcessoAnunciante(UUID anuncianteId) {

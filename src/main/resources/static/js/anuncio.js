@@ -341,6 +341,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             enderecoEmEdicao = await requisitarApi(`/enderecos/${imovelEmEdicao.enderecoId}`);
+            salvarEnderecoAnuncioCache(anuncio.id, enderecoEmEdicao);
             fotosOriginais = await requisitarApi(`/fotos-imovel/imovel/${imovelEmEdicao.id}`);
             if (!Array.isArray(fotosOriginais)) {
                 throw new Error('A API retornou um formato inesperado para as fotos do imóvel.');
@@ -417,6 +418,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             estado: obterValor('anuncio-estado').toUpperCase(),
             cep: obterValor('anuncio-cep')
         };
+    }
+
+    function salvarEnderecoAnuncioCache(anuncioId, endereco) {
+        if (!anuncioId) {
+            console.warn('Não foi possível vincular o endereço local: a API não retornou o ID do anúncio.');
+            return false;
+        }
+
+        try {
+            localStorage.setItem(`enderecoAnuncio_${anuncioId}`, JSON.stringify(endereco));
+            return true;
+        } catch (error) {
+            console.warn(`Não foi possível guardar o endereço local do anúncio ${anuncioId}:`, error);
+            return false;
+        }
     }
 
     function obterImovelPayload(enderecoId) {
@@ -580,15 +596,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const anuncioCriado = await resAnuncio.json();
+        const enderecoCacheSalvo = salvarEnderecoAnuncioCache(
+            anuncioCriado.id,
+            { ...enderecoPayload, id: enderecoCriado.id }
+        );
+        const avisoEndereco = enderecoCacheSalvo
+            ? null
+            : 'O anúncio foi publicado, mas o endereço não ficou salvo neste navegador.';
 
         try {
             await sincronizarFotos(imovelCriado.id);
-            return { anuncio: anuncioCriado, aviso: null };
+            return { anuncio: anuncioCriado, aviso: avisoEndereco };
         } catch (error) {
             console.error('O anúncio foi criado, mas houve falha ao salvar uma ou mais fotos:', error);
             return {
                 anuncio: anuncioCriado,
-                aviso: `O anúncio foi publicado, mas uma ou mais fotos não foram salvas. Você pode tentar novamente ao editar o anúncio. Detalhe: ${error.message}`
+                aviso: [
+                    avisoEndereco,
+                    `O anúncio foi publicado, mas uma ou mais fotos não foram salvas. Você pode tentar novamente ao editar o anúncio. Detalhe: ${error.message}`
+                ].filter(Boolean).join('\n')
             };
         }
     }
@@ -644,14 +670,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                     });
 
                     if (response.ok) {
-                        let avisoFotos = null;
+                        const enderecoCacheSalvo = salvarEnderecoAnuncioCache(
+                            id,
+                            { ...obterEnderecoPayload(), id: enderecoId }
+                        );
+                        const avisos = enderecoCacheSalvo
+                            ? []
+                            : ['O anúncio foi atualizado, mas o endereço não ficou salvo neste navegador.'];
                         try {
                             await sincronizarFotos(imovelId);
                         } catch (error) {
                             console.error('O anúncio foi atualizado, mas houve falha ao sincronizar as fotos:', error);
-                            avisoFotos = `O anúncio foi atualizado, mas uma ou mais fotos não foram sincronizadas. Detalhe: ${error.message}`;
+                            avisos.push(`O anúncio foi atualizado, mas uma ou mais fotos não foram sincronizadas. Detalhe: ${error.message}`);
                         }
-                        alert(avisoFotos || 'Anúncio atualizado com sucesso!');
+                        alert(avisos.join('\n') || 'Anúncio atualizado com sucesso!');
                         fecharModal();
                         carregarMeusAnuncios();
                     } else {
