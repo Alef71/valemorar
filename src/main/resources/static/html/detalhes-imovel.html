@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detalhes do Imóvel - Vale Morar</title>
+  
+  <!-- Fontes Google -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400;1,6..72,600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN com Paleta Vale Morar -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            serif: ['Newsreader', 'serif'],
+          },
+          colors: {
+            brand: {
+              green: '#173A2A',
+              brown: '#7A4318',
+              gold: '#B98232',
+              cream: '#F4EFE3',
+              greenSoft: '#405B38',
+              earthLight: '#A66A2C',
+              surface: '#FFFFFF',
+              textPrimary: '#1C241E',
+              textSecondary: '#5C4F43',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="stylesheet" href="../css/header.css">
+</head>
+<body class="bg-brand-cream text-brand-textPrimary font-sans antialiased flex flex-col min-h-screen">
+
+  <!-- CABEÇALHO -->
+  <header class="app-header-sticky px-4 sm:px-6 lg:px-12 py-3.5 border-b border-[#dfd7c8] bg-white/90 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <a href="index.html" class="flex items-center gap-3">
+        <img src="../imagem/vale%20morar.jpeg" alt="Vale Morar" class="h-10 w-auto object-contain rounded-md">
+      </a>
+      <a href="index.html" class="flex items-center gap-1 text-xs font-bold text-brand-green hover:underline">
+        <span class="material-symbols-outlined text-sm">arrow_back</span> Voltar para a busca
+      </a>
+    </div>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-12 py-8 space-y-8">
+
+    <!-- CONTAINER DE CARREGAMENTO / ERRO -->
+    <div id="loading-state" class="text-center py-16 text-brand-textSecondary">
+      <p class="text-base font-semibold">Carregando detalhes do imóvel...</p>
+    </div>
+
+    <!-- CONTEÚDO DO IMÓVEL (EXIBIDO APÓS O CARREGAMENTO) -->
+    <div id="imovel-conteudo" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+      <!-- COLUNA DA ESQUERDA: FOTOS E DESCRIÇÃO -->
+      <div class="lg:col-span-8 space-y-6">
+
+        <!-- CABEÇALHO DO IMÓVEL -->
+        <div>
+          <div class="flex items-center gap-2 mb-2">
+            <span id="badge-modalidade" class="bg-brand-green text-white text-[10px] font-extrabold px-2.5 py-1 rounded-md uppercase tracking-wider">
+              Aluguel
+            </span>
+            <span id="badge-tipo" class="bg-brand-brown/10 text-brand-brown text-xs font-bold px-2.5 py-0.5 rounded-md">
+              Casa
+            </span>
+          </div>
+          <h1 id="imovel-titulo" class="text-2xl sm:text-3xl font-extrabold text-brand-textPrimary">
+            Carregando título...
+          </h1>
+          <p id="imovel-endereco" class="text-xs sm:text-sm text-brand-textSecondary flex items-center gap-1 mt-1">
+            <span class="material-symbols-outlined text-sm text-brand-green">location_on</span>
+            <span>Carregando localização...</span>
+          </p>
+        </div>
+
+        <!-- GALERIA DE FOTOS -->
+        <div class="space-y-3">
+          <div class="relative h-72 sm:h-96 w-full rounded-2xl overflow-hidden bg-stone-200 border border-[#dfd7c8] shadow-sm">
+            <img id="foto-principal" src="" alt="Foto principal" class="w-full h-full object-cover">
+          </div>
+          <div id="galeria-thumbnails" class="flex items-center gap-2 overflow-x-auto pb-2">
+            <!-- Renderizado via JS -->
+          </div>
+        </div>
+
+        <!-- ESPECIFICAÇÕES RÁPIDAS -->
+        <div class="bg-white border border-[#dfd7c8] rounded-2xl p-4 sm:p-6 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+          <div>
+            <span class="material-symbols-outlined text-brand-green text-2xl">bed</span>
+            <p class="text-[11px] text-brand-textSecondary font-semibold">Quartos</p>
+            <p id="spec-quartos" class="text-base font-extrabold text-brand-textPrimary">-</p>
+          </div>
+          <div>
+            <span class="material-symbols-outlined text-brand-green text-2xl">shower</span>
+            <p class="text-[11px] text-brand-textSecondary font-semibold">Banheiros</p>
+            <p id="spec-banheiros" class="text-base font-extrabold text-brand-textPrimary">-</p>
+          </div>
+          <div>
+            <span class="material-symbols-outlined text-brand-green text-2xl">directions_car</span>
+            <p class="text-[11px] text-brand-textSecondary font-semibold">Vagas</p>
+            <p id="spec-vagas" class="text-base font-extrabold text-brand-textPrimary">-</p>
+          </div>
+          <div>
+            <span class="material-symbols-outlined text-brand-green text-2xl">square_foot</span>
+            <p class="text-[11px] text-brand-textSecondary font-semibold">Área</p>
+            <p id="spec-area" class="text-base font-extrabold text-brand-textPrimary">-</p>
+          </div>
+        </div>
+
+        <!-- DESCRIÇÃO COMPLETA -->
+        <div class="bg-white border border-[#dfd7c8] rounded-2xl p-6 space-y-3">
+          <h2 class="text-lg font-bold text-brand-textPrimary">Sobre o Imóvel</h2>
+          <p id="imovel-descricao" class="text-sm text-brand-textSecondary leading-relaxed whitespace-pre-line">
+            Carregando descrição...
+          </p>
+
+          <div class="pt-4 border-t border-stone-100">
+            <h3 class="text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">Diferenciais</h3>
+            <div id="imovel-tags" class="flex flex-wrap gap-1.5">
+              <!-- Renderizado via JS -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- COLUNA DA DIREITA: PREÇO E CONTATO -->
+      <div class="lg:col-span-4 space-y-6">
+
+        <div class="bg-white border border-[#dfd7c8] rounded-2xl p-6 shadow-md sticky top-24 space-y-6">
+          <div>
+            <span class="text-xs font-bold text-stone-500 uppercase tracking-wider">Valor do Aluguel</span>
+            <p id="imovel-preco" class="text-3xl font-extrabold text-brand-green">R$ 0,00</p>
+            <p id="imovel-condominio" class="text-xs text-brand-textSecondary font-semibold mt-1 hidden">
+              + R$ <span id="val-condominio">0</span>/mês de condomínio
+            </p>
+          </div>
+
+          <hr class="border-stone-200">
+
+          <!-- INFORMAÇÕES DO ANUNCIANTE -->
+          <div class="space-y-4">
+            <h3 class="text-sm font-bold text-brand-textPrimary uppercase tracking-wider">Anunciado por</h3>
+            
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-full bg-brand-cream border border-[#dfd7c8] flex items-center justify-center font-bold text-brand-green text-lg">
+                <span id="proprietario-inicial">P</span>
+              </div>
+              <div>
+                <p id="proprietario-nome" class="font-bold text-sm text-brand-textPrimary">Carregando...</p>
+                <p id="proprietario-tipo" class="text-xs text-stone-500">Anunciante Verificado</p>
+              </div>
+            </div>
+
+            <div class="space-y-2 pt-2">
+              <div class="flex items-center gap-2 p-3 bg-[#fcfbf9] border border-[#dfd7c8] rounded-xl text-xs">
+                <span class="material-symbols-outlined text-brand-green text-base">mail</span>
+                <div class="overflow-hidden">
+                  <p class="text-[10px] text-stone-500 font-bold uppercase">E-mail de Contato</p>
+                  <a id="proprietario-email" href="#" class="font-bold text-brand-textPrimary hover:underline block truncate">
+                    Carregando e-mail...
+                  </a>
+                </div>
+              </div>
+
+              <a id="btn-whatsapp" href="#" target="_blank" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-sm">
+                <span class="material-symbols-outlined text-base">chat</span>
+                <span>Falar via WhatsApp</span>
+              </a>
+            </div>
+
+            <form id="form-contato-direto" class="space-y-3 pt-4 border-t border-stone-100">
+              <h4 class="text-xs font-bold text-stone-700">Enviar Mensagem ao Proprietário</h4>
+              <input type="text" id="msg-nome" placeholder="Seu Nome" required class="w-full bg-[#fcfbf9] border border-[#dcd6c9] rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-green">
+              <input type="email" id="msg-email" placeholder="Seu E-mail" required class="w-full bg-[#fcfbf9] border border-[#dcd6c9] rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-green">
+              <textarea id="msg-texto" rows="3" placeholder="Tenho interesse neste imóvel. Podemos agendar uma visita?" required class="w-full bg-[#fcfbf9] border border-[#dcd6c9] rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-green"></textarea>
+              <button type="submit" class="w-full bg-brand-gold hover:bg-brand-earthLight text-white font-extrabold py-2.5 rounded-xl text-xs uppercase tracking-wider transition">
+                Enviar E-mail
+              </button>
+            </form>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="bg-brand-cream border-t border-[#dfd7c8] py-8 text-center text-xs text-brand-textSecondary mt-12">
+    <p>&copy; 2026 Vale Morar Imóveis. Todos os direitos reservados.</p>
+  </footer>
+
+  <script src="../js/detalhes-imovel.js"></script>
+</body>
+</html>

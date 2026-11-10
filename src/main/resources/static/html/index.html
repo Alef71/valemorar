@@ -52,11 +52,11 @@
   <header class="app-header-sticky px-4 sm:px-6 lg:px-12 py-3.5 border-b border-[#dfd7c8] bg-white/90 backdrop-blur-md sticky top-0 z-50">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
       
-      <!-- LOGO COM CAMINHO CORRIGIDO PARA index.html -->
+      <!-- LOGO + CIDADE DINÂMICA -->
       <a href="index.html" class="brand-logo-link flex items-center gap-3 group focus:outline-none">
         <img src="../imagem/vale%20morar.jpeg" alt="Vale Morar" class="h-10 w-auto object-contain rounded-md">
         
-        <div id="header-user-city" class="hidden xl:flex items-center pl-3 border-l border-[#dfd9cc] text-[11px] font-bold tracking-widest text-brand-textSecondary uppercase">
+        <div id="header-user-city" class="hidden md:flex flex-col justify-center pl-3 border-l border-[#dfd9cc]">
           <!-- Preenchido via JS (header.js) -->
         </div>
       </a>
@@ -67,9 +67,10 @@
         <a href="busca.html?modalidade=residencial" class="nav-link hover:text-brand-green">Aluguel Residencial</a>
         <a href="busca.html?modalidade=comercial" class="nav-link hover:text-brand-green">Aluguel Comercial</a>
         <a href="busca.html?modalidade=sitios" class="nav-link hover:text-brand-green">Sítios & Chácaras</a>
+        <a href="#diferenciais" class="nav-link hover:text-brand-green">Como Funciona</a>
       </nav>
 
-      <!-- ÁREA DINÂMICA DO USUÁRIO (Preenchida pelo header.js) -->
+      <!-- ÁREA DINÂMICA DO USUÁRIO -->
       <div id="user-header-actions" class="flex items-center gap-3"></div>
 
     </div>
@@ -78,68 +79,358 @@
   <!-- CONTEÚDO PRINCIPAL -->
   <main class="flex-1">
 
-    <!-- HERO SECTION & BUSCA -->
-    <section class="pt-10 pb-12 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto">
-      <div class="text-center max-w-3xl mx-auto space-y-4">
-        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#e8e0d0] border border-[#d8cdba] text-xs font-bold text-brand-brown uppercase tracking-wider shadow-xs">
+    <!-- HERO SECTION & BUSCA INTEGRADA -->
+    <section class="pt-8 pb-12 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto">
+      <div class="text-center max-w-3xl mx-auto space-y-3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#e8e0d0] border border-[#d8cdba] text-xs font-bold text-brand-brown uppercase tracking-wider shadow-xs">
           <span class="w-2 h-2 rounded-full bg-brand-gold animate-pulse"></span>
           Alto, Médio e Baixo Jequitinhonha
         </div>
 
-        <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-brand-textPrimary leading-tight">
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-brand-textPrimary leading-tight">
           O seu novo lar no coração do <span class="font-serif italic font-normal text-brand-green">Vale do Jequitinhonha</span>.
         </h1>
 
-        <p class="text-sm sm:text-base md:text-lg text-brand-textSecondary leading-relaxed">
-          Plataforma dedicada a aluguéis residenciais e comerciais em Diamantina, Araçuaí, Almenara, Capelinha e região.
+        <p class="text-sm sm:text-base text-brand-textSecondary leading-relaxed max-w-2xl mx-auto">
+          Plataforma dedicada a aluguéis residenciais e comerciais em Diamantina, Araçuaí, Almenara, Capelinha e região. Alugue sem burocracia, com agilidade e acolhimento mineiro.
         </p>
       </div>
 
-      <!-- BOX DE BUSCA INTEGRADA -->
-      <div class="mt-8 bg-white border border-[#dfd7c8] rounded-2xl shadow-xl p-4 sm:p-6 max-w-5xl mx-auto">
-        <form class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 items-end" action="busca.html" method="GET">
+      <!-- CARD DE BUSCA AVANÇADA -->
+      <div class="mt-8 bg-white border border-[#dfd7c8] rounded-3xl shadow-xl p-5 sm:p-7 max-w-5xl mx-auto">
+        <form id="form-busca-vitrine" class="space-y-5">
           
-          <div class="lg:col-span-4">
-            <label class="block text-xs font-bold text-brand-textSecondary mb-1.5">Cidade do Vale</label>
-            <select name="cidade" class="w-full bg-[#fcfbf9] border border-[#dcd6c9] rounded-lg px-3 py-2.5 text-sm font-semibold text-brand-textPrimary focus:outline-none focus:border-brand-green">
-              <option value="">Todas as Cidades</option>
-            </select>
-          </div>
-
-          <div class="lg:col-span-4">
-            <label class="block text-xs font-bold text-brand-textSecondary mb-1.5">Bairro ou Referência</label>
-            <input type="text" name="bairro" placeholder="Ex: Centro, UFVJM" class="w-full bg-[#fcfbf9] border border-[#dcd6c9] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-brand-green">
-          </div>
-
-          <div class="lg:col-span-2">
-            <div class="flex justify-between items-center mb-1.5">
-              <label class="text-xs font-bold text-brand-textSecondary">Até R$</label>
-              <span class="text-xs font-bold text-brand-green" id="price-val">3.500</span>
-            </div>
-            <div class="bg-[#fcfbf9] border border-[#dcd6c9] rounded-lg p-2.5 flex items-center">
-              <input type="range" id="price-range" name="preco_max" min="500" max="6000" value="3500" step="100" class="w-full cursor-pointer">
-            </div>
-          </div>
-
-          <div class="lg:col-span-2">
-            <button type="submit" class="w-full bg-brand-gold hover:bg-brand-earthLight text-white py-2.5 px-4 rounded-lg text-sm font-extrabold shadow-md transition flex items-center justify-center gap-1.5">
-              <span class="material-symbols-outlined text-base">search</span>
-              <span>Buscar</span>
+          <!-- Abas Superiores de Categoria/Tipo -->
+          <div class="flex flex-wrap items-center gap-2 border-b border-gray-100 pb-4">
+            <button type="button" class="btn-aba-tipo px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-brand-green text-white" data-tipo="">
+              <span class="material-symbols-outlined text-base">grid_view</span> Todos os Imóveis
             </button>
+            <button type="button" class="btn-aba-tipo px-4 py-2 rounded-xl text-xs font-semibold text-stone-600 bg-stone-100 hover:bg-stone-200 transition flex items-center gap-1.5" data-tipo="CASA">
+              <span class="material-symbols-outlined text-base">home</span> Casas
+            </button>
+            <button type="button" class="btn-aba-tipo px-4 py-2 rounded-xl text-xs font-semibold text-stone-600 bg-stone-100 hover:bg-stone-200 transition flex items-center gap-1.5" data-tipo="APARTAMENTO">
+              <span class="material-symbols-outlined text-base">apartment</span> Apartamentos
+            </button>
+            <button type="button" class="btn-aba-tipo px-4 py-2 rounded-xl text-xs font-semibold text-stone-600 bg-stone-100 hover:bg-stone-200 transition flex items-center gap-1.5" data-tipo="COMERCIAL">
+              <span class="material-symbols-outlined text-base">storefront</span> Comerciais
+            </button>
+            <button type="button" class="btn-aba-tipo px-4 py-2 rounded-xl text-xs font-semibold text-stone-600 bg-stone-100 hover:bg-stone-200 transition flex items-center gap-1.5" data-tipo="SITIO">
+              <span class="material-symbols-outlined text-base">nature</span> Sítios & Chácaras
+            </button>
+          </div>
+
+          <!-- Linha de Campos de Filtro -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-end pt-1">
+            
+            <!-- Cidade -->
+            <div class="lg:col-span-3">
+              <label class="block text-xs font-bold text-stone-600 mb-1 flex items-center gap-1">
+                <span class="material-symbols-outlined text-xs text-brand-green">location_city</span> Cidade do Vale
+              </label>
+              <select id="filtro-cidade" name="cidade" class="w-full bg-[#fcfbf9] border border-[#dcd6c9] rounded-xl px-3 py-2.5 text-xs font-semibold text-stone-800 focus:outline-none focus:border-brand-green">
+                <option value="">Todas as Cidades</option>
+              </select>
+            </div>
+
+            <!-- Bairro / Referência -->
+            <div class="lg:col-span-3">
+              <label class="block text-xs font-bold text-stone-600 mb-1 flex items-center gap-1">
+                <span class="material-symbols-outlined text-xs text-brand-green">search</span> Bairro ou Referência
+              </label>
+              <input type="text" id="filtro-bairro" name="bairro" placeholder="Ex: Centro, UFVJM, Bairro Novo..." class="w-full bg-[#fcfbf9] border border-[#dcd6c9] rounded-xl px-3 py-2.5 text-xs font-medium text-stone-800 focus:outline-none focus:border-brand-green">
+            </div>
+
+            <!-- Preço Máximo -->
+            <div class="lg:col-span-3">
+              <div class="flex justify-between items-center mb-1">
+                <label class="text-xs font-bold text-stone-600">Até R$</label>
+                <span class="text-xs font-extrabold text-brand-green" id="price-val">3.500</span>
+              </div>
+              <div class="bg-[#fcfbf9] border border-[#dcd6c9] rounded-xl p-2 flex items-center h-[42px]">
+                <input type="range" id="price-range" name="preco_max" min="500" max="10000" value="3500" step="250" class="w-full cursor-pointer accent-brand-green">
+              </div>
+            </div>
+
+            <!-- Quartos -->
+            <div class="lg:col-span-3">
+              <label class="block text-xs font-bold text-stone-600 mb-1 flex items-center gap-1">
+                <span class="material-symbols-outlined text-xs text-brand-green">bed</span> Quartos
+              </label>
+              <div class="flex items-center gap-1 bg-[#fcfbf9] border border-[#dcd6c9] rounded-xl p-1 h-[42px]">
+                <button type="button" class="btn-quartos flex-1 py-1.5 text-xs font-bold rounded-lg transition bg-brand-green text-white" data-quartos="">Tudo</button>
+                <button type="button" class="btn-quartos flex-1 py-1.5 text-xs font-semibold text-stone-600 hover:bg-stone-200 rounded-lg transition" data-quartos="1">1+</button>
+                <button type="button" class="btn-quartos flex-1 py-1.5 text-xs font-semibold text-stone-600 hover:bg-stone-200 rounded-lg transition" data-quartos="2">2+</button>
+                <button type="button" class="btn-quartos flex-1 py-1.5 text-xs font-semibold text-stone-600 hover:bg-stone-200 rounded-lg transition" data-quartos="3">3+</button>
+                <button type="button" class="btn-quartos flex-1 py-1.5 text-xs font-semibold text-stone-600 hover:bg-stone-200 rounded-lg transition" data-quartos="4">4+</button>
+              </div>
+            </div>
+
+            <!-- Botão de Busca -->
+            <div class="lg:col-span-12 mt-2">
+              <button type="submit" class="w-full bg-brand-gold hover:bg-brand-earthLight text-white py-3 px-6 rounded-xl text-xs font-extrabold shadow-md transition flex items-center justify-center gap-2 uppercase tracking-wider">
+                <span class="material-symbols-outlined text-base">search</span>
+                <span>Buscar Imóveis</span>
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Badges de Confiança -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pt-4 border-t border-stone-100 text-[11px] font-semibold text-stone-600">
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-sm text-brand-green">verified</span>
+              <span>Aluguel sem fiador</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-sm text-brand-gold">bolt</span>
+              <span>Contrato digital rápido</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-sm text-brand-green">shield</span>
+              <span>Atendimento verificado</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-sm text-brand-gold">visibility</span>
+              <span>Visita presencial ou 3D</span>
+            </div>
           </div>
 
         </form>
       </div>
     </section>
 
+    <!-- SEÇÃO: EXPLORE AS CIDADES DO JEQUITINHONHA -->
+    <section id="cidades" class="py-12 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto">
+      
+      <!-- Cabeçalho da Seção -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-brand-brown block mb-1">Território & Tradição</span>
+          <h2 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-brand-textPrimary">
+            Explore as Cidades do <span class="font-serif italic font-normal text-brand-green">Jequitinhonha</span>
+          </h2>
+          <p class="text-xs sm:text-sm text-brand-textSecondary mt-1 max-w-2xl">
+            Dos casarios coloniais da serra às cidades ribeirinhas do Rio Jequitinhonha. Encontre opções para estudantes, famílias e profissionais.
+          </p>
+        </div>
+        <div>
+          <button type="button" id="btn-ver-todas-cidades" class="text-xs sm:text-sm font-bold text-brand-green hover:underline flex items-center gap-1 cursor-pointer">
+            <span>Ver todas as cidades atendidas</span>
+            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Grid com 6 Cards de Cidades Históricas -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <!-- Card 1: Diamantina -->
+        <div class="card-cidade cursor-pointer group relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition duration-500 min-h-[340px] flex flex-col justify-end p-5 text-white" data-cidade="Diamantina">
+          <div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition duration-700" style="background-image: url('../imagem/diamantina.png');"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/30"></div>
+
+          <div class="relative z-10 space-y-1.5 pt-12">
+            <span class="text-[10px] font-extrabold uppercase tracking-widest text-emerald-400 block">ALTO VALE</span>
+            <h3 class="text-2xl font-bold tracking-tight">Diamantina</h3>
+            <p class="text-xs text-stone-300 leading-snug line-clamp-2">
+              Casas coloniais, quitinetes universitárias para UFVJM e apartamentos no centro.
+            </p>
+            <div class="pt-3 border-t border-white/20 flex justify-end items-center text-xs font-bold">
+              <span class="text-emerald-400 group-hover:translate-x-1 transition flex items-center gap-0.5">Ver imóveis &rsaquo;</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Araçuaí -->
+        <div class="card-cidade cursor-pointer group relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition duration-500 min-h-[340px] flex flex-col justify-end p-5 text-white" data-cidade="Araçuaí">
+          <div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition duration-700" style="background-image: url('../imagem/aracuai.png');"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/30"></div>
+
+          <div class="relative z-10 space-y-1.5 pt-12">
+            <span class="text-[10px] font-extrabold uppercase tracking-widest text-amber-400 block">MÉDIO VALE</span>
+            <h3 class="text-2xl font-bold tracking-tight">Araçuaí</h3>
+            <p class="text-xs text-stone-300 leading-snug line-clamp-2">
+              Casas amplas com quintal, pontos comerciais centrais e bairros tranquilos e ensolarados.
+            </p>
+            <div class="pt-3 border-t border-white/20 flex justify-end items-center text-xs font-bold">
+              <span class="text-emerald-400 group-hover:translate-x-1 transition flex items-center gap-0.5">Ver imóveis &rsaquo;</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Almenara -->
+        <div class="card-cidade cursor-pointer group relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition duration-500 min-h-[340px] flex flex-col justify-end p-5 text-white" data-cidade="Almenara">
+          <div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition duration-700" style="background-image: url('../imagem/jequitionha.png');"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/30"></div>
+
+          <div class="relative z-10 space-y-1.5 pt-12">
+            <span class="text-[10px] font-extrabold uppercase tracking-widest text-emerald-400 block">BAIXO VALE</span>
+            <h3 class="text-2xl font-bold tracking-tight">Almenara</h3>
+            <p class="text-xs text-stone-300 leading-snug line-clamp-2">
+              Polo comercial do Baixo Vale com galpões, lojas e vilas residenciais familiares.
+            </p>
+            <div class="pt-3 border-t border-white/20 flex justify-end items-center text-xs font-bold">
+              <span class="text-emerald-400 group-hover:translate-x-1 transition flex items-center gap-0.5">Ver imóveis &rsaquo;</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4: Capelinha -->
+        <div class="card-cidade cursor-pointer group relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition duration-500 min-h-[340px] flex flex-col justify-end p-5 text-white" data-cidade="Capelinha">
+          <div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition duration-700" style="background-image: url('../imagem/capelinha.png');"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/30"></div>
+
+          <div class="relative z-10 space-y-1.5 pt-12">
+            <span class="text-[10px] font-extrabold uppercase tracking-widest text-emerald-400 block">ALTO VALE</span>
+            <h3 class="text-2xl font-bold tracking-tight">Capelinha</h3>
+            <p class="text-xs text-stone-300 leading-snug line-clamp-2">
+              Apartamentos modernos e chácaras com o clima ameno e cafeeiro da serra mineira.
+            </p>
+            <div class="pt-3 border-t border-white/20 flex justify-end items-center text-xs font-bold">
+              <span class="text-emerald-400 group-hover:translate-x-1 transition flex items-center gap-0.5">Ver imóveis &rsaquo;</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 5: Pedra Azul -->
+        <div class="card-cidade cursor-pointer group relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition duration-500 min-h-[340px] flex flex-col justify-end p-5 text-white" data-cidade="Pedra Azul">
+          <div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition duration-700" style="background-image: url('../imagem/pedra%20azul.png');"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/30"></div>
+
+          <div class="relative z-10 space-y-1.5 pt-12">
+            <span class="text-[10px] font-extrabold uppercase tracking-widest text-amber-400 block">MÉDIO VALE</span>
+            <h3 class="text-2xl font-bold tracking-tight">Pedra Azul</h3>
+            <p class="text-xs text-stone-300 leading-snug line-clamp-2">
+              Imóveis com vista para os maciços rochosos, centro acolhedor e tranquilidade.
+            </p>
+            <div class="pt-3 border-t border-white/20 flex justify-end items-center text-xs font-bold">
+              <span class="text-emerald-400 group-hover:translate-x-1 transition flex items-center gap-0.5">Ver imóveis &rsaquo;</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 6: Minas Novas -->
+        <div class="card-cidade cursor-pointer group relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition duration-500 min-h-[340px] flex flex-col justify-end p-5 text-white" data-cidade="Minas Novas">
+          <div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition duration-700" style="background-image: url('../imagem/minas%20novas.png');"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/30"></div>
+
+          <div class="relative z-10 space-y-1.5 pt-12">
+            <span class="text-[10px] font-extrabold uppercase tracking-widest text-amber-400 block">TRADIÇÃO & BARRO</span>
+            <h3 class="text-2xl font-bold tracking-tight">Minas Novas</h3>
+            <p class="text-xs text-stone-300 leading-snug line-clamp-2">
+              História viva das mestras do barro, ruas de pedra e casarios acolhedores.
+            </p>
+            <div class="pt-3 border-t border-white/20 flex justify-end items-center text-xs font-bold">
+              <span class="text-emerald-400 group-hover:translate-x-1 transition flex items-center gap-0.5">Ver imóveis &rsaquo;</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SEÇÃO: POR QUE O VALE MORAR É DIFERENTE? -->
+    <section id="diferenciais" class="py-16 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto">
+      
+      <!-- Cabeçalho -->
+      <div class="text-center max-w-3xl mx-auto space-y-2 mb-12">
+        <span class="text-xs font-extrabold uppercase tracking-widest text-brand-gold block">
+          TECNOLOGIA COM ALMA MINEIRA
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-serif font-semibold text-brand-textPrimary">
+          Por Que o Vale Morar é Diferente?
+        </h2>
+        <p class="text-xs sm:text-sm text-brand-textSecondary leading-relaxed pt-1 max-w-2xl mx-auto">
+          Plataformas convencionais não entendem as dinâmicas do Jequitinhonha. Nós nascemos aqui para transformar o aluguel em uma experiência segura, ágil e respeitosa.
+        </p>
+      </div>
+
+      <!-- Grid de 4 Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+        <!-- Card 1: Conhecimento Raiz -->
+        <div class="bg-[#f7f4ed] border border-[#eae3d5] rounded-3xl p-6 flex flex-col justify-between hover:shadow-md transition duration-300">
+          <div class="space-y-4">
+            <div class="w-10 h-10 rounded-xl bg-emerald-100/80 text-emerald-800 flex items-center justify-center">
+              <span class="material-symbols-outlined text-xl">forest</span>
+            </div>
+            <h3 class="text-lg font-bold text-stone-800">Conhecimento Raiz</h3>
+            <p class="text-xs text-stone-600 leading-relaxed">
+              Conhecemos cada rua, altitude de serra, proximidade dos campi universitários e particularidades hídricas das cidades do Vale.
+            </p>
+          </div>
+          <div class="pt-6 border-t border-stone-200/70 mt-6 text-xs font-bold text-emerald-700">
+            Presença de ponta a ponta
+          </div>
+        </div>
+
+        <!-- Card 2: Burocracia Zero -->
+        <div class="bg-[#f7f4ed] border border-[#eae3d5] rounded-3xl p-6 flex flex-col justify-between hover:shadow-md transition duration-300">
+          <div class="space-y-4">
+            <div class="w-10 h-10 rounded-xl bg-amber-100/80 text-amber-800 flex items-center justify-center">
+              <span class="material-symbols-outlined text-xl">task_alt</span>
+            </div>
+            <h3 class="text-lg font-bold text-stone-800">Burocracia Zero</h3>
+            <p class="text-xs text-stone-600 leading-relaxed">
+              Sem necessidade de pedir favores a parentes. Aceitamos garantia caução, cartão de crédito facilitado e seguro fiança regional sem complicações.
+            </p>
+          </div>
+          <div class="pt-6 border-t border-stone-200/70 mt-6 text-xs font-bold text-amber-800">
+            Análise cadastral em 15 min
+          </div>
+        </div>
+
+        <!-- Card 3: Suporte Humanizado -->
+        <div class="bg-[#f7f4ed] border border-[#eae3d5] rounded-3xl p-6 flex flex-col justify-between hover:shadow-md transition duration-300">
+          <div class="space-y-4">
+            <div class="w-10 h-10 rounded-xl bg-emerald-100/80 text-emerald-800 flex items-center justify-center">
+              <span class="material-symbols-outlined text-xl">chat</span>
+            </div>
+            <h3 class="text-lg font-bold text-stone-800">Suporte Humanizado</h3>
+            <p class="text-xs text-stone-600 leading-relaxed">
+              Atendimento acolhedor pelo WhatsApp ou em pontos de apoio com corretores de verdade que conhecem e valorizam nossa gente.
+            </p>
+          </div>
+          <div class="pt-6 border-t border-stone-200/70 mt-6 text-xs font-bold text-emerald-700">
+            Atendimento em bom mineirês
+          </div>
+        </div>
+
+        <!-- Card 4: Vistoria Fotográfica -->
+        <div class="bg-[#f7f4ed] border border-[#eae3d5] rounded-3xl p-6 flex flex-col justify-between hover:shadow-md transition duration-300">
+          <div class="space-y-4">
+            <div class="w-10 h-10 rounded-xl bg-amber-100/80 text-amber-800 flex items-center justify-center">
+              <span class="material-symbols-outlined text-xl">center_focus_strong</span>
+            </div>
+            <h3 class="text-lg font-bold text-stone-800">Vistoria Fotográfica</h3>
+            <p class="text-xs text-stone-600 leading-relaxed">
+              Laudo detalhado de entrada e saída com mais de 50 fotos em alta definição. Transparência total que protege locador e inquilino.
+            </p>
+          </div>
+          <div class="pt-6 border-t border-stone-200/70 mt-6 text-xs font-bold text-amber-800">
+            Segurança jurídica comprovada
+          </div>
+        </div>
+
+      </div>
+    </section>
+
     <!-- VITRINE DE IMÓVEIS -->
     <section class="py-12 bg-white border-y border-[#dfd7c8]">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-textPrimary mb-6">Imóveis Recém-Catalogados</h2>
+        <div class="flex justify-between items-end mb-6">
+          <div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-textPrimary">Imóveis Disponíveis</h2>
+            <p class="text-xs text-stone-500 font-medium">Resultados filtrados com base no seu endereço e termos de busca.</p>
+          </div>
+          <span id="total-resultados" class="text-xs font-bold bg-brand-cream border border-[#dfd7c8] text-brand-brown px-3 py-1 rounded-full">
+            Carregando...
+          </span>
+        </div>
         
         <!-- Container onde os imóveis do backend serão renderizados -->
         <div id="vitrine-imoveis" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <p class="text-brand-textSecondary text-sm col-span-full">Carregando imóveis...</p>
+          <p class="text-brand-textSecondary text-sm col-span-full text-center py-10">Carregando imóveis do Vale...</p>
         </div>
       </div>
     </section>
