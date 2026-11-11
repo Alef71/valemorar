@@ -11,13 +11,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-// Expõe apenas a localização pública do imóvel (cidade/bairro/UF), nunca logradouro ou número
+// Expõe a descrição e apenas a localização pública do imóvel (cidade/bairro/UF).
 public record AnuncioResponseDTO(
         UUID id,
         UUID imovelId,
         UUID enderecoId,
         UUID anuncianteId,
         String titulo,
+        String descricao,
         String tipoImovel,
         Integer quartos,
         String cidade,
@@ -48,6 +49,7 @@ public record AnuncioResponseDTO(
                 imovel != null ? imovel.getEnderecoId() : null,
                 anuncio.getAnuncianteId(),
                 imovel != null ? imovel.getTitulo() : null,
+                imovel != null ? imovel.getDescricao() : null,
                 imovel != null ? imovel.getTipoImovel() : null,
                 imovel != null ? imovel.getQuartos() : null,
                 endereco != null ? endereco.getCidade() : null,
