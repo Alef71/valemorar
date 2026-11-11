@@ -6,6 +6,5 @@ import java.util.UUID;
 
 public record LocatarioCreateDTO(
 
-                // Opcional: o cadastro é sempre do usuário autenticado; apenas administradores podem informar outro usuário
-                UUID usuarioId) {
+                @NotNull(message = "O ID do usuário é obrigatório") UUID usuarioId) {
 }

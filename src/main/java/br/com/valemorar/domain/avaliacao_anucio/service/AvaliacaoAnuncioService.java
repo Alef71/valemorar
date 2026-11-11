@@ -4,7 +4,6 @@ import br.com.valemorar.domain.avaliacao_anucio.AvaliacaoAnuncio;
 import br.com.valemorar.domain.avaliacao_anucio.dto.AvaliacaoAnuncioCreateDTO;
 import br.com.valemorar.domain.avaliacao_anucio.dto.AvaliacaoAnuncioResponseDTO;
 import br.com.valemorar.domain.avaliacao_anucio.repository.AvaliacaoAnuncioRepository;
-import br.com.valemorar.infra.SecurityUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +24,7 @@ public class AvaliacaoAnuncioService {
     public AvaliacaoAnuncioResponseDTO criar(AvaliacaoAnuncioCreateDTO dto) {
         AvaliacaoAnuncio avaliacao = new AvaliacaoAnuncio();
         avaliacao.setAnuncioId(dto.anuncioId());
-        avaliacao.setUsuarioId(SecurityUtils.resolverDono(dto.usuarioId()));
+        avaliacao.setUsuarioId(dto.usuarioId());
         avaliacao.setNota(dto.nota());
         avaliacao.setComentario(dto.comentario());
         avaliacao.setCriadoEm(LocalDateTime.now());
@@ -45,7 +44,7 @@ public class AvaliacaoAnuncioService {
     @Transactional(readOnly = true)
     public AvaliacaoAnuncioResponseDTO buscarPorId(UUID id) {
         AvaliacaoAnuncio avaliacao = repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Avaliação não encontrada"));
+                .orElseThrow(() -> new RuntimeException("Avaliação não encontrada"));
         return AvaliacaoAnuncioResponseDTO.fromEntity(avaliacao);
     }
 
@@ -60,8 +59,7 @@ public class AvaliacaoAnuncioService {
     @Transactional
     public AvaliacaoAnuncioResponseDTO atualizar(UUID id, AvaliacaoAnuncioCreateDTO dto) {
         AvaliacaoAnuncio avaliacao = repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Avaliação não encontrada"));
-        SecurityUtils.exigirDonoOuAdmin(avaliacao.getUsuarioId());
+                .orElseThrow(() -> new RuntimeException("Avaliação não encontrada"));
 
         avaliacao.setNota(dto.nota());
         avaliacao.setComentario(dto.comentario());
@@ -72,9 +70,9 @@ public class AvaliacaoAnuncioService {
 
     @Transactional
     public void deletar(UUID id) {
-        AvaliacaoAnuncio avaliacao = repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Avaliação não encontrada"));
-        SecurityUtils.exigirDonoOuAdmin(avaliacao.getUsuarioId());
-        repository.delete(avaliacao);
+        if (!repository.existsById(id)) {
+            throw new RuntimeException("Avaliação não encontrada");
+        }
+        repository.deleteById(id);
     }
 }

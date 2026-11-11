@@ -1,16 +1,10 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const container = document.getElementById('user-header-actions');
     const headerCityElem = document.getElementById('header-user-city');
-    const API_BASE_URL = window.API_BASE_URL || (
-        ['localhost', '127.0.0.1'].includes(window.location.hostname)
-            ? 'http://localhost:8080'
-            : window.location.origin
-    );
-    
     // Função para sanitizar HTML (Evita XSS)
     function escaparHTML(texto) {
         if (!texto) return '';
-        return texto.toString().replace(/[&<>'"]/g, function(tag) {
+        return texto.toString().replace(/[&<>'"]/g, (tag) => {
             const caracteres = {
                 '&': '&amp;',
                 '<': '&lt;',
@@ -31,7 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Erro ao ler dados do usuário no localStorage:', e);
     }
 
-    // 2. RENDERIZA A BARRA COM BASE NO USUÁRIO LOGADO
+    // 2. RENDERIZA OS BOTÕES E ÁREA DO USUÁRIO NO HEADER
     if (container) {
         if (usuario && (usuario.nome || usuario.email)) {
             const nomeExibicao = usuario.nome || usuario.email.split('@')[0];
@@ -41,16 +35,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             const inicialSegura = escaparHTML(inicial);
 
             container.innerHTML = `
-                <a href="/painel?acao=anunciar" class="bg-brand-green text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1 hover:bg-brand-greenSoft transition">
-                    <span class="material-symbols-outlined text-base">add_home</span> Anunciar
+                <a href="painel.html" class="bg-brand-green hover:bg-opacity-90 text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 transition shadow-xs">
+                    <span class="material-symbols-outlined text-base">home_work</span> Anunciar Imóvel
                 </a>
 
-                <a href="/painel" class="flex items-center gap-2 pl-3 border-l border-[#dfd9cc] hover:opacity-80 transition">
+                <a href="painel.html" class="flex items-center gap-2 pl-3 border-l border-[#dfd9cc] hover:opacity-80 transition">
                     <div class="w-8 h-8 rounded-full bg-brand-green text-white flex items-center justify-center font-bold text-xs shadow-xs">
                         ${inicialSegura}
                     </div>
                     <div class="text-left text-xs leading-tight hidden sm:block">
-                        <span class="font-bold text-brand-textPrimary block">${nomeSeguro}</span>
+                        <span class="font-bold text-stone-800 block">${nomeSeguro}</span>
                         <span class="text-brand-green font-semibold text-[10px]">Meu Painel</span>
                     </div>
                 </a>
@@ -60,51 +54,73 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </button>
             `;
 
-            // Evento de Logout
             document.getElementById('btn-header-logout')?.addEventListener('click', () => {
                 localStorage.removeItem('usuario');
                 localStorage.removeItem('token');
-                window.location.href = '/';
+                window.location.href = 'index.html';
             });
         } else {
-            // USUÁRIO DESLOGADO
+            // Visitante Deslogado
             container.innerHTML = `
-                <a href="/entrar" class="text-brand-textSecondary hover:text-brand-green text-xs font-semibold px-3 py-2 transition">
+                <a href="auth.html" class="bg-brand-green hover:bg-opacity-90 text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 transition shadow-xs">
+                    <span class="material-symbols-outlined text-base">home_work</span> Anunciar Imóvel
+                </a>
+                <a href="auth.html" class="text-stone-600 hover:text-brand-green text-xs font-semibold px-2 py-1.5 transition">
                     Entrar
                 </a>
-                <a href="/entrar?modo=cadastro" class="bg-brand-gold text-white text-xs font-bold px-3.5 py-2 rounded-lg shadow-xs hover:bg-brand-earthLight transition">
+                <a href="auth.html?modo=cadastro" class="bg-brand-gold hover:bg-opacity-90 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition">
                     Criar Conta
                 </a>
             `;
         }
     }
 
-    // 3. ATUALIZA A CIDADE NO CABEÇALHO (ENDEREÇO ESPECÍFICO DO USUÁRIO)
+    // 3. RENDERIZA O BLOCO DA CIDADE NO HEADER
     function atualizarCidadeHeader(cidade, estado) {
-        if (headerCityElem && cidade) {
-            headerCityElem.innerText = `${cidade.toUpperCase()} • ${estado ? estado.toUpperCase() : 'MG'}`;
-        }
+        if (!headerCityElem) return;
+
+        const cidadeFormatada = cidade ? cidade.toUpperCase() : '';
+        const estadoFormatado = estado ? estado.toUpperCase() : '';
+
+        headerCityElem.innerHTML = `
+            <span class="text-[11px] font-bold text-brand-green tracking-wider uppercase leading-tight block">
+                ${escaparHTML(cidadeFormatada)} • ${escaparHTML(estadoFormatado)}
+            </span>
+            <span class="text-[10px] text-stone-500 font-medium normal-case leading-tight block">
+                Aluguel & Moradia
+            </span>
+        `;
     }
 
-    if (usuario?.cidade) {
-        atualizarCidadeHeader(usuario.cidade, usuario.estado);
-    } else if (usuario && usuario.id && localStorage.getItem('token')) {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`${API_BASE_URL}/api/enderecos/me`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (response.status === 200) {
-                const endereco = await response.json();
-                if (endereco && endereco.cidade) {
-                    atualizarCidadeHeader(endereco.cidade, endereco.estado);
-                    usuario.cidade = endereco.cidade;
-                    usuario.estado = endereco.estado;
-                    localStorage.setItem('usuario', JSON.stringify(usuario));
-                }
-            }
-        } catch (err) {
-            // Falha tratada para não quebrar a interface
+    // 4. CARREGA A CIDADE A PARTIR DO ENDEREÇO DO USUÁRIO
+    async function carregarCidadeEndereco() {
+        if (!usuario || !usuario.id) {
+            atualizarCidadeHeader('JEQUITINHONHA', 'MG');
+            return;
         }
+
+        // A) Tenta ler do cache de endereço gerado pelo Painel
+        const cacheEndereco = localStorage.getItem(`enderecoUsuario_${usuario.id}`);
+        if (cacheEndereco) {
+            try {
+                const end = JSON.parse(cacheEndereco);
+                if (end && end.cidade) {
+                    atualizarCidadeHeader(end.cidade, end.estado);
+                    return;
+                }
+            } catch (e) {
+                console.warn('Erro ao ler cache de endereço no header:', e);
+            }
+        }
+
+        // B) Tenta do perfil salvo no localStorage
+        if (usuario.cidade) {
+            atualizarCidadeHeader(usuario.cidade, usuario.estado);
+            return;
+        }
+
+        atualizarCidadeHeader('VALE DO JEQUITINHONHA', 'MG');
     }
+
+    carregarCidadeEndereco();
 });

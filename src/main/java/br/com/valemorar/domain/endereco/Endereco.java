@@ -8,8 +8,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,14 +25,6 @@ public class Endereco {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    // Dono do endereço; nulo apenas em registros legados sem imóvel vinculado
-    @Column(name = "usuario_id")
-    private UUID usuarioId;
-
-    // true = endereço pessoal do perfil; false = endereço de imóvel
-    @Column(nullable = false)
-    private boolean pessoal;
-
     @Column(nullable = false)
     private String logradouro;
 
@@ -48,8 +38,7 @@ public class Endereco {
     @Column(nullable = false)
     private String estado;
 
-    @JdbcTypeCode(SqlTypes.CHAR)
-    @Column(length = 8)
+    @Column(columnDefinition = "CHAR(8)")
     private String cep;
 
     private Double latitude;

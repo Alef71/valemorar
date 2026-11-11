@@ -1,24 +1,26 @@
-<header class="app-header-sticky px-4 sm:px-6 lg:px-12 py-3.5 border-b border-[#ece7dc] bg-white/80 backdrop-blur-md sticky top-0 z-50">
+<header class="app-header-sticky px-4 sm:px-6 lg:px-12 py-3 border-b border-[#ece7dc] bg-white/90 backdrop-blur-md sticky top-0 z-50">
   <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
     
-    <!-- Logo com Imagem + Cidade Dinâmica (CORRIGIDO PARA index.html) -->
-    <a href="/" class="brand-logo-link flex items-center gap-3 group focus:outline-none">
-      <img src="/imagem/vale%20morar.jpeg" alt="Vale Morar" class="h-10 w-auto object-contain rounded-md">
+    <!-- Logo + Cidade Dinâmica (Foto 2) -->
+    <a href="index.html" class="brand-logo-link flex items-center gap-3 group focus:outline-none">
+      <img src="../imagem/vale%20morar.jpeg" alt="Vale Morar" class="h-10 w-auto object-contain rounded-md">
       
-      <div id="header-user-city" class="hidden xl:flex items-center pl-3 border-l border-[#dfd9cc] text-[11px] font-bold tracking-widest text-brand-textSecondary uppercase">
-        <!-- Preenchido via JS -->
+      <!-- Container em 2 linhas da Cidade -->
+      <div id="header-user-city" class="hidden md:flex flex-col justify-center pl-3 border-l border-[#dfd9cc]">
+        <!-- Preenchido via JS (ex: JEQUITINHONHA • MG / Aluguel & Moradia) -->
       </div>
     </a>
 
-    <!-- Links do Menu (CORRIGIDO PARA index.html#cidades) -->
-    <nav class="hidden lg:flex items-center gap-6 text-sm font-medium text-brand-textSecondary">
-      <a href="/#cidades" class="nav-link text-brand-green font-bold border-b-2 border-brand-green pb-0.5">Explorar Cidades</a>
-      <a href="/imoveis?tipoImovel=RESIDENCIAL" class="nav-link hover:text-brand-green">Aluguel Residencial</a>
-      <a href="/imoveis?tipoImovel=COMERCIAL" class="nav-link hover:text-brand-green">Aluguel Comercial</a>
-      <a href="/imoveis?tipoImovel=CHACARA" class="nav-link hover:text-brand-green">Sítios & Chácaras</a>
+    <!-- Links do Menu Nav -->
+    <nav class="hidden lg:flex items-center gap-6 text-xs font-medium text-stone-600">
+      <a href="index.html#cidades" class="nav-link text-brand-green font-bold border-b-2 border-brand-green pb-0.5">Explorar Cidades</a>
+      <a href="index.html#form-busca-vitrine" class="nav-link hover:text-brand-green transition">Aluguel Residencial</a>
+      <a href="index.html#form-busca-vitrine" class="nav-link hover:text-brand-green transition">Aluguel Comercial</a>
+      <a href="index.html#form-busca-vitrine" class="nav-link hover:text-brand-green transition">Sítios & Chácaras</a>
+      <a href="#como-funciona" class="nav-link hover:text-brand-green transition">Como Funciona</a>
     </nav>
 
-    <!-- Área Dinâmica do Usuário -->
+    <!-- Área Dinâmica do Usuário / Botões de Ação -->
     <div id="user-header-actions" class="flex items-center gap-3">
       <!-- Conteúdo inserido dinamicamente via JS -->
     </div>

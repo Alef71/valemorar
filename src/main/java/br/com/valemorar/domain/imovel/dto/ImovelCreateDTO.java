@@ -12,8 +12,7 @@ import java.util.UUID;
 
 public record ImovelCreateDTO(
 
-        // Opcional: o dono é o usuário autenticado; apenas administradores podem informar outro locador
-        UUID locadorId,
+        @NotNull(message = "O ID do locador é obrigatório") UUID locadorId,
 
         @NotNull(message = "O ID do endereço é obrigatório") UUID enderecoId,
 

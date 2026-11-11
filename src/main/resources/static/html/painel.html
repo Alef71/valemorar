@@ -43,24 +43,24 @@
     </script>
 
     <!-- Estilos Externos -->
-    <link rel="stylesheet" href="/css/header.css">
-    <link rel="stylesheet" href="/css/painel.css">
+    <link rel="stylesheet" href="../css/header.css">
+    <link rel="stylesheet" href="../css/painel.css">
 </head>
 <body class="bg-brand-cream text-brand-textPrimary font-sans antialiased flex flex-col min-h-screen">
 
     <!-- HEADER DINÂMICO -->
     <header class="app-header-sticky px-4 sm:px-6 lg:px-12 py-3.5 border-b border-[#dfd7c8] bg-white/90 backdrop-blur-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
-            <a href="/" class="brand-logo-link flex items-center gap-3 group focus:outline-none">
-                <img src="/imagem/vale%20morar.jpeg" alt="Vale Morar" class="h-10 w-auto object-contain rounded-md">
+            <a href="index.html" class="brand-logo-link flex items-center gap-3 group focus:outline-none">
+                <img src="../imagem/vale%20morar.jpeg" alt="Vale Morar" class="h-10 w-auto object-contain rounded-md">
                 <div id="header-user-city" class="hidden xl:flex items-center pl-3 border-l border-[#dfd9cc] text-[11px] font-bold tracking-widest text-brand-textSecondary uppercase">
                     <!-- Preenchido via JS -->
                 </div>
             </a>
             
             <nav class="nav-links flex items-center gap-4 text-sm font-medium">
-                <a href="/" class="hover:text-brand-green">Home</a>
-                <a href="/painel" class="text-brand-green font-bold">Meu Painel</a>
+                <a href="index.html" class="hover:text-brand-green">Home</a>
+                <a href="painel.html" class="text-brand-green font-bold">Meu Painel</a>
                 <button id="btn-logout" class="btn-logout bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-700 transition">Sair</button>
             </nav>
         </div>
@@ -72,7 +72,7 @@
         <!-- CARD DE PERFIL -->
         <aside class="profile-card bg-white p-6 rounded-2xl border border-[#dfd7c8] shadow-sm flex flex-col items-center text-center h-fit">
             <div class="avatar-wrapper mb-4">
-                <img id="user-avatar" src="" alt="Foto de Perfil" class="w-28 h-28 rounded-full object-cover border-2 border-brand-gold">
+                <img id="user-avatar" src="https://via.placeholder.com/120" alt="Foto de Perfil" class="w-28 h-28 rounded-full object-cover border-2 border-brand-gold">
             </div>
             <h3 id="user-name" class="text-lg font-bold text-brand-textPrimary">Carregando...</h3>
             <p id="user-email" class="user-email text-xs text-brand-textSecondary mb-2">...</p>
@@ -94,6 +94,7 @@
             <!-- CARD DE ENDEREÇO CADASTRADO DO PERFIL -->
             <div class="content-box bg-white p-6 rounded-2xl border border-[#dfd7c8] shadow-sm">
                 <h3 class="text-lg font-bold text-brand-textPrimary mb-3">Meu Endereço Pessoal</h3>
+                <p class="text-xs text-brand-textSecondary mb-3">Este endereço fica salvo apenas neste navegador e não é enviado ao servidor.</p>
                 <div id="endereco-info-container">
                     <p class="empty-message text-sm text-brand-textSecondary">Nenhum endereço cadastrado no momento.</p>
                 </div>
@@ -129,7 +130,7 @@
 
     </main>
 
-    <!-- MODAL: EDITAR PERFIL -->
+    <!-- MODAL 1: EDITAR PERFIL -->
     <div class="modal-overlay hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" id="modal-perfil">
         <div class="modal-card bg-white rounded-2xl max-w-md w-full p-6 border border-[#dfd7c8] shadow-2xl">
             <div class="modal-header flex justify-between items-center mb-4">
@@ -141,21 +142,9 @@
                     <label for="edit-nome" class="block text-xs font-bold text-brand-textSecondary mb-1">Nome Completo</label>
                     <input type="text" id="edit-nome" required class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm focus:outline-none focus:border-brand-green">
                 </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="form-group">
-                        <label for="edit-telefone" class="block text-xs font-bold text-brand-textSecondary mb-1">Telefone</label>
-                        <input type="tel" id="edit-telefone" maxlength="20" placeholder="(33) 99999-9999" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm focus:outline-none focus:border-brand-green">
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-whatsapp" class="block text-xs font-bold text-brand-textSecondary mb-1">WhatsApp</label>
-                        <input type="tel" id="edit-whatsapp" maxlength="20" placeholder="(33) 99999-9999" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm focus:outline-none focus:border-brand-green">
-                    </div>
-                </div>
-                <p class="text-[11px] text-brand-textSecondary -mt-2">Exibidos apenas para usuários logados que visualizarem seus anúncios.</p>
                 <div class="form-group">
                     <label for="edit-foto-file" class="block text-xs font-bold text-brand-textSecondary mb-1">Foto de Perfil</label>
-                    <input type="file" id="edit-foto-file" accept="image/jpeg,image/png,image/webp" class="w-full text-xs">
-                    <p class="text-[11px] text-brand-textSecondary mt-1">JPG, PNG ou WEBP, até 5MB.</p>
+                    <input type="file" id="edit-foto-file" accept="image/*" class="w-full text-xs">
                 </div>
                 <div class="avatar-preview-container text-center mt-2">
                     <img id="edit-foto-preview" src="" alt="Prévia da Foto" class="w-24 h-24 rounded-full mx-auto hidden object-cover border border-[#dcd6c9]">
@@ -168,13 +157,14 @@
         </div>
     </div>
 
-    <!-- MODAL: CADASTRAR / EDITAR ENDEREÇO DA CONTA -->
+    <!-- MODAL 2: CADASTRAR / EDITAR ENDEREÇO DA CONTA -->
     <div class="modal-overlay hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" id="modal-endereco">
         <div class="modal-card bg-white rounded-2xl max-w-lg w-full p-6 border border-[#dfd7c8] shadow-2xl">
             <div class="modal-header flex justify-between items-center mb-4">
-                <h3 id="modal-endereco-titulo" class="text-lg font-bold text-brand-textPrimary">Cadastrar Endereço</h3>
+                <h3 id="modal-endereco-titulo" class="text-lg font-bold text-brand-textPrimary">Endereço do Perfil</h3>
                 <button class="btn-close text-xl font-bold text-brand-textSecondary" id="btn-fechar-modal-endereco">&times;</button>
             </div>
+            <p class="text-xs text-brand-textSecondary mb-4">O endereço será salvo apenas neste navegador. Ele não será associado à sua conta no servidor.</p>
             <form id="form-endereco" class="space-y-4">
                 <div class="form-row grid grid-cols-3 gap-3">
                     <div class="form-group col-span-1">
@@ -203,11 +193,13 @@
                     </div>
                     <div class="form-group col-span-2">
                         <label for="end-cidade" class="block text-xs font-bold text-brand-textSecondary mb-1">Cidade</label>
-                        <input type="text" id="end-cidade" required class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                        <select id="end-cidade" required class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                            <option value="">Selecione uma Cidade do Vale</option>
+                        </select>
                     </div>
                     <div class="form-group col-span-1">
                         <label for="end-estado" class="block text-xs font-bold text-brand-textSecondary mb-1">UF</label>
-                        <input type="text" id="end-estado" maxlength="2" placeholder="MG" required class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                        <input type="text" id="end-estado" maxlength="2" placeholder="MG" required class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm uppercase">
                     </div>
                 </div>
                 <div class="modal-footer flex justify-end gap-2 pt-4">
@@ -218,21 +210,33 @@
         </div>
     </div>
 
-    <!-- MODAL: CADASTRAR / EDITAR ANÚNCIO -->
+    <!-- MODAL 3: CADASTRAR / EDITAR ANÚNCIO -->
     <div class="modal-overlay hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto" id="modal-anuncio">
         <div class="modal-card bg-white rounded-2xl max-w-2xl w-full p-6 border border-[#dfd7c8] shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="modal-header flex justify-between items-center mb-4">
                 <h3 id="modal-anuncio-titulo" class="text-lg font-bold text-brand-textPrimary">Criar Anúncio</h3>
                 <button class="btn-close text-xl font-bold text-brand-textSecondary" id="btn-fechar-modal-anuncio">&times;</button>
             </div>
+
             <form id="form-anuncio" class="space-y-4">
                 <!-- CAMPOS OCULTOS -->
                 <input type="hidden" id="anuncio-id">
                 <input type="hidden" id="anuncio-imovel-id">
+                <input type="hidden" id="anuncio-endereco-id">
 
                 <!-- 1. DADOS DO IMÓVEL & VALORES -->
-                <h4 class="text-sm font-bold text-brand-green border-b border-[#dfd7c8] pb-1">1. Informações do Anúncio</h4>
-                <div class="form-row grid grid-cols-3 gap-3">
+                <h4 class="text-xs font-bold text-brand-green uppercase tracking-wider border-b border-[#dfd7c8] pb-1">1. Negócio & Categoria</h4>
+                <div class="form-row grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="form-group">
+                        <label for="anuncio-titulo" class="block text-xs font-bold text-brand-textSecondary mb-1">Título do imóvel</label>
+                        <input type="text" id="anuncio-titulo" maxlength="150" required placeholder="Ex: Casa próxima ao centro" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                    </div>
+                    <div class="form-group">
+                        <label for="anuncio-descricao" class="block text-xs font-bold text-brand-textSecondary mb-1">Descrição</label>
+                        <textarea id="anuncio-descricao" maxlength="2000" rows="2" placeholder="Descreva o imóvel" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm"></textarea>
+                    </div>
+                </div>
+                <div class="form-row grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div class="form-group">
                         <label for="anuncio-modalidade" class="block text-xs font-bold text-brand-textSecondary mb-1">Modalidade</label>
                         <select id="anuncio-modalidade" required class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
@@ -241,118 +245,145 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="anuncio-tipo-imovel" class="block text-xs font-bold text-brand-textSecondary mb-1">Tipo de Imóvel</label>
+                        <label for="anuncio-tipo-imovel" class="block text-xs font-bold text-brand-textSecondary mb-1">Tipo do Imóvel</label>
                         <select id="anuncio-tipo-imovel" required class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
                             <option value="RESIDENCIAL">Residencial</option>
                             <option value="APARTAMENTO">Apartamento</option>
                             <option value="CASA">Casa</option>
                             <option value="COMERCIAL">Comercial</option>
-                            <option value="CHACARA">Chácara</option>
+                            <option value="TERRENO">Terreno</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="anuncio-quartos" class="block text-xs font-bold text-brand-textSecondary mb-1">Quartos</label>
-                        <input type="number" id="anuncio-quartos" min="0" value="1" required class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                        <label for="anuncio-valor" class="block text-xs font-bold text-brand-textSecondary mb-1">Valor Principal (R$)</label>
+                        <input type="number" step="0.01" id="anuncio-valor" placeholder="1200.00" required class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
                     </div>
                 </div>
 
-                <div class="form-row grid grid-cols-3 gap-3">
-                    <div class="form-group">
-                        <label for="anuncio-valor" class="block text-xs font-bold text-brand-textSecondary mb-1">Valor do Imóvel (R$)</label>
-                        <input type="number" step="0.01" id="anuncio-valor" min="0.01" placeholder="0.00" required class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
-                    </div>
+                <div class="form-row grid grid-cols-2 gap-3">
                     <div class="form-group">
                         <label for="anuncio-condominio" class="block text-xs font-bold text-brand-textSecondary mb-1">Condomínio (R$)</label>
-                        <input type="number" step="0.01" id="anuncio-condominio" min="0" value="0.00" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                        <input type="number" step="0.01" id="anuncio-condominio" value="0" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
                     </div>
                     <div class="form-group">
                         <label for="anuncio-iptu" class="block text-xs font-bold text-brand-textSecondary mb-1">IPTU (R$)</label>
-                        <input type="number" step="0.01" id="anuncio-iptu" min="0" value="0.00" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                        <input type="number" step="0.01" id="anuncio-iptu" value="0" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
                     </div>
                 </div>
 
                 <!-- 2. ENDEREÇO DO IMÓVEL -->
-                <h4 class="text-sm font-bold text-brand-green border-b border-[#dfd7c8] pb-1 pt-2">2. Endereço do Imóvel</h4>
+                <h4 class="text-xs font-bold text-brand-green uppercase tracking-wider border-b border-[#dfd7c8] pb-1 pt-2">2. Localização do Imóvel</h4>
                 <div class="form-row grid grid-cols-3 gap-3">
                     <div class="form-group col-span-1">
                         <label for="anuncio-cep" class="block text-xs font-bold text-brand-textSecondary mb-1">CEP</label>
-                        <input type="text" id="anuncio-cep" required placeholder="00000-000" maxlength="9" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                        <input type="text" id="anuncio-cep" placeholder="35160-000" maxlength="9" pattern="[0-9]{5}-?[0-9]{3}" required class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
                     </div>
                     <div class="form-group col-span-2">
-                        <label for="anuncio-logradouro" class="block text-xs font-bold text-brand-textSecondary mb-1">Logradouro / Rua</label>
-                        <input type="text" id="anuncio-logradouro" required placeholder="Rua / Avenida" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                        <label for="anuncio-logradouro" class="block text-xs font-bold text-brand-textSecondary mb-1">Rua / Logradouro</label>
+                        <input type="text" id="anuncio-logradouro" placeholder="Ex: Av. Castelo Branco" maxlength="255" required class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                    </div>
+                </div>
+                <div class="form-row grid grid-cols-5 gap-3">
+                    <div class="form-group col-span-1">
+                        <label for="anuncio-numero" class="block text-xs font-bold text-brand-textSecondary mb-1">Número</label>
+                        <input type="text" id="anuncio-numero" placeholder="100" maxlength="20" required class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                    </div>
+                    <div class="form-group col-span-2">
+                        <label for="anuncio-complemento" class="block text-xs font-bold text-brand-textSecondary mb-1">Complemento</label>
+                        <input type="text" id="anuncio-complemento" placeholder="Apto 201" maxlength="100" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                    </div>
+                    <div class="form-group col-span-2">
+                        <label for="anuncio-bairro" class="block text-xs font-bold text-brand-textSecondary mb-1">Bairro</label>
+                        <input type="text" id="anuncio-bairro" placeholder="Horto" maxlength="100" required class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                    </div>
+                </div>
+                <div class="form-row grid grid-cols-3 gap-3">
+                    <div class="form-group col-span-2">
+                        <label for="anuncio-cidade" class="block text-xs font-bold text-brand-textSecondary mb-1">Cidade do Vale</label>
+                        <select id="anuncio-cidade" required class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                            <option value="">Selecione uma Cidade do Vale</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-span-1">
+                        <label for="anuncio-estado" class="block text-xs font-bold text-brand-textSecondary mb-1">Estado (UF)</label>
+                        <input type="text" id="anuncio-estado" placeholder="MG" minlength="2" maxlength="2" required class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm uppercase">
+                    </div>
+                </div>
+
+                <!-- 3. DETALHES DO IMÓVEL -->
+                <h4 class="text-xs font-bold text-brand-green uppercase tracking-wider border-b border-[#dfd7c8] pb-1 pt-2">3. Características do Imóvel</h4>
+                <div class="form-row grid grid-cols-4 gap-3">
+                    <div class="form-group">
+                        <label for="anuncio-quartos" class="block text-xs font-bold text-brand-textSecondary mb-1">Quartos</label>
+                        <input type="number" id="anuncio-quartos" value="1" min="0" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                    </div>
+                    <div class="form-group">
+                        <label for="anuncio-suites" class="block text-xs font-bold text-brand-textSecondary mb-1">Suítes</label>
+                        <input type="number" id="anuncio-suites" value="0" min="0" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                    </div>
+                    <div class="form-group">
+                        <label for="anuncio-banheiros" class="block text-xs font-bold text-brand-textSecondary mb-1">Banheiros</label>
+                        <input type="number" id="anuncio-banheiros" value="1" min="0" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                    </div>
+                    <div class="form-group">
+                        <label for="anuncio-vagas" class="block text-xs font-bold text-brand-textSecondary mb-1">Vagas</label>
+                        <input type="number" id="anuncio-vagas" value="0" min="0" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
                     </div>
                 </div>
 
                 <div class="form-row grid grid-cols-3 gap-3">
-                    <div class="form-group col-span-1">
-                        <label for="anuncio-numero" class="block text-xs font-bold text-brand-textSecondary mb-1">Número</label>
-                        <input type="text" id="anuncio-numero" required placeholder="123" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                    <div class="form-group">
+                        <label for="anuncio-area-total" class="block text-xs font-bold text-brand-textSecondary mb-1">Área Total (m²)</label>
+                        <input type="number" id="anuncio-area-total" placeholder="75" min="0.1" step="0.1" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
                     </div>
-                    <div class="form-group col-span-2">
-                        <label for="anuncio-complemento" class="block text-xs font-bold text-brand-textSecondary mb-1">Complemento (Opcional)</label>
-                        <input type="text" id="anuncio-complemento" placeholder="Apto 101, Bloco B" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                    <div class="form-group">
+                        <label for="anuncio-area-construida" class="block text-xs font-bold text-brand-textSecondary mb-1">Área Útil (m²)</label>
+                        <input type="number" id="anuncio-area-construida" placeholder="60" min="0.1" step="0.1" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
                     </div>
-                </div>
-
-                <div class="form-row grid grid-cols-5 gap-3">
-                    <div class="form-group col-span-2">
-                        <label for="anuncio-bairro" class="block text-xs font-bold text-brand-textSecondary mb-1">Bairro</label>
-                        <input type="text" id="anuncio-bairro" required class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
-                    </div>
-                    <div class="form-group col-span-2">
-                        <label for="anuncio-cidade" class="block text-xs font-bold text-brand-textSecondary mb-1">Cidade</label>
-                        <select id="anuncio-cidade" required class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
-                            <option value="">Selecione a cidade</option>
-                        </select>
-                    </div>
-                    <div class="form-group col-span-1">
-                        <label for="anuncio-estado" class="block text-xs font-bold text-brand-textSecondary mb-1">UF</label>
-                        <input type="text" id="anuncio-estado" required minlength="2" maxlength="2" placeholder="MG" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                    <div class="form-group">
+                        <label for="anuncio-andar" class="block text-xs font-bold text-brand-textSecondary mb-1">Andar</label>
+                        <input type="number" id="anuncio-andar" value="0" min="0" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
                     </div>
                 </div>
 
-                <!-- TAGS -->
+                <div class="flex gap-6 py-1">
+                    <label class="flex items-center gap-2 text-xs font-bold text-brand-textSecondary cursor-pointer">
+                        <input type="checkbox" id="anuncio-mobiliado" class="rounded text-brand-gold focus:ring-0"> Mobiliado
+                    </label>
+                    <label class="flex items-center gap-2 text-xs font-bold text-brand-textSecondary cursor-pointer">
+                        <input type="checkbox" id="anuncio-aceita-pet" class="rounded text-brand-gold focus:ring-0"> Aceita Pet
+                    </label>
+                </div>
+
                 <div class="form-group">
-                    <label for="anuncio-tags" class="block text-xs font-bold text-brand-textSecondary mb-1">Tags de Proximidade (separadas por vírgula)</label>
-                    <input type="text" id="anuncio-tags" placeholder="Ex: IFNMG, UFVJM, Centro, Hospital" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                    <label for="anuncio-tags" class="block text-xs font-bold text-brand-textSecondary mb-1">Tags (separadas por vírgula)</label>
+                    <input type="text" id="anuncio-tags" placeholder="Garagem, Varanda, Elevador, Ar Condicionado" class="w-full px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
                 </div>
 
-                <!-- 3. FOTOS DO IMÓVEL -->
-                <h4 class="text-sm font-bold text-brand-green border-b border-[#dfd7c8] pb-1 pt-2">3. Fotos do Imóvel</h4>
-                <div class="form-row flex flex-col items-start gap-3">
-                    <div class="form-group flex-1">
-                        <label for="foto-arquivo-input" class="block text-xs font-bold text-brand-textSecondary mb-1">Fotos (JPG, PNG ou WEBP, até 5MB cada)</label>
-                        <input type="file" id="foto-arquivo-input" accept="image/jpeg,image/png,image/webp" multiple class="w-full text-xs">
-                    </div>
-                    <div class="form-group flex items-center gap-2 pb-2">
-                        <input type="checkbox" id="foto-capa-checkbox" class="w-4 h-4 text-brand-green">
-                        <label for="foto-capa-checkbox" class="text-xs font-bold text-brand-textSecondary cursor-pointer">Definir como Capa</label>
-                    </div>
-                    <button type="button" id="btn-add-foto" class="btn-secondary disabled:opacity-50 px-3 py-2 bg-gray-100 border border-[#dcd6c9] hover:bg-gray-200 text-xs font-bold rounded-lg mb-0.5">+ Adicionar</button>
+                <!-- 4. FOTOS DO ANÚNCIO -->
+                <h4 class="text-xs font-bold text-brand-green uppercase tracking-wider border-b border-[#dfd7c8] pb-1 pt-2">4. Fotos do Imóvel</h4>
+                <div class="form-row flex items-center gap-2">
+                    <input type="url" id="foto-url-input" maxlength="500" placeholder="Cole a URL da imagem (http...)" class="flex-1 px-3 py-2 rounded-lg border border-[#dcd6c9] bg-[#fcfbf9] text-sm">
+                    <label class="flex items-center gap-1 text-xs text-brand-textSecondary">
+                        <input type="checkbox" id="foto-capa-checkbox"> Capa
+                    </label>
+                    <button type="button" id="btn-add-foto" class="px-3 py-2 bg-brand-green text-white text-xs font-bold rounded-lg hover:bg-brand-greenSoft">Adicionar</button>
                 </div>
 
-                <!-- CONTAINER DE LISTAGEM DE FOTOS -->
-                <div id="lista-fotos-container" class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 bg-[#fcfbf9] border border-dashed border-[#dcd6c9] rounded-lg min-h-[60px]">
+                <div id="lista-fotos-container" class="grid grid-cols-4 gap-2 min-h-[80px] p-2 bg-[#fcfbf9] border border-[#dfd7c8] rounded-xl">
                     <p class="col-span-full text-center text-xs text-brand-textSecondary my-auto">Nenhuma foto adicionada ainda.</p>
                 </div>
 
                 <div class="modal-footer flex justify-end gap-2 pt-4">
                     <button type="button" class="btn-secondary px-4 py-2 bg-gray-100 hover:bg-gray-200 text-brand-textPrimary text-xs font-bold rounded-lg" id="btn-cancelar-anuncio">Cancelar</button>
-                    <button type="submit" class="btn-primary px-4 py-2 bg-brand-gold hover:bg-brand-earthLight text-white text-xs font-bold rounded-lg shadow-sm" id="btn-salvar-anuncio">Salvar Anúncio</button>
+                    <button type="submit" class="btn-primary px-4 py-2 bg-brand-gold hover:bg-brand-earthLight text-white text-xs font-bold rounded-lg shadow-sm">Salvar Anúncio</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- FOOTER -->
-    <footer class="app-footer bg-brand-cream border-t border-[#dfd7c8] py-6 text-center text-xs text-brand-textSecondary">
-        <p>&copy; 2026 ValeMorar. Todos os direitos reservados.</p>
-    </footer>
-
-    <!-- SCRIPTS -->
-    <script src="/js/cidades.js"></script>
-    <script src="/js/header.js"></script>
-    <script src="/js/painel.js"></script>
+    <!-- CARREGAMENTO DOS SCRIPTS -->
+    <script src="../js/painel.js"></script>
+    <script src="../js/anuncio.js"></script>
 </body>
 </html>

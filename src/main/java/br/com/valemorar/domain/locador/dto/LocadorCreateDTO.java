@@ -8,8 +8,7 @@ import java.util.UUID;
 
 public record LocadorCreateDTO(
 
-                // Opcional: o cadastro é sempre do usuário autenticado; apenas administradores podem informar outro usuário
-                UUID usuarioId,
+                @NotNull(message = "O ID do usuário é obrigatório") UUID usuarioId,
 
                 @NotBlank(message = "O telefone é obrigatório") @Size(max = 20, message = "O telefone deve ter no máximo 20 caracteres") String telefone,
 

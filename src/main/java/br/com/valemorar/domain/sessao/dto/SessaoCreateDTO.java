@@ -10,8 +10,7 @@ import java.util.UUID;
 
 public record SessaoCreateDTO(
 
-                // Opcional: a sessão é sempre do usuário autenticado
-                UUID usuarioId,
+                @NotNull(message = "O ID do usuário é obrigatório") UUID usuarioId,
 
                 @NotBlank(message = "O hash do refresh token é obrigatório") String refreshTokenHash,
 

@@ -4,8 +4,6 @@ import br.com.valemorar.domain.foto_imovel.FotoImovel;
 import br.com.valemorar.domain.foto_imovel.dto.FotoImovelCreateDTO;
 import br.com.valemorar.domain.foto_imovel.dto.FotoImovelResponseDTO;
 import br.com.valemorar.domain.foto_imovel.repository.FotoImovelRepository;
-import br.com.valemorar.domain.imovel.service.ImovelService;
-import br.com.valemorar.infra.SecurityUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -18,19 +16,14 @@ import java.util.UUID;
 @Service
 public class FotoImovelService {
 
-    private static final String MENSAGEM_NAO_ENCONTRADA = "Foto do imóvel não encontrada";
-
     private final FotoImovelRepository repository;
-    private final ImovelService imovelService;
 
-    public FotoImovelService(FotoImovelRepository repository, ImovelService imovelService) {
+    public FotoImovelService(FotoImovelRepository repository) {
         this.repository = repository;
-        this.imovelService = imovelService;
     }
 
     @Transactional
     public FotoImovelResponseDTO criar(FotoImovelCreateDTO dto) {
-        imovelService.buscarProprio(dto.imovelId());
         boolean eCapa = Boolean.TRUE.equals(dto.capa());
 
         if (eCapa) {
@@ -50,7 +43,6 @@ public class FotoImovelService {
 
     @Transactional(readOnly = true)
     public Page<FotoImovelResponseDTO> listarTodos(Pageable pageable) {
-        SecurityUtils.exigirAdmin();
         return repository.findAll(pageable)
                 .map(FotoImovelResponseDTO::fromEntity);
     }
@@ -58,7 +50,7 @@ public class FotoImovelService {
     @Transactional(readOnly = true)
     public FotoImovelResponseDTO buscarPorId(UUID id) {
         FotoImovel entity = repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(MENSAGEM_NAO_ENCONTRADA));
+                .orElseThrow(() -> new IllegalArgumentException("Foto do imóvel não encontrada"));
         return FotoImovelResponseDTO.fromEntity(entity);
     }
 
@@ -72,9 +64,8 @@ public class FotoImovelService {
 
     @Transactional
     public FotoImovelResponseDTO atualizar(UUID id, FotoImovelCreateDTO dto) {
-        FotoImovel entity = buscarPropria(id);
-        // Também exige ser dono do imóvel de destino, caso a foto esteja sendo movida
-        imovelService.buscarProprio(dto.imovelId());
+        FotoImovel entity = repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Foto do imóvel não encontrada"));
 
         boolean eCapa = Boolean.TRUE.equals(dto.capa());
 
@@ -93,14 +84,10 @@ public class FotoImovelService {
 
     @Transactional
     public void deletar(UUID id) {
-        repository.delete(buscarPropria(id));
-    }
-
-    private FotoImovel buscarPropria(UUID id) {
-        FotoImovel entity = repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(MENSAGEM_NAO_ENCONTRADA));
-        imovelService.buscarProprio(entity.getImovelId());
-        return entity;
+        if (!repository.existsById(id)) {
+            throw new IllegalArgumentException("Foto do imóvel não encontrada");
+        }
+        repository.deleteById(id);
     }
 
     private void desmarcarCapaAtual(UUID imovelId) {

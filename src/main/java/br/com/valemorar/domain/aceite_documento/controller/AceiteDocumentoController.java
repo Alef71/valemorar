@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,9 +35,8 @@ public class AceiteDocumentoController {
     })
     @PostMapping
     public ResponseEntity<AceiteDocumentoResponseDTO> registrarAceite(
-            @RequestBody @Valid AceiteDocumentoCreateDTO dto, HttpServletRequest request) {
-        // O IP é evidência do aceite: vem da requisição, nunca do corpo enviado pelo cliente
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.registrarAceite(dto, request.getRemoteAddr()));
+            @RequestBody @Valid AceiteDocumentoCreateDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.registrarAceite(dto));
     }
 
     @Operation(summary = "Listar todos os aceites", description = "Retorna uma página com todos os registros de aceites de documentos")

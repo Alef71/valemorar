@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conheça a cidade | Vale Morar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400;1,6..72,600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            serif: ['Newsreader', 'serif'],
+          },
+          colors: {
+            brand: {
+              green: '#173A2A',
+              brown: '#7A4318',
+              gold: '#B98232',
+              cream: '#F4EFE3',
+              greenSoft: '#405B38',
+              textPrimary: '#1C241E',
+              textSecondary: '#5C4F43',
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="stylesheet" href="../css/header.css">
+</head>
+<body class="min-h-screen bg-brand-cream font-sans text-brand-textPrimary antialiased flex flex-col">
+  <header class="app-header-sticky sticky top-0 z-50 border-b border-[#dfd7c8] bg-brand-cream/90 px-4 py-3.5 backdrop-blur-md sm:px-6 lg:px-12">
+    <div class="mx-auto flex max-w-7xl items-center justify-between gap-4">
+      <a href="index.html" class="brand-logo-link flex items-center gap-3">
+        <img src="../imagem/vale%20morar.jpeg" alt="Vale Morar" class="h-10 w-auto rounded-md object-contain">
+        <div id="header-user-city" class="hidden flex-col justify-center border-l border-[#dfd9cc] pl-3 md:flex"></div>
+      </a>
+      <nav class="hidden items-center gap-6 text-sm font-medium text-brand-textSecondary lg:flex" aria-label="Navegação principal">
+        <a href="index.html#cidades" class="hover:text-brand-green">Explorar cidades</a>
+        <a href="index.html#vitrine-imoveis" class="hover:text-brand-green">Imóveis disponíveis</a>
+      </nav>
+      <div id="user-header-actions" class="flex items-center gap-3"></div>
+    </div>
+  </header>
+
+  <main class="flex-1">
+    <section id="cidade-capa" class="relative isolate flex min-h-[300px] items-end overflow-hidden bg-brand-green px-4 py-10 text-white sm:min-h-[380px] sm:px-8 lg:px-12">
+      <div id="cidade-imagem" class="absolute inset-0 -z-20 bg-cover bg-center"></div>
+      <div class="absolute inset-0 -z-10 bg-gradient-to-t from-black/85 via-black/45 to-black/20"></div>
+      <div class="mx-auto w-full max-w-7xl">
+        <a href="index.html#cidades" class="mb-6 inline-flex items-center gap-1 text-sm font-semibold text-white/90 hover:text-white">
+          <span class="material-symbols-outlined text-base" aria-hidden="true">arrow_back</span>
+          Voltar para as cidades
+        </a>
+        <p id="cidade-regiao" class="text-xs font-extrabold uppercase tracking-[0.2em] text-emerald-300"></p>
+        <h1 id="cidade-nome" class="mt-2 font-serif text-4xl font-semibold sm:text-6xl"></h1>
+        <p class="mt-3 max-w-2xl text-sm leading-relaxed text-white/90 sm:text-base">
+          Conheça os pontos de referência, a vida local e os serviços desta cidade do Vale do Jequitinhonha.
+        </p>
+      </div>
+    </section>
+
+    <div class="mx-auto grid w-full max-w-7xl gap-6 px-4 py-10 sm:px-6 lg:grid-cols-3 lg:px-12">
+      <section class="rounded-2xl border border-[#dfd7c8] bg-brand-cream p-6 shadow-sm lg:col-span-2" aria-labelledby="cidade-atracoes-titulo">
+        <div class="mb-5 flex items-center gap-3">
+          <span class="material-symbols-outlined text-2xl text-brand-green" aria-hidden="true">landscape</span>
+          <h2 id="cidade-atracoes-titulo" class="text-xl font-bold">Marcos históricos e atrações</h2>
+        </div>
+        <ul id="cidade-atracoes" class="grid gap-3 sm:grid-cols-2"></ul>
+      </section>
+
+      <section class="rounded-2xl border border-[#dfd7c8] bg-brand-cream p-6 shadow-sm" aria-labelledby="cidade-comercio-titulo">
+        <div class="mb-5 flex items-center gap-3">
+          <span class="material-symbols-outlined text-2xl text-brand-green" aria-hidden="true">storefront</span>
+          <h2 id="cidade-comercio-titulo" class="text-xl font-bold">Comércio e serviços</h2>
+        </div>
+        <ul id="cidade-comercio" class="space-y-3"></ul>
+      </section>
+
+      <section class="rounded-2xl border border-[#dfd7c8] bg-brand-cream p-6 shadow-sm lg:col-span-2" aria-labelledby="cidade-instituicoes-titulo">
+        <div class="mb-5 flex items-center gap-3">
+          <span class="material-symbols-outlined text-2xl text-brand-green" aria-hidden="true">business</span>
+          <h2 id="cidade-instituicoes-titulo" class="text-xl font-bold">Empresas e instituições</h2>
+        </div>
+        <ul id="cidade-instituicoes" class="grid gap-3 sm:grid-cols-2"></ul>
+      </section>
+
+      <aside class="rounded-2xl bg-brand-green p-6 text-white shadow-sm">
+        <span class="material-symbols-outlined text-3xl text-emerald-300" aria-hidden="true">photo_library</span>
+        <h2 class="mt-3 text-xl font-bold">Turismo e cultura</h2>
+        <p class="mt-2 text-sm leading-relaxed text-white/80">Veja informações, fotos e referências locais no portal indicado.</p>
+        <a id="cidade-portal" href="#" target="_blank" rel="noopener noreferrer" class="mt-5 inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-bold text-brand-green hover:bg-brand-cream">
+          Acessar portal da cidade
+          <span class="material-symbols-outlined text-base" aria-hidden="true">open_in_new</span>
+        </a>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="border-t border-[#dfd7c8] bg-brand-cream px-4 py-6 text-center text-xs text-brand-textSecondary">
+    <p>&copy; 2026 Vale Morar Imóveis. Todos os direitos reservados.</p>
+  </footer>
+
+  <script src="../js/header.js"></script>
+  <script src="../js/cidade.js"></script>
+</body>
+</html>
