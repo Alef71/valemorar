@@ -67,7 +67,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         $('anuncio-titulo').textContent = a.titulo || `${tipo} em ${a.cidade || 'Vale do Jequitinhonha'}`;
         $('anuncio-localizacao').textContent = local || 'Vale do Jequitinhonha';
-        $('anuncio-descricao').textContent = a.descricao || 'O anunciante ainda não informou uma descrição.';
         $('anuncio-modalidade').textContent = a.status && a.status !== 'ATIVO'
             ? `${rotulo(a.modalidade)} · ${rotulo(a.status)}`
             : rotulo(a.modalidade || 'Disponível');
