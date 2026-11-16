@@ -194,13 +194,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     ? `Condomínio: ${valorCondominio.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`
                     : valorCondominio === 0 ? 'Sem taxa de condomínio' : ''
             ].filter(Boolean).join(' • ');
-            const imagem = imagemPadrao;
+            const imagem = anuncio.fotoCapa || imagemPadrao;
             const linkDetalhes = `detalhes-imovel.html?id=${encodeURIComponent(anuncio.id)}`;
 
             return `
                 <article class="bg-brand-cream border border-[#ebe5db] rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition duration-300 flex flex-col group">
                     <a href="${linkDetalhes}" class="relative h-56 w-full bg-stone-100 overflow-hidden block" aria-label="Ver ${tipo}">
-                        <img src="${imagem}" alt="Imagem ilustrativa de imóvel" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <img src="${escaparHTML(imagem)}" alt="${escaparHTML(titulo)}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.onerror=null;this.src='${imagemPadrao}'">
                         <span class="absolute top-3 left-3 bg-brand-green text-white text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">${modalidade}</span>
                         ${estado}
                     </a>

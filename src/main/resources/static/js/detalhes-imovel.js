@@ -162,12 +162,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             ? [...fotosImovel].sort((a, b) => Number(a.ordem || 0) - Number(b.ordem || 0))
             : [];
         const fotoPrincipal = document.getElementById('foto-principal');
-        const fotoDestaque = listaFotos.find(foto => foto.capa && foto.url) || listaFotos[0];
+        const fotoDestaque = listaFotos.find(foto => foto.capa && foto.url)
+            || listaFotos.find(foto => foto.url)
+            || (dadosAnuncio.fotoCapa ? { url: dadosAnuncio.fotoCapa } : null);
         fotoPrincipal.src = fotoDestaque?.url || imagemPadrao;
-        fotoPrincipal.alt = listaFotos.length ? 'Foto do imóvel' : 'Imagem ilustrativa de imóvel';
+        fotoPrincipal.alt = fotoDestaque ? 'Foto do imóvel' : 'Imagem ilustrativa de imóvel';
+        fotoPrincipal.onerror = () => {
+            fotoPrincipal.onerror = null;
+            fotoPrincipal.src = imagemPadrao;
+        };
 
         const galeria = document.getElementById('galeria-thumbnails');
         const miniaturas = listaFotos.filter(foto => foto.url);
+        if (miniaturas.length === 0 && dadosAnuncio.fotoCapa) {
+            miniaturas.push({ url: dadosAnuncio.fotoCapa });
+        }
         const indiceDestaque = miniaturas.indexOf(fotoDestaque);
         galeria.classList.toggle('hidden', miniaturas.length < 2);
         galeria.innerHTML = miniaturas.map((foto, indice) => `

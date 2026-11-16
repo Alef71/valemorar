@@ -6,6 +6,8 @@ import br.com.valemorar.domain.anucio.dto.AnuncioResponseDTO;
 import br.com.valemorar.domain.anucio.repository.AnuncioRepository;
 import br.com.valemorar.domain.endereco.Endereco;
 import br.com.valemorar.domain.endereco.repository.EnderecoRepository;
+import br.com.valemorar.domain.foto_imovel.FotoImovel;
+import br.com.valemorar.domain.foto_imovel.repository.FotoImovelRepository;
 import br.com.valemorar.domain.imovel.Imovel;
 import br.com.valemorar.domain.imovel.repository.ImovelRepository;
 import br.com.valemorar.domain.usuario.Usuario;
@@ -40,16 +42,19 @@ public class AnuncioService {
     private final ImovelRepository imovelRepository;
     private final EnderecoRepository enderecoRepository;
     private final UsuarioRepository usuarioRepository;
+    private final FotoImovelRepository fotoImovelRepository;
 
     public AnuncioService(
             AnuncioRepository anuncioRepository,
             ImovelRepository imovelRepository,
             EnderecoRepository enderecoRepository,
-            UsuarioRepository usuarioRepository) {
+            UsuarioRepository usuarioRepository,
+            FotoImovelRepository fotoImovelRepository) {
         this.anuncioRepository = anuncioRepository;
         this.imovelRepository = imovelRepository;
         this.enderecoRepository = enderecoRepository;
         this.usuarioRepository = usuarioRepository;
+        this.fotoImovelRepository = fotoImovelRepository;
     }
 
     @Transactional
@@ -189,6 +194,25 @@ public class AnuncioService {
         Map<UUID, Usuario> anunciantes = new HashMap<>();
         usuarioRepository.findAllById(anuncianteIds)
                 .forEach(usuario -> anunciantes.put(usuario.getId(), usuario));
+        Set<UUID> imovelIds = anuncios.getContent().stream()
+                .map(Anuncio::getImovel)
+                .filter(Objects::nonNull)
+                .map(Imovel::getId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Map<UUID, String> fotosCapa = new HashMap<>();
+        List<FotoImovel> fotosAnuncios = imovelIds.isEmpty()
+                ? List.of()
+                : fotoImovelRepository.findByImovelIdInOrderByOrdemAsc(imovelIds);
+        fotosAnuncios.stream()
+                .collect(Collectors.groupingBy(FotoImovel::getImovelId))
+                .forEach((imovelId, fotos) -> fotosCapa.put(
+                        imovelId,
+                        fotos.stream()
+                                .filter(foto -> Boolean.TRUE.equals(foto.getCapa()))
+                                .findFirst()
+                                .orElse(fotos.get(0))
+                                .getUrl()));
 
         return anuncios.map(anuncio -> {
             Imovel imovel = anuncio.getImovel();
@@ -198,7 +222,8 @@ public class AnuncioService {
                     anuncio,
                     endereco,
                     anunciante != null ? anunciante.getNome() : null,
-                    anunciante != null ? anunciante.getEmail() : null);
+                    anunciante != null ? anunciante.getEmail() : null,
+                    imovel != null ? fotosCapa.get(imovel.getId()) : null);
         });
     }
 
@@ -210,11 +235,21 @@ public class AnuncioService {
         Usuario anunciante = anuncio.getAnuncianteId() != null
                 ? usuarioRepository.findById(anuncio.getAnuncianteId()).orElse(null)
                 : null;
+        List<FotoImovel> fotosImovel = imovel != null && imovel.getId() != null
+                ? fotoImovelRepository.findByImovelIdInOrderByOrdemAsc(Set.of(imovel.getId()))
+                : List.of();
+        String fotoCapa = fotosImovel.stream()
+                .filter(foto -> Boolean.TRUE.equals(foto.getCapa()))
+                .findFirst()
+                .or(() -> fotosImovel.stream().findFirst())
+                .map(FotoImovel::getUrl)
+                .orElse(null);
         return AnuncioResponseDTO.fromEntity(
                 anuncio,
                 endereco,
                 anunciante != null ? anunciante.getNome() : null,
-                anunciante != null ? anunciante.getEmail() : null);
+                anunciante != null ? anunciante.getEmail() : null,
+                fotoCapa);
     }
 
     private void validarAcessoAnunciante(UUID anuncianteId) {

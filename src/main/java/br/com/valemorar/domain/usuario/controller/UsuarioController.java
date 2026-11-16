@@ -10,9 +10,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
 import java.util.UUID;
@@ -53,6 +56,17 @@ public class UsuarioController {
     @PutMapping("/me")
     public ResponseEntity<UsuarioResponseDTO> atualizarPerfilProprio(@RequestBody @Valid UsuarioUpdateDTO dto) {
         return ResponseEntity.ok(service.atualizarPerfilProprio(dto));
+    }
+
+    @Operation(summary = "Atualizar foto de perfil", description = "Armazena uma imagem enviada pelo usuário autenticado")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Foto de perfil atualizada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Imagem inválida")
+    })
+    @PutMapping(value = "/me/foto", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<UsuarioResponseDTO> atualizarFotoPerfil(@RequestParam("file") MultipartFile file) {
+        String publicBaseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
+        return ResponseEntity.ok(service.atualizarFotoPerfil(file, publicBaseUrl));
     }
 
     @Operation(summary = "Desativar própria conta", description = "Permite que o usuário autenticado desative sua conta temporariamente (RF03 / LGPD)")

@@ -48,7 +48,7 @@ public class SecurityConfig {
 
                                                 // Arquivos Estáticos do Front-end
                                                 .requestMatchers("/", "/*.html", "/html/**", "/css/**", "/js/**",
-                                                                "/imagem/**")
+                                                                "/imagem/**", "/uploads/**")
                                                 .permitAll()
 
                                                 // Endpoints Públicos da API

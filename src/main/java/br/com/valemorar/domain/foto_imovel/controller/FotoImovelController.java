@@ -12,8 +12,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
 import java.util.UUID;
@@ -37,6 +40,22 @@ public class FotoImovelController {
     @PostMapping
     public ResponseEntity<FotoImovelResponseDTO> criar(@RequestBody @Valid FotoImovelCreateDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(dto));
+    }
+
+    @Operation(summary = "Enviar foto do imóvel", description = "Armazena uma imagem do computador vinculada ao imóvel")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Foto enviada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Imagem inválida ou limite de fotos excedido")
+    })
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<FotoImovelResponseDTO> enviar(
+            @RequestParam UUID imovelId,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(defaultValue = "false") Boolean capa,
+            @RequestParam(defaultValue = "0") Integer ordem) {
+        String publicBaseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(service.criarUpload(imovelId, file, capa, ordem, publicBaseUrl));
     }
 
     @Operation(summary = "Listar todas as fotos", description = "Retorna uma página com todas as fotos cadastradas no sistema")

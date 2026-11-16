@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const userEmailElem = document.getElementById('user-email');
     const userRoleElem = document.getElementById('user-role');
     const userAvatarElem = document.getElementById('user-avatar');
+    const btnSelecionarFotoPerfil = document.getElementById('btn-selecionar-foto-perfil');
     const headerCityElem = document.getElementById('header-user-city');
 
     // Elementos de Modais do Perfil e Endereço
@@ -172,20 +173,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // 3. EDITAR PERFIL (PUT /api/usuarios/me)
-    if (btnAbrirPerfil) {
-        btnAbrirPerfil.addEventListener('click', () => {
-            if (editNome) editNome.value = usuarioLogado?.nome || '';
-            if (editFotoPreview) {
-                const foto = usuarioLogado?.fotoPerfil || usuarioLogado?.fotoUrl;
-                if (foto) {
-                    editFotoPreview.src = foto;
-                    editFotoPreview.classList.remove('hidden');
-                } else {
-                    editFotoPreview.classList.add('hidden');
-                }
+    function abrirModalPerfil(selecionarFoto = false) {
+        if (editNome) editNome.value = usuarioLogado?.nome || '';
+        if (editFotoFile) editFotoFile.value = '';
+        if (editFotoPreview) {
+            const foto = usuarioLogado?.fotoPerfil || usuarioLogado?.fotoUrl;
+            if (foto) {
+                editFotoPreview.src = foto;
+                editFotoPreview.classList.remove('hidden');
+            } else {
+                editFotoPreview.classList.add('hidden');
             }
-            if (modalPerfil) modalPerfil.classList.remove('hidden');
-        });
+        }
+        if (modalPerfil) modalPerfil.classList.remove('hidden');
+        if (selecionarFoto) editFotoFile?.click();
+    }
+
+    if (btnAbrirPerfil) {
+        btnAbrirPerfil.addEventListener('click', () => abrirModalPerfil());
+    }
+    if (btnSelecionarFotoPerfil) {
+        btnSelecionarFotoPerfil.addEventListener('click', () => abrirModalPerfil(true));
     }
 
     function fecharModalPerfil() {
@@ -198,14 +206,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         editFotoFile.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
-                const reader = new FileReader();
-                reader.onload = (evt) => {
-                    if (editFotoPreview) {
-                        editFotoPreview.src = evt.target.result;
-                        editFotoPreview.classList.remove('hidden');
-                    }
-                };
-                reader.readAsDataURL(file);
+                if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) ||
+                    file.size > 5 * 1024 * 1024) {
+                    alert('Envie uma imagem JPEG, PNG ou WebP de até 5 MB.');
+                    editFotoFile.value = '';
+                    return;
+                }
+                if (editFotoPreview) {
+                    editFotoPreview.src = URL.createObjectURL(file);
+                    editFotoPreview.classList.remove('hidden');
+                }
             }
         });
     }
@@ -220,23 +230,32 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return alert('O nome deve ter pelo menos 3 caracteres.');
             }
 
-            let fotoBase64 = usuarioLogado?.fotoPerfil || usuarioLogado?.fotoUrl || '';
-            const file = editFotoFile?.files[0];
-            
-            if (file) {
-                fotoBase64 = await new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onload = (evt) => resolve(evt.target.result);
-                    reader.readAsDataURL(file);
-                });
-            }
-
-            const payload = {
-                nome: nomeVal,
-                fotoPerfil: fotoBase64
-            };
-
             try {
+                const file = editFotoFile?.files[0];
+                if (file && (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) ||
+                    file.size > 5 * 1024 * 1024)) {
+                    return alert('Envie uma imagem JPEG, PNG ou WebP de até 5 MB.');
+                }
+
+                let fotoPerfil = usuarioLogado?.fotoPerfil || usuarioLogado?.fotoUrl || null;
+                if (file) {
+                    const formData = new FormData();
+                    formData.append('file', file);
+
+                    const uploadResponse = await fetch(`${API_BASE}/usuarios/me/foto`, {
+                        method: 'PUT',
+                        headers: { 'Authorization': `Bearer ${currentToken}` },
+                        body: formData
+                    });
+                    if (!uploadResponse.ok) {
+                        const erro = await uploadResponse.json().catch(() => ({}));
+                        return alert(erro.message || erro.erro || 'Erro ao enviar a foto de perfil.');
+                    }
+                    const usuarioComFoto = await uploadResponse.json();
+                    fotoPerfil = usuarioComFoto.fotoPerfil;
+                }
+
+                const payload = { nome: nomeVal, fotoPerfil };
                 const res = await fetch(`${API_BASE}/usuarios/me`, {
                     method: 'PUT',
                     headers: {

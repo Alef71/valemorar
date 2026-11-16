@@ -113,6 +113,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Gerenciador de Fotos
     const inputFotoUrl = document.getElementById('foto-url-input');
+    const inputFotoArquivo = document.getElementById('foto-arquivo-input');
     const checkFotoCapa = document.getElementById('foto-capa-checkbox');
     const btnAddFoto = document.getElementById('btn-add-foto');
     const containerFotos = document.getElementById('lista-fotos-container');
@@ -264,6 +265,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const url = inputFotoUrl?.value.trim();
             if (!url) return alert('Informe a URL da imagem.');
             if (url.length > 500) return alert('A URL da imagem deve ter no máximo 500 caracteres.');
+            if (fotosLista.length >= 6) return alert('Cada anúncio pode ter no máximo 6 fotos.');
 
             try {
                 const urlValidada = new URL(url);
@@ -284,6 +286,42 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    if (inputFotoArquivo) {
+        inputFotoArquivo.addEventListener('change', () => {
+            const arquivos = Array.from(inputFotoArquivo.files || []);
+            if (fotosLista.length + arquivos.length > 6) {
+                alert('Cada anúncio pode ter no máximo 6 fotos.');
+                inputFotoArquivo.value = '';
+                return;
+            }
+
+            const arquivoInvalido = arquivos.find(arquivo =>
+                !['image/jpeg', 'image/png', 'image/webp'].includes(arquivo.type) ||
+                arquivo.size > 5 * 1024 * 1024
+            );
+            if (arquivoInvalido) {
+                alert('Envie imagens JPEG, PNG ou WebP de até 5 MB cada.');
+                inputFotoArquivo.value = '';
+                return;
+            }
+
+            const marcarCapa = Boolean(checkFotoCapa?.checked) || fotosLista.length === 0;
+            arquivos.forEach((file, index) => {
+                const previewUrl = URL.createObjectURL(file);
+                fotosLista.push({
+                    file,
+                    previewUrl,
+                    url: previewUrl,
+                    capa: marcarCapa && index === 0,
+                    ordem: fotosLista.length
+                });
+            });
+            if (checkFotoCapa) checkFotoCapa.checked = false;
+            inputFotoArquivo.value = '';
+            renderizarFotos();
+        });
+    }
+
     function renderizarFotos() {
         if (!containerFotos) return;
         if (fotosLista.length === 0) {
@@ -293,7 +331,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         containerFotos.innerHTML = fotosLista.map((foto, index) => `
             <div class="relative group border rounded-lg overflow-hidden bg-gray-100 h-20">
-                <img src="${escaparHTML(foto.url)}" class="w-full h-full object-cover" alt="Foto">
+                <img src="${escaparHTML(foto.previewUrl || foto.url)}" class="w-full h-full object-cover" alt="Foto">
                 ${foto.capa ? '<span class="absolute top-1 left-1 bg-brand-gold text-white text-[10px] font-bold px-1.5 py-0.5 rounded">Capa</span>' : ''}
                 <button type="button" data-index="${index}" class="btn-remover-foto absolute top-1 right-1 bg-red-600 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center font-bold shadow">&times;</button>
             </div>
@@ -304,6 +342,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         containerFotos.addEventListener('click', (e) => {
             if (e.target.classList.contains('btn-remover-foto')) {
                 const index = parseInt(e.target.getAttribute('data-index'), 10);
+                if (fotosLista[index]?.previewUrl) URL.revokeObjectURL(fotosLista[index].previewUrl);
                 fotosLista.splice(index, 1);
                 renderizarFotos();
             }
@@ -392,6 +431,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('anuncio-aceita-pet').checked = Boolean(imovelEmEdicao?.aceitaPet);
 
         if (inputFotoUrl) inputFotoUrl.value = '';
+        if (inputFotoArquivo) inputFotoArquivo.value = '';
         if (checkFotoCapa) checkFotoCapa.checked = false;
 
         renderizarFotos();
@@ -471,7 +511,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function sincronizarFotos(imovelId) {
         const idsMantidos = new Set(fotosLista.filter(foto => foto.id).map(foto => String(foto.id)));
 
+        for (const foto of [...fotosOriginais]) {
+            if (!idsMantidos.has(String(foto.id))) {
+                await requisitarApi(`/fotos-imovel/${foto.id}`, { method: 'DELETE' });
+                fotosOriginais = fotosOriginais.filter(original => String(original.id) !== String(foto.id));
+            }
+        }
+
         for (const [ordem, foto] of fotosLista.entries()) {
+            if (foto.file) {
+                const formData = new FormData();
+                formData.append('imovelId', imovelId);
+                formData.append('file', foto.file);
+                formData.append('capa', Boolean(foto.capa));
+                formData.append('ordem', ordem);
+
+                const salva = await requisitarApi('/fotos-imovel/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                Object.assign(foto, salva);
+                delete foto.file;
+                if (foto.previewUrl) {
+                    URL.revokeObjectURL(foto.previewUrl);
+                    delete foto.previewUrl;
+                }
+                continue;
+            }
+
             const payload = {
                 imovelId,
                 url: foto.url,
@@ -487,12 +554,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
             foto.id = salva.id;
             foto.ordem = ordem;
-        }
-
-        for (const foto of fotosOriginais) {
-            if (!idsMantidos.has(String(foto.id))) {
-                await requisitarApi(`/fotos-imovel/${foto.id}`, { method: 'DELETE' });
-            }
         }
 
         fotosOriginais = fotosLista.map(foto => ({ ...foto }));

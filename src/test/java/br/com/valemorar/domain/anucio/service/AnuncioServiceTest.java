@@ -5,6 +5,8 @@ import br.com.valemorar.domain.anucio.dto.AnuncioResponseDTO;
 import br.com.valemorar.domain.anucio.repository.AnuncioRepository;
 import br.com.valemorar.domain.endereco.Endereco;
 import br.com.valemorar.domain.endereco.repository.EnderecoRepository;
+import br.com.valemorar.domain.foto_imovel.FotoImovel;
+import br.com.valemorar.domain.foto_imovel.repository.FotoImovelRepository;
 import br.com.valemorar.domain.imovel.Imovel;
 import br.com.valemorar.domain.imovel.repository.ImovelRepository;
 import br.com.valemorar.domain.usuario.Usuario;
@@ -29,7 +31,9 @@ class AnuncioServiceTest {
     @Test
     void includesFullAddressInPaginatedPublicListings() {
         UUID enderecoId = UUID.randomUUID();
+        UUID imovelId = UUID.randomUUID();
         Imovel imovel = new Imovel();
+        imovel.setId(imovelId);
         imovel.setEnderecoId(enderecoId);
         imovel.setTitulo("Casa das Flores");
         imovel.setDescricao("Casa com quintal.");
@@ -52,8 +56,9 @@ class AnuncioServiceTest {
         ImovelRepository imovelRepository = mock(ImovelRepository.class);
         EnderecoRepository enderecoRepository = mock(EnderecoRepository.class);
         UsuarioRepository usuarioRepository = mock(UsuarioRepository.class);
+        FotoImovelRepository fotoImovelRepository = mock(FotoImovelRepository.class);
         AnuncioService service = new AnuncioService(
-                anuncioRepository, imovelRepository, enderecoRepository, usuarioRepository);
+                anuncioRepository, imovelRepository, enderecoRepository, usuarioRepository, fotoImovelRepository);
         Usuario anunciante = new Usuario();
         anunciante.setId(anuncio.getAnuncianteId());
         anunciante.setNome("Maria Silva");
@@ -63,6 +68,12 @@ class AnuncioServiceTest {
                 .thenReturn(new PageImpl<>(List.of(anuncio), pageable, 1));
         when(enderecoRepository.findAllById(Set.of(enderecoId))).thenReturn(List.of(endereco));
         when(usuarioRepository.findAllById(Set.of(anunciante.getId()))).thenReturn(List.of(anunciante));
+        FotoImovel fotoCapa = new FotoImovel();
+        fotoCapa.setImovelId(imovelId);
+        fotoCapa.setUrl("http://localhost:8080/uploads/capa.jpg");
+        fotoCapa.setCapa(true);
+        when(fotoImovelRepository.findByImovelIdInOrderByOrdemAsc(Set.of(imovelId)))
+                .thenReturn(List.of(fotoCapa));
 
         Page<AnuncioResponseDTO> result = service.listarTodos(pageable);
 
@@ -78,6 +89,7 @@ class AnuncioServiceTest {
         assertEquals("Casa com quintal.", response.descricao());
         assertEquals("Maria Silva", response.anuncianteNome());
         assertEquals("maria@example.com", response.anuncianteEmail());
+        assertEquals("http://localhost:8080/uploads/capa.jpg", response.fotoCapa());
         verify(enderecoRepository).findAllById(Set.of(enderecoId));
     }
 
@@ -98,8 +110,9 @@ class AnuncioServiceTest {
         ImovelRepository imovelRepository = mock(ImovelRepository.class);
         EnderecoRepository enderecoRepository = mock(EnderecoRepository.class);
         UsuarioRepository usuarioRepository = mock(UsuarioRepository.class);
+        FotoImovelRepository fotoImovelRepository = mock(FotoImovelRepository.class);
         AnuncioService service = new AnuncioService(
-                anuncioRepository, imovelRepository, enderecoRepository, usuarioRepository);
+                anuncioRepository, imovelRepository, enderecoRepository, usuarioRepository, fotoImovelRepository);
         when(anuncioRepository.findById(anuncioId)).thenReturn(Optional.of(anuncio));
         when(usuarioRepository.findById(anuncianteId)).thenReturn(Optional.of(anunciante));
 

@@ -20,6 +20,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const feedbackDiv = document.getElementById('mensagem-feedback');
     const btnEntrar = document.getElementById('btn-entrar');
     const btnCadastrar = document.getElementById('btn-cadastrar');
+    const cadFotoFile = document.getElementById('cad-foto-file');
+    const cadFotoPreview = document.getElementById('cad-foto-preview');
+
+    if (cadFotoFile) {
+        cadFotoFile.addEventListener('change', () => {
+            const file = cadFotoFile.files[0];
+            if (!file) {
+                cadFotoPreview?.classList.add('hidden');
+                return;
+            }
+            if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) ||
+                file.size > 5 * 1024 * 1024) {
+                alert('Envie uma imagem JPEG, PNG ou WebP de até 5 MB.');
+                cadFotoFile.value = '';
+                cadFotoPreview?.classList.add('hidden');
+                return;
+            }
+            if (cadFotoPreview) {
+                cadFotoPreview.src = URL.createObjectURL(file);
+                cadFotoPreview.classList.remove('hidden');
+            }
+        });
+    }
 
     // Suporte ao parâmetro ?modo=cadastro na URL (para vir do botão "Criar Conta" do cabeçalho)
     const urlParams = new URLSearchParams(window.location.search);
@@ -131,9 +154,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const nome = document.getElementById('cad-nome')?.value.trim();
             const email = document.getElementById('cad-email')?.value.trim();
             const senha = document.getElementById('cad-senha')?.value;
-            const fotoPerfil = document.getElementById('cad-fotoPerfil')?.value.trim() || null;
+            const fotoFile = cadFotoFile?.files[0] || null;
 
-            const payload = { nome, email, senha, fotoPerfil };
+            const payload = { nome, email, senha, fotoPerfil: null };
 
             try {
                 const response = await fetch(API_CADASTRO_URL, {
@@ -168,13 +191,51 @@ document.addEventListener('DOMContentLoaded', () => {
                         };
                         localStorage.setItem('usuario', JSON.stringify(usuario));
 
-                        exibirFeedback('Conta criada com sucesso! Redirecionando para o painel...', 'sucesso');
+                        let erroUploadFoto = null;
+                        if (fotoFile) {
+                            if (!data.token) {
+                                erroUploadFoto = 'Não foi possível iniciar a sessão para salvar a foto.';
+                            } else {
+                                try {
+                                    const formData = new FormData();
+                                    formData.append('file', fotoFile);
+                                    const fotoResponse = await fetch(`${API_BASE_URL}/api/usuarios/me/foto`, {
+                                        method: 'PUT',
+                                        headers: { 'Authorization': `Bearer ${data.token}` },
+                                        body: formData
+                                    });
+                                    if (fotoResponse.ok) {
+                                        const usuarioComFoto = await fotoResponse.json();
+                                        Object.assign(usuario, usuarioComFoto);
+                                        localStorage.setItem('usuario', JSON.stringify(usuario));
+                                    } else {
+                                        const erro = await fotoResponse.json().catch(() => ({}));
+                                        erroUploadFoto = erro.erro || erro.message || 'Não foi possível salvar a foto de perfil.';
+                                    }
+                                } catch (error) {
+                                    console.error('Erro ao enviar a foto de perfil:', error);
+                                    erroUploadFoto = 'Não foi possível enviar a foto. Você poderá adicioná-la pelo painel.';
+                                }
+                            }
+                        }
+
+                        exibirFeedback(
+                            erroUploadFoto
+                                ? `Conta criada, mas a foto não foi salva: ${erroUploadFoto}`
+                                : 'Conta criada com sucesso! Redirecionando para o painel...',
+                            erroUploadFoto ? 'erro' : 'sucesso'
+                        );
 
                         setTimeout(() => {
                             window.location.href = 'painel.html';
-                        }, 1200);
+                        }, erroUploadFoto ? 3000 : 1200);
                     } else {
-                        exibirFeedback('Cadastro realizado! Por favor, faça o login manual.', 'sucesso');
+                        exibirFeedback(
+                            fotoFile
+                                ? 'Cadastro realizado! Entre e adicione sua foto pelo painel.'
+                                : 'Cadastro realizado! Por favor, faça o login manual.',
+                            'sucesso'
+                        );
                         formCadastro.reset();
                         setTimeout(() => {
                             toggleViews();

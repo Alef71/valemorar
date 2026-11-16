@@ -7,10 +7,12 @@ import br.com.valemorar.domain.usuario.dto.UsuarioUpdateDTO;
 import br.com.valemorar.domain.usuario.enums.PerfilEnum;
 import br.com.valemorar.domain.usuario.enums.StatusUsuarioEnum;
 import br.com.valemorar.domain.usuario.repository.UsuarioRepository;
+import br.com.valemorar.infra.ImageStorageService;
 import br.com.valemorar.infra.SecurityUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,10 +23,15 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ImageStorageService imageStorageService;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
+    public UsuarioService(
+            UsuarioRepository usuarioRepository,
+            PasswordEncoder passwordEncoder,
+            ImageStorageService imageStorageService) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
+        this.imageStorageService = imageStorageService;
     }
 
     @Transactional
@@ -79,6 +86,22 @@ public class UsuarioService {
 
         Usuario atualizado = usuarioRepository.save(usuarioLogado);
         return UsuarioResponseDTO.fromEntity(atualizado);
+    }
+
+    @Transactional
+    public UsuarioResponseDTO atualizarFotoPerfil(MultipartFile file, String publicBaseUrl) {
+        Usuario usuarioLogado = usuarioRepository.findById(SecurityUtils.getUsuarioAutenticado().getId())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        String imagePath = imageStorageService.store(file);
+        try {
+            usuarioLogado.setFotoPerfil(publicBaseUrl + imagePath);
+            usuarioLogado.setAtualizadoEm(LocalDateTime.now());
+            return UsuarioResponseDTO.fromEntity(usuarioRepository.save(usuarioLogado));
+        } catch (RuntimeException e) {
+            imageStorageService.delete(imagePath);
+            throw e;
+        }
     }
 
     @Transactional
