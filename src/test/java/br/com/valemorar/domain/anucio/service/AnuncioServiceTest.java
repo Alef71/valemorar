@@ -7,12 +7,15 @@ import br.com.valemorar.domain.endereco.Endereco;
 import br.com.valemorar.domain.endereco.repository.EnderecoRepository;
 import br.com.valemorar.domain.imovel.Imovel;
 import br.com.valemorar.domain.imovel.repository.ImovelRepository;
+import br.com.valemorar.domain.usuario.Usuario;
+import br.com.valemorar.domain.usuario.repository.UsuarioRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -32,6 +35,7 @@ class AnuncioServiceTest {
         imovel.setDescricao("Casa com quintal.");
 
         Anuncio anuncio = new Anuncio();
+        anuncio.setAnuncianteId(UUID.randomUUID());
         anuncio.setImovel(imovel);
 
         Endereco endereco = new Endereco();
@@ -47,11 +51,18 @@ class AnuncioServiceTest {
         AnuncioRepository anuncioRepository = mock(AnuncioRepository.class);
         ImovelRepository imovelRepository = mock(ImovelRepository.class);
         EnderecoRepository enderecoRepository = mock(EnderecoRepository.class);
-        AnuncioService service = new AnuncioService(anuncioRepository, imovelRepository, enderecoRepository);
+        UsuarioRepository usuarioRepository = mock(UsuarioRepository.class);
+        AnuncioService service = new AnuncioService(
+                anuncioRepository, imovelRepository, enderecoRepository, usuarioRepository);
+        Usuario anunciante = new Usuario();
+        anunciante.setId(anuncio.getAnuncianteId());
+        anunciante.setNome("Maria Silva");
+        anunciante.setEmail("maria@example.com");
         PageRequest pageable = PageRequest.of(0, 10);
         when(anuncioRepository.findAll(pageable))
                 .thenReturn(new PageImpl<>(List.of(anuncio), pageable, 1));
         when(enderecoRepository.findAllById(Set.of(enderecoId))).thenReturn(List.of(endereco));
+        when(usuarioRepository.findAllById(Set.of(anunciante.getId()))).thenReturn(List.of(anunciante));
 
         Page<AnuncioResponseDTO> result = service.listarTodos(pageable);
 
@@ -65,6 +76,36 @@ class AnuncioServiceTest {
         assertEquals("39100000", response.cep());
         assertEquals("Casa das Flores", response.titulo());
         assertEquals("Casa com quintal.", response.descricao());
+        assertEquals("Maria Silva", response.anuncianteNome());
+        assertEquals("maria@example.com", response.anuncianteEmail());
         verify(enderecoRepository).findAllById(Set.of(enderecoId));
+    }
+
+    @Test
+    void includesAdvertiserNameAndEmailInPublicAnnouncementDetails() {
+        UUID anuncioId = UUID.randomUUID();
+        UUID anuncianteId = UUID.randomUUID();
+        Anuncio anuncio = new Anuncio();
+        anuncio.setId(anuncioId);
+        anuncio.setAnuncianteId(anuncianteId);
+
+        Usuario anunciante = new Usuario();
+        anunciante.setId(anuncianteId);
+        anunciante.setNome("Maria Silva");
+        anunciante.setEmail("maria@example.com");
+
+        AnuncioRepository anuncioRepository = mock(AnuncioRepository.class);
+        ImovelRepository imovelRepository = mock(ImovelRepository.class);
+        EnderecoRepository enderecoRepository = mock(EnderecoRepository.class);
+        UsuarioRepository usuarioRepository = mock(UsuarioRepository.class);
+        AnuncioService service = new AnuncioService(
+                anuncioRepository, imovelRepository, enderecoRepository, usuarioRepository);
+        when(anuncioRepository.findById(anuncioId)).thenReturn(Optional.of(anuncio));
+        when(usuarioRepository.findById(anuncianteId)).thenReturn(Optional.of(anunciante));
+
+        AnuncioResponseDTO resposta = service.buscarPorId(anuncioId);
+
+        assertEquals("Maria Silva", resposta.anuncianteNome());
+        assertEquals("maria@example.com", resposta.anuncianteEmail());
     }
 }

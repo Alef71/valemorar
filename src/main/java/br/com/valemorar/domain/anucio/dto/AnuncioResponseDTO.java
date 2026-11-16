@@ -35,9 +35,19 @@ public record AnuncioResponseDTO(
         String status,
         LocalDateTime publicadoEm,
         LocalDateTime expiraEm,
-        LocalDateTime atualizadoEm) {
+        LocalDateTime atualizadoEm,
+        String anuncianteNome,
+        String anuncianteEmail) {
 
     public static AnuncioResponseDTO fromEntity(Anuncio anuncio, Endereco endereco) {
+        return fromEntity(anuncio, endereco, null, null);
+    }
+
+    public static AnuncioResponseDTO fromEntity(
+            Anuncio anuncio,
+            Endereco endereco,
+            String anuncianteNome,
+            String anuncianteEmail) {
         Imovel imovel = anuncio.getImovel();
 
         return new AnuncioResponseDTO(
@@ -65,6 +75,8 @@ public record AnuncioResponseDTO(
                 anuncio.getStatus(),
                 anuncio.getPublicadoEm(),
                 anuncio.getExpiraEm(),
-                anuncio.getAtualizadoEm());
+                anuncio.getAtualizadoEm(),
+                anuncianteNome,
+                anuncianteEmail);
     }
 }

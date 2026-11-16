@@ -100,6 +100,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     renderizarDetalhes(anuncio, imovel, endereco, fotos, locador, erroDetalhes);
+    configurarComentarios(anuncio);
 
     function renderizarDetalhes(dadosAnuncio, dadosImovel, dadosEndereco, fotosImovel, dadosLocador, falhaDetalhes) {
         const imovel = dadosAnuncio.imovel || dadosAnuncio;
@@ -186,7 +187,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         });
 
-        configurarContato(dadosLocador, titulo, falhaDetalhes);
+        configurarContato(dadosLocador, titulo, falhaDetalhes, dadosAnuncio);
 
         if (loadingState) loadingState.classList.add('hidden');
         if (conteudoImovel) conteudoImovel.classList.remove('hidden');
@@ -195,23 +196,157 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    function configurarContato(dadosLocador, titulo, falhaDetalhes) {
+    async function configurarComentarios(dadosAnuncio) {
+        const secao = document.getElementById('comentarios-section');
+        const aviso = document.getElementById('comentarios-aviso');
+        const formulario = document.getElementById('form-comentario');
+        const texto = document.getElementById('comentario-texto');
+        const status = document.getElementById('comentario-status');
+        const lista = document.getElementById('lista-comentarios');
+        secao.classList.remove('hidden');
+
+        const usuarioCache = (() => {
+            try {
+                return JSON.parse(localStorage.getItem('usuario') || 'null');
+            } catch (error) {
+                console.warn('Não foi possível ler o usuário local para exibir os comentários:', error);
+                return null;
+            }
+        })();
+
+        function exibirAviso(mensagem, linkLogin = false) {
+            aviso.textContent = mensagem;
+            aviso.classList.remove('hidden');
+            if (linkLogin) {
+                const link = document.createElement('a');
+                link.href = 'auth.html';
+                link.className = 'ml-1 font-bold text-brand-green underline';
+                link.textContent = 'Entrar';
+                aviso.append(' ', link);
+            }
+        }
+
+        function renderizarComentarios(comentarios) {
+            if (!comentarios.length) {
+                lista.innerHTML = '<p class="text-sm text-brand-textSecondary">Ainda não há comentários neste anúncio.</p>';
+                return;
+            }
+
+            lista.innerHTML = comentarios.map(comentario => {
+                const data = comentario.criadoEm ? new Date(comentario.criadoEm) : null;
+                const dataFormatada = data && !Number.isNaN(data.getTime())
+                    ? data.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
+                    : '';
+                return `
+                    <article class="rounded-xl border border-[#dfd7c8] bg-white p-4">
+                        <div class="mb-2 flex flex-wrap items-baseline justify-between gap-2">
+                            <h3 class="text-sm font-bold text-brand-green">${escaparHTML(comentario.usuarioNome || 'Usuário')}</h3>
+                            ${dataFormatada ? `<time class="text-xs text-brand-textSecondary">${escaparHTML(dataFormatada)}</time>` : ''}
+                        </div>
+                        <p class="whitespace-pre-line break-words text-sm leading-relaxed text-brand-textPrimary">${escaparHTML(comentario.comentario)}</p>
+                    </article>`;
+            }).join('');
+        }
+
+        if (!token) {
+            exibirAviso('Entre na sua conta para comentar neste anúncio.', true);
+        } else if (usuarioCache?.id && usuarioCache.id === dadosAnuncio.anuncianteId) {
+            exibirAviso('Você é o anunciante deste imóvel e não pode comentar no próprio anúncio.');
+        } else {
+            formulario.classList.remove('hidden');
+        }
+
+        try {
+            const comentarios = await requisitarJson(`/avaliacoes-anuncio/anuncio/${encodeURIComponent(dadosAnuncio.id)}`);
+            renderizarComentarios(Array.isArray(comentarios) ? comentarios : []);
+        } catch (error) {
+            console.error('Erro ao carregar comentários do anúncio:', error);
+            lista.innerHTML = '<p class="text-sm text-red-700">Não foi possível carregar os comentários. Tente novamente mais tarde.</p>';
+        }
+
+        formulario.addEventListener('submit', async evento => {
+            evento.preventDefault();
+            const comentario = texto.value.trim();
+            if (!comentario) {
+                status.textContent = 'Escreva um comentário antes de enviar.';
+                return;
+            }
+
+            const botao = formulario.querySelector('button[type="submit"]');
+            botao.disabled = true;
+            status.textContent = 'Enviando comentário...';
+
+            try {
+                const response = await fetch(`${API_BASE}/avaliacoes-anuncio`, {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        anuncioId: dadosAnuncio.id,
+                        comentario
+                    })
+                });
+                const resposta = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    if (response.status === 401 || response.status === 403) {
+                        status.textContent = 'Sua sessão expirou ou você não tem permissão para comentar.';
+                        return;
+                    }
+                    status.textContent = resposta.erro || resposta.message || 'Não foi possível enviar o comentário.';
+                    return;
+                }
+
+                texto.value = '';
+                status.textContent = 'Comentário publicado com sucesso.';
+                try {
+                    const comentarios = await requisitarJson(`/avaliacoes-anuncio/anuncio/${encodeURIComponent(dadosAnuncio.id)}`);
+                    renderizarComentarios(Array.isArray(comentarios) ? comentarios : []);
+                } catch (error) {
+                    console.error('Comentário publicado, mas a lista não pôde ser atualizada:', error);
+                    lista.innerHTML = '<p class="text-sm text-red-700">Comentário publicado, mas não foi possível atualizar a lista.</p>';
+                }
+            } catch (error) {
+                console.error('Erro ao enviar comentário:', error);
+                status.textContent = 'Falha de conexão ao enviar o comentário.';
+            } finally {
+                botao.disabled = false;
+            }
+        });
+    }
+
+    function configurarContato(dadosLocador, titulo, falhaDetalhes, dadosAnuncio) {
         const nomeElem = document.getElementById('proprietario-nome');
         const inicialElem = document.getElementById('proprietario-inicial');
+        const emailElem = document.getElementById('proprietario-email');
         const linkWhatsapp = document.getElementById('btn-whatsapp');
         const formulario = document.getElementById('form-contato-direto');
         const aviso = document.getElementById('contato-indisponivel');
         const mensagemAviso = document.getElementById('contato-mensagem');
         const linkLogin = document.getElementById('link-login-contato');
 
-        nomeElem.innerText = 'Anunciante';
-        inicialElem.innerText = 'A';
+        const nomeAnunciante = dadosAnuncio?.anuncianteNome || 'Anunciante';
+        nomeElem.innerText = nomeAnunciante;
+        inicialElem.innerText = nomeAnunciante.charAt(0).toLocaleUpperCase('pt-BR') || 'A';
+
+        if (dadosAnuncio?.anuncianteEmail) {
+            emailElem.href = `mailto:${dadosAnuncio.anuncianteEmail}`;
+            emailElem.innerText = dadosAnuncio.anuncianteEmail;
+            emailElem.classList.remove('hidden');
+        }
 
         const telefone = dadosLocador?.whatsapp || dadosLocador?.telefone;
         if (!token) {
-            mensagemAviso.innerText = 'Entre na sua conta para consultar os dados de contato cadastrados pelo anunciante.';
-            aviso.classList.remove('hidden');
-            linkLogin.classList.remove('hidden');
+            if (telefone) {
+                configurarWhatsapp(telefone, titulo, linkWhatsapp, formulario);
+            } else {
+                mensagemAviso.innerText = 'Entre na sua conta para consultar o telefone ou WhatsApp do anunciante.';
+                aviso.classList.remove('hidden');
+                linkLogin.classList.remove('hidden');
+            }
             return;
         }
 
@@ -225,6 +360,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
+        configurarWhatsapp(telefone, titulo, linkWhatsapp, formulario);
+    }
+
+    function configurarWhatsapp(telefone, titulo, linkWhatsapp, formulario) {
         const numero = String(telefone).replace(/\D/g, '');
         const numeroInternacional = numero.startsWith('55') ? numero : `55${numero}`;
         const urlWhatsapp = `https://wa.me/${numeroInternacional}?text=${encodeURIComponent(`Olá, tenho interesse no imóvel: ${titulo}`)}`;

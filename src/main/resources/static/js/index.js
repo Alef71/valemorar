@@ -116,7 +116,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function aplicarFiltrosEExibir() {
         if (!vitrineContainer) return;
 
-        const precoMaximo = Number(priceRange?.value || Number.POSITIVE_INFINITY);
+        const limitePreco = Number(priceRange?.max || Number.POSITIVE_INFINITY);
+        const valorLimitePreco = Number(priceRange?.value || limitePreco);
+        const precoMaximo = valorLimitePreco < limitePreco
+            ? valorLimitePreco
+            : Number.POSITIVE_INFINITY;
         const cidadeSelecionada = normalizarTexto(cidadeBusca?.value);
         const filtrados = anuncios.filter(anuncio => {
             const imovel = anuncio.imovel || anuncio;
@@ -252,7 +256,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (priceRange && priceVal) {
         priceRange.addEventListener('input', () => {
-            priceVal.innerText = Number(priceRange.value).toLocaleString('pt-BR');
+            const valor = Number(priceRange.value);
+            const limite = Number(priceRange.max);
+            priceVal.innerText = valor >= limite
+                ? 'Sem limite'
+                : valor.toLocaleString('pt-BR');
             aplicarFiltrosEExibir();
         });
     }

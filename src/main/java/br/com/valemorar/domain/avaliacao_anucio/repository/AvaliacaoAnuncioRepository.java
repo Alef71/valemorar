@@ -11,5 +11,7 @@ import java.util.UUID;
 public interface AvaliacaoAnuncioRepository extends JpaRepository<AvaliacaoAnuncio, UUID> {
     List<AvaliacaoAnuncio> findByAnuncioId(UUID anuncioId);
 
+    List<AvaliacaoAnuncio> findByAnuncioIdOrderByCriadoEmDesc(UUID anuncioId);
+
     List<AvaliacaoAnuncio> findByUsuarioId(UUID usuarioId);
 }

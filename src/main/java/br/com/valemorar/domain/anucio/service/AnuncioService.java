@@ -8,6 +8,8 @@ import br.com.valemorar.domain.endereco.Endereco;
 import br.com.valemorar.domain.endereco.repository.EnderecoRepository;
 import br.com.valemorar.domain.imovel.Imovel;
 import br.com.valemorar.domain.imovel.repository.ImovelRepository;
+import br.com.valemorar.domain.usuario.Usuario;
+import br.com.valemorar.domain.usuario.repository.UsuarioRepository;
 import br.com.valemorar.infra.SecurityUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,14 +39,17 @@ public class AnuncioService {
     private final AnuncioRepository anuncioRepository;
     private final ImovelRepository imovelRepository;
     private final EnderecoRepository enderecoRepository;
+    private final UsuarioRepository usuarioRepository;
 
     public AnuncioService(
             AnuncioRepository anuncioRepository,
             ImovelRepository imovelRepository,
-            EnderecoRepository enderecoRepository) {
+            EnderecoRepository enderecoRepository,
+            UsuarioRepository usuarioRepository) {
         this.anuncioRepository = anuncioRepository;
         this.imovelRepository = imovelRepository;
         this.enderecoRepository = enderecoRepository;
+        this.usuarioRepository = usuarioRepository;
     }
 
     @Transactional
@@ -177,11 +182,23 @@ public class AnuncioService {
         Map<UUID, Endereco> enderecos = new HashMap<>();
         enderecoRepository.findAllById(enderecoIds)
                 .forEach(endereco -> enderecos.put(endereco.getId(), endereco));
+        Set<UUID> anuncianteIds = anuncios.getContent().stream()
+                .map(Anuncio::getAnuncianteId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Map<UUID, Usuario> anunciantes = new HashMap<>();
+        usuarioRepository.findAllById(anuncianteIds)
+                .forEach(usuario -> anunciantes.put(usuario.getId(), usuario));
 
         return anuncios.map(anuncio -> {
             Imovel imovel = anuncio.getImovel();
             Endereco endereco = imovel != null ? enderecos.get(imovel.getEnderecoId()) : null;
-            return AnuncioResponseDTO.fromEntity(anuncio, endereco);
+            Usuario anunciante = anunciantes.get(anuncio.getAnuncianteId());
+            return AnuncioResponseDTO.fromEntity(
+                    anuncio,
+                    endereco,
+                    anunciante != null ? anunciante.getNome() : null,
+                    anunciante != null ? anunciante.getEmail() : null);
         });
     }
 
@@ -190,7 +207,14 @@ public class AnuncioService {
         Endereco endereco = imovel != null
                 ? enderecoRepository.findById(imovel.getEnderecoId()).orElse(null)
                 : null;
-        return AnuncioResponseDTO.fromEntity(anuncio, endereco);
+        Usuario anunciante = anuncio.getAnuncianteId() != null
+                ? usuarioRepository.findById(anuncio.getAnuncianteId()).orElse(null)
+                : null;
+        return AnuncioResponseDTO.fromEntity(
+                anuncio,
+                endereco,
+                anunciante != null ? anunciante.getNome() : null,
+                anunciante != null ? anunciante.getEmail() : null);
     }
 
     private void validarAcessoAnunciante(UUID anuncianteId) {

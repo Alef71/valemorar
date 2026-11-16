@@ -56,7 +56,8 @@ public class SecurityConfig {
                                                 .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
                                                 .requestMatchers(HttpMethod.GET, "/api/anuncios", "/api/anuncios/**")
                                                 .permitAll()
-
+                                                .requestMatchers(HttpMethod.GET, "/api/avaliacoes-anuncio/anuncio/**")
+                                                .permitAll()
                                                 // LIBERADO: Leitura de Endereços/Cidades no Cabeçalho e Vitrine
                                                 .requestMatchers(HttpMethod.GET, "/api/enderecos", "/api/enderecos/**")
                                                 .permitAll()

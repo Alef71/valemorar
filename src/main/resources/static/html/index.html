@@ -123,11 +123,11 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 items-end pt-1">
             <div>
               <div class="flex justify-between items-center mb-1">
-                <label class="text-xs font-bold text-stone-600">Até R$</label>
-                <span class="text-xs font-extrabold text-brand-green" id="price-val">3.500</span>
+                <label class="text-xs font-bold text-stone-600">Preço máximo</label>
+                <span class="text-xs font-extrabold text-brand-green" id="price-val">Sem limite</span>
               </div>
               <div class="bg-[#fcfbf9] border border-[#dcd6c9] rounded-xl p-2 flex items-center h-[42px]">
-                <input type="range" id="price-range" name="preco_max" min="500" max="10000" value="3500" step="250" class="w-full cursor-pointer accent-brand-green">
+                <input type="range" id="price-range" name="preco_max" min="500" max="10000" value="10000" step="250" class="w-full cursor-pointer accent-brand-green" aria-label="Preço máximo dos anúncios">
               </div>
             </div>
 
@@ -232,6 +232,26 @@
           </div>
 
         </form>
+      </div>
+    </section>
+
+    <!-- VITRINE DE IMÓVEIS -->
+    <section class="py-12 bg-brand-cream border-y border-[#dfd7c8]">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
+        <div id="vitrine-imoveis" class="flex justify-between items-end mb-6">
+          <div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-textPrimary">Imóveis Disponíveis</h2>
+            <p class="text-xs text-stone-500 font-medium">Filtre os anúncios por tipo de imóvel, faixa de preço e quartos.</p>
+          </div>
+          <span id="total-resultados" class="text-xs font-bold bg-brand-cream border border-[#dfd7c8] text-brand-brown px-3 py-1 rounded-full">
+            Carregando...
+          </span>
+        </div>
+
+        <!-- Container onde os imóveis do backend serão renderizados -->
+        <div id="lista-anuncios" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <p class="text-brand-textSecondary text-sm col-span-full text-center py-10">Carregando imóveis do Vale...</p>
+        </div>
       </div>
     </section>
 
@@ -371,8 +391,8 @@
               <span class="text-emerald-400">Conheça a região</span>
             </div>
           </div>
-          </a>
         </div>
+        </a>
 
       </div>
     </section>
@@ -386,10 +406,10 @@
           TECNOLOGIA COM ALMA MINEIRA
         </span>
         <h2 class="text-3xl sm:text-4xl font-serif font-semibold text-brand-textPrimary">
-          Por Que o Vale Morar é Diferente?
+          Por que escolher o Vale Morar?
         </h2>
         <p class="text-xs sm:text-sm text-brand-textSecondary leading-relaxed pt-1 max-w-2xl mx-auto">
-          Plataformas convencionais não entendem as dinâmicas do Jequitinhonha. Nós nascemos aqui para transformar o aluguel em uma experiência segura, ágil e respeitosa.
+          Somos da região e conhecemos suas particularidades. Ajudamos você a encontrar ou anunciar um imóvel com informação clara e atendimento próximo.
         </p>
       </div>
 
@@ -397,101 +417,79 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
         <!-- Card 1: Conhecimento Raiz -->
-        <div class="bg-[#f7f4ed] border border-[#eae3d5] rounded-3xl p-6 flex flex-col justify-between hover:shadow-md transition duration-300">
+        <div class="bg-white border border-[#dfd7c8] rounded-3xl p-6 flex flex-col justify-between hover:shadow-md transition duration-300">
           <div class="space-y-4">
-            <div class="w-10 h-10 rounded-xl bg-emerald-100/80 text-emerald-800 flex items-center justify-center">
+            <div class="w-10 h-10 rounded-xl bg-[#eaf4ee] text-brand-green flex items-center justify-center">
               <span class="material-symbols-outlined text-xl">forest</span>
             </div>
-            <h3 class="text-lg font-bold text-stone-800">Conhecimento Raiz</h3>
-            <p class="text-xs text-stone-600 leading-relaxed">
-              Conhecemos cada rua, altitude de serra, proximidade dos campi universitários e particularidades hídricas das cidades do Vale.
+            <h3 class="text-lg font-bold text-brand-textPrimary">Conhecimento local</h3>
+            <p class="text-xs text-brand-textSecondary leading-relaxed">
+              Conhecemos as cidades do Jequitinhonha, seus bairros, serviços e referências para ajudar você a escolher melhor.
             </p>
           </div>
-          <div class="pt-6 border-t border-stone-200/70 mt-6 text-xs font-bold text-emerald-700">
-            Presença de ponta a ponta
+          <div class="pt-6 border-t border-[#dfd7c8] mt-6 text-xs font-bold text-brand-green">
+            Uma plataforma feita para a região
           </div>
         </div>
 
-        <!-- Card 2: Burocracia Zero -->
-        <div class="bg-[#f7f4ed] border border-[#eae3d5] rounded-3xl p-6 flex flex-col justify-between hover:shadow-md transition duration-300">
+        <!-- Card 2: Aluguel sem complicação -->
+        <div class="bg-white border border-[#dfd7c8] rounded-3xl p-6 flex flex-col justify-between hover:shadow-md transition duration-300">
           <div class="space-y-4">
-            <div class="w-10 h-10 rounded-xl bg-amber-100/80 text-amber-800 flex items-center justify-center">
+            <div class="w-10 h-10 rounded-xl bg-[#eaf4ee] text-brand-green flex items-center justify-center">
               <span class="material-symbols-outlined text-xl">task_alt</span>
             </div>
-            <h3 class="text-lg font-bold text-stone-800">Burocracia Zero</h3>
-            <p class="text-xs text-stone-600 leading-relaxed">
-              Sem necessidade de pedir favores a parentes. Aceitamos garantia caução, cartão de crédito facilitado e seguro fiança regional sem complicações.
+            <h3 class="text-lg font-bold text-brand-textPrimary">Mais opções para alugar</h3>
+            <p class="text-xs text-brand-textSecondary leading-relaxed">
+              Consulte as condições de cada imóvel e conheça as alternativas de garantia disponíveis para a locação.
             </p>
           </div>
-          <div class="pt-6 border-t border-stone-200/70 mt-6 text-xs font-bold text-amber-800">
-            Análise cadastral em 15 min
+          <div class="pt-6 border-t border-[#dfd7c8] mt-6 text-xs font-bold text-brand-green">
+            Condições explicadas com clareza
           </div>
         </div>
 
         <!-- Card 3: Suporte Humanizado -->
-        <div class="bg-[#f7f4ed] border border-[#eae3d5] rounded-3xl p-6 flex flex-col justify-between hover:shadow-md transition duration-300">
+        <div class="bg-white border border-[#dfd7c8] rounded-3xl p-6 flex flex-col justify-between hover:shadow-md transition duration-300">
           <div class="space-y-4">
-            <div class="w-10 h-10 rounded-xl bg-emerald-100/80 text-emerald-800 flex items-center justify-center">
+            <div class="w-10 h-10 rounded-xl bg-[#eaf4ee] text-brand-green flex items-center justify-center">
               <span class="material-symbols-outlined text-xl">chat</span>
             </div>
-            <h3 class="text-lg font-bold text-stone-800">Suporte Humanizado</h3>
-            <p class="text-xs text-stone-600 leading-relaxed">
-              Atendimento acolhedor pelo WhatsApp ou em pontos de apoio com corretores de verdade que conhecem e valorizam nossa gente.
+            <h3 class="text-lg font-bold text-brand-textPrimary">Atendimento próximo</h3>
+            <p class="text-xs text-brand-textSecondary leading-relaxed">
+              Conte com uma equipe pronta para orientar você durante a busca e esclarecer dúvidas sobre os anúncios.
             </p>
           </div>
-          <div class="pt-6 border-t border-stone-200/70 mt-6 text-xs font-bold text-emerald-700">
-            Atendimento em bom mineirês
+          <div class="pt-6 border-t border-[#dfd7c8] mt-6 text-xs font-bold text-brand-green">
+            Conversa simples e acolhedora
           </div>
         </div>
 
         <!-- Card 4: Vistoria Fotográfica -->
-        <div class="bg-[#f7f4ed] border border-[#eae3d5] rounded-3xl p-6 flex flex-col justify-between hover:shadow-md transition duration-300">
+        <div class="bg-white border border-[#dfd7c8] rounded-3xl p-6 flex flex-col justify-between hover:shadow-md transition duration-300">
           <div class="space-y-4">
-            <div class="w-10 h-10 rounded-xl bg-amber-100/80 text-amber-800 flex items-center justify-center">
+            <div class="w-10 h-10 rounded-xl bg-[#eaf4ee] text-brand-green flex items-center justify-center">
               <span class="material-symbols-outlined text-xl">center_focus_strong</span>
             </div>
-            <h3 class="text-lg font-bold text-stone-800">Vistoria Fotográfica</h3>
-            <p class="text-xs text-stone-600 leading-relaxed">
-              Laudo detalhado de entrada e saída com mais de 50 fotos em alta definição. Transparência total que protege locador e inquilino.
+            <h3 class="text-lg font-bold text-brand-textPrimary">Registro do imóvel</h3>
+            <p class="text-xs text-brand-textSecondary leading-relaxed">
+              Fotos e informações detalhadas ajudam você a conhecer o imóvel antes de entrar em contato com o anunciante.
             </p>
           </div>
-          <div class="pt-6 border-t border-stone-200/70 mt-6 text-xs font-bold text-amber-800">
-            Segurança jurídica comprovada
+          <div class="pt-6 border-t border-[#dfd7c8] mt-6 text-xs font-bold text-brand-green">
+            Mais informação para decidir
           </div>
         </div>
 
-      </div>
-    </section>
-
-    <!-- VITRINE DE IMÓVEIS -->
-    <section class="py-12 bg-brand-cream border-y border-[#dfd7c8]">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
-        <div id="vitrine-imoveis" class="flex justify-between items-end mb-6">
-          <div>
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-textPrimary">Imóveis Disponíveis</h2>
-            <p class="text-xs text-stone-500 font-medium">Filtre os anúncios por tipo de imóvel, faixa de preço e quartos.</p>
-          </div>
-          <span id="total-resultados" class="text-xs font-bold bg-brand-cream border border-[#dfd7c8] text-brand-brown px-3 py-1 rounded-full">
-            Carregando...
-          </span>
-        </div>
-        
-        <!-- Container onde os imóveis do backend serão renderizados -->
-        <div id="lista-anuncios" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <p class="text-brand-textSecondary text-sm col-span-full text-center py-10">Carregando imóveis do Vale...</p>
-        </div>
       </div>
     </section>
 
   </main>
 
-  <!-- RODAPÉ -->
-  <footer class="bg-brand-cream border-t border-[#dfd7c8] py-8 text-center text-xs text-brand-textSecondary">
-    <p>&copy; 2026 Vale Morar Imóveis. Todos os direitos reservados.</p>
-  </footer>
+  <div data-site-footer></div>
 
   <!-- CARREGAMENTO DE SCRIPTS -->
   <script src="../js/header.js"></script>
   <script src="../js/index.js"></script>
+  <script src="../js/footer.js"></script>
 </body>
 </html>

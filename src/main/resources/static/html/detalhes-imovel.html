@@ -172,7 +172,7 @@
               </div>
               <div>
                 <p id="proprietario-nome" class="font-bold text-sm text-brand-textPrimary">Carregando...</p>
-                <p id="proprietario-tipo" class="text-xs text-stone-500">Anunciante</p>
+                <a id="proprietario-email" class="hidden break-all text-xs text-brand-green hover:underline" aria-label="E-mail do anunciante"></a>
               </div>
             </div>
 
@@ -205,12 +205,37 @@
 
     </div>
 
+    <section id="comentarios-section" class="hidden rounded-2xl border border-[#dfd7c8] bg-white p-5 shadow-sm sm:p-6" aria-labelledby="comentarios-titulo">
+      <div class="mb-5">
+        <h2 id="comentarios-titulo" class="text-xl font-bold text-brand-textPrimary">Comentários</h2>
+        <p class="mt-1 text-sm text-brand-textSecondary">Compartilhe sua dúvida ou experiência sobre este anúncio.</p>
+      </div>
+
+      <div id="comentarios-aviso" class="mb-4 hidden rounded-xl border border-[#dfd7c8] bg-brand-cream p-4 text-sm text-brand-textSecondary" role="status" aria-live="polite"></div>
+
+      <form id="form-comentario" class="mb-6 hidden space-y-3 rounded-xl bg-[#fcfbf9] p-4">
+        <label for="comentario-texto" class="block text-sm font-bold text-brand-textPrimary">Deixe seu comentário</label>
+        <textarea id="comentario-texto" rows="4" maxlength="2000" required
+          placeholder="Escreva sua mensagem (até 2000 caracteres)"
+          class="w-full rounded-xl border border-[#dcd6c9] bg-white px-3 py-2 text-sm text-brand-textPrimary focus:border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green/15"></textarea>
+        <div class="flex items-center justify-between gap-3">
+          <p id="comentario-status" class="text-xs text-brand-textSecondary" role="status" aria-live="polite"></p>
+          <button type="submit" class="rounded-xl bg-brand-gold px-5 py-2.5 text-sm font-bold text-white transition hover:bg-brand-earthLight disabled:cursor-not-allowed disabled:opacity-60">
+            Enviar comentário
+          </button>
+        </div>
+      </form>
+
+      <div id="lista-comentarios" class="space-y-3" aria-live="polite">
+        <p class="text-sm text-brand-textSecondary">Carregando comentários...</p>
+      </div>
+    </section>
+
   </main>
 
-  <footer class="bg-brand-cream border-t border-[#dfd7c8] py-8 text-center text-xs text-brand-textSecondary mt-12">
-    <p>&copy; 2026 Vale Morar Imóveis. Todos os direitos reservados.</p>
-  </footer>
+  <div data-site-footer class="mt-12"></div>
 
   <script src="../js/detalhes-imovel.js"></script>
+  <script src="../js/footer.js"></script>
 </body>
 </html>

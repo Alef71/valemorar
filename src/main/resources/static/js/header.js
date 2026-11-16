@@ -94,15 +94,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 4. CARREGA A CIDADE A PARTIR DO ENDEREÇO DO USUÁRIO
     async function carregarCidadeEndereco() {
-        if (!usuario || !usuario.id) {
+        if (!usuario) {
             atualizarCidadeHeader('JEQUITINHONHA', 'MG');
             return;
         }
 
         // A) Tenta ler do cache de endereço gerado pelo Painel
-        const cacheEndereco = localStorage.getItem(`enderecoUsuario_${usuario.id}`);
-        if (cacheEndereco) {
+        const chavesEndereco = [];
+        if (usuario.id) chavesEndereco.push(`enderecoUsuario_${usuario.id}`);
+        if (usuario.email) {
+            chavesEndereco.push(`enderecoUsuario_email_${encodeURIComponent(usuario.email.trim().toLowerCase())}`);
+        }
+
+        for (const chave of chavesEndereco) {
             try {
+                const cacheEndereco = localStorage.getItem(chave);
+                if (!cacheEndereco) continue;
+
                 const end = JSON.parse(cacheEndereco);
                 if (end && end.cidade) {
                     atualizarCidadeHeader(end.cidade, end.estado);

@@ -31,6 +31,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    function obterChavesEndereco(usuario) {
+        const chaves = [];
+        if (usuario?.id) chaves.push(`enderecoUsuario_${usuario.id}`);
+        if (usuario?.email) {
+            chaves.push(`enderecoUsuario_email_${encodeURIComponent(usuario.email.trim().toLowerCase())}`);
+        }
+        return chaves;
+    }
+
     // Elementos de Perfil e Header
     const userNameElem = document.getElementById('user-name');
     const welcomeNameElem = document.getElementById('welcome-name');
@@ -127,11 +136,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 2. BUSCAR E RENDERIZAR ENDEREÇO DO USUÁRIO
     function carregarEnderecoUsuario() {
-        if (!usuarioLogado || !usuarioLogado.id) return;
-
-        const cacheLocal = localStorage.getItem(`enderecoUsuario_${usuarioLogado.id}`);
-        if (cacheLocal) {
+        const chavesEndereco = obterChavesEndereco(usuarioLogado);
+        for (const chave of chavesEndereco) {
             try {
+                const cacheLocal = localStorage.getItem(chave);
+                if (!cacheLocal) continue;
+
                 enderecoUsuarioMemoria = JSON.parse(cacheLocal);
                 if (enderecoUsuarioMemoria?.logradouro) {
                     renderizarEnderecoUsuario(enderecoUsuarioMemoria);
@@ -292,11 +302,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
 
             try {
-                if (!usuarioLogado?.id) {
+                const chaveEndereco = obterChavesEndereco(usuarioLogado)[0];
+                if (!chaveEndereco) {
                     throw new Error('Não foi possível identificar o usuário para salvar o endereço.');
                 }
 
-                localStorage.setItem(`enderecoUsuario_${usuarioLogado.id}`, JSON.stringify(payload));
+                localStorage.setItem(chaveEndereco, JSON.stringify(payload));
                 enderecoUsuarioMemoria = payload;
                 renderizarEnderecoUsuario(enderecoUsuarioMemoria);
                 alert('Endereço salvo apenas neste navegador.');
