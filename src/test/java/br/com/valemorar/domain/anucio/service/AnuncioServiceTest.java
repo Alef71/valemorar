@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -37,6 +38,7 @@ class AnuncioServiceTest {
         imovel.setEnderecoId(enderecoId);
         imovel.setTitulo("Casa das Flores");
         imovel.setDescricao("Casa com quintal.");
+        imovel.setAceitaPet(true);
 
         Anuncio anuncio = new Anuncio();
         anuncio.setAnuncianteId(UUID.randomUUID());
@@ -63,6 +65,7 @@ class AnuncioServiceTest {
         anunciante.setId(anuncio.getAnuncianteId());
         anunciante.setNome("Maria Silva");
         anunciante.setEmail("maria@example.com");
+        anunciante.setFotoPerfil("http://localhost:8080/uploads/perfil.jpg");
         PageRequest pageable = PageRequest.of(0, 10);
         when(anuncioRepository.findAll(pageable))
                 .thenReturn(new PageImpl<>(List.of(anuncio), pageable, 1));
@@ -87,9 +90,11 @@ class AnuncioServiceTest {
         assertEquals("39100000", response.cep());
         assertEquals("Casa das Flores", response.titulo());
         assertEquals("Casa com quintal.", response.descricao());
+        assertTrue(response.aceitaPet());
         assertEquals("Maria Silva", response.anuncianteNome());
         assertEquals("maria@example.com", response.anuncianteEmail());
         assertEquals("http://localhost:8080/uploads/capa.jpg", response.fotoCapa());
+        assertEquals("http://localhost:8080/uploads/perfil.jpg", response.anuncianteFotoPerfil());
         verify(enderecoRepository).findAllById(Set.of(enderecoId));
     }
 
@@ -105,6 +110,7 @@ class AnuncioServiceTest {
         anunciante.setId(anuncianteId);
         anunciante.setNome("Maria Silva");
         anunciante.setEmail("maria@example.com");
+        anunciante.setFotoPerfil("http://localhost:8080/uploads/perfil.jpg");
 
         AnuncioRepository anuncioRepository = mock(AnuncioRepository.class);
         ImovelRepository imovelRepository = mock(ImovelRepository.class);
@@ -120,5 +126,6 @@ class AnuncioServiceTest {
 
         assertEquals("Maria Silva", resposta.anuncianteNome());
         assertEquals("maria@example.com", resposta.anuncianteEmail());
+        assertEquals("http://localhost:8080/uploads/perfil.jpg", resposta.anuncianteFotoPerfil());
     }
 }

@@ -25,6 +25,7 @@ public record AnuncioResponseDTO(
         String descricao,
         String tipoImovel,
         Integer quartos,
+        Boolean aceitaPet,
         List<String> tags,
         BigDecimal valor,
         String modalidade,
@@ -38,7 +39,8 @@ public record AnuncioResponseDTO(
         LocalDateTime atualizadoEm,
         String anuncianteNome,
         String anuncianteEmail,
-        String fotoCapa) {
+        String fotoCapa,
+        String anuncianteFotoPerfil) {
 
     public static AnuncioResponseDTO fromEntity(Anuncio anuncio, Endereco endereco) {
         return fromEntity(anuncio, endereco, null, null);
@@ -58,6 +60,16 @@ public record AnuncioResponseDTO(
             String anuncianteNome,
             String anuncianteEmail,
             String fotoCapa) {
+        return fromEntity(anuncio, endereco, anuncianteNome, anuncianteEmail, fotoCapa, null);
+    }
+
+    public static AnuncioResponseDTO fromEntity(
+            Anuncio anuncio,
+            Endereco endereco,
+            String anuncianteNome,
+            String anuncianteEmail,
+            String fotoCapa,
+            String anuncianteFotoPerfil) {
         Imovel imovel = anuncio.getImovel();
 
         return new AnuncioResponseDTO(
@@ -75,6 +87,7 @@ public record AnuncioResponseDTO(
                 imovel != null ? imovel.getDescricao() : null,
                 imovel != null ? imovel.getTipoImovel() : null,
                 imovel != null ? imovel.getQuartos() : null,
+                imovel != null ? imovel.getAceitaPet() : null,
                 anuncio.getTags() != null ? new ArrayList<>(anuncio.getTags()) : List.of(),
                 anuncio.getValor(),
                 anuncio.getModalidade(),
@@ -88,6 +101,7 @@ public record AnuncioResponseDTO(
                 anuncio.getAtualizadoEm(),
                 anuncianteNome,
                 anuncianteEmail,
-                fotoCapa);
+                fotoCapa,
+                anuncianteFotoPerfil);
     }
 }

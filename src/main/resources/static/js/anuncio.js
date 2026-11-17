@@ -118,6 +118,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btnAddFoto = document.getElementById('btn-add-foto');
     const containerFotos = document.getElementById('lista-fotos-container');
 
+    function obterTagsSelecionadas() {
+        const selecionadas = Array.from(document.querySelectorAll('.anuncio-tag:checked'))
+            .map(input => input.value);
+        const extras = (document.getElementById('anuncio-tags')?.value || '')
+            .split(',')
+            .map(tag => tag.trim())
+            .filter(Boolean);
+        return [...new Set([...selecionadas, ...extras])];
+    }
+
+    function definirTagsSelecionadas(tags = []) {
+        const valoresSelecionados = new Set(tags.map(tag => tag.toLocaleLowerCase('pt-BR')));
+        const tagsPadrao = Array.from(document.querySelectorAll('.anuncio-tag'));
+        tagsPadrao.forEach(input => {
+            input.checked = valoresSelecionados.has(input.value.toLocaleLowerCase('pt-BR'));
+        });
+
+        const tagsConhecidas = new Set(tagsPadrao.map(input => input.value.toLocaleLowerCase('pt-BR')));
+        const extras = tags.filter(tag => !tagsConhecidas.has(tag.toLocaleLowerCase('pt-BR')));
+        const inputExtras = document.getElementById('anuncio-tags');
+        if (inputExtras) inputExtras.value = extras.join(', ');
+    }
+
     // 3. CARREGAR IDENTIDADE DO USUÁRIO
     async function carregarUsuario() {
         try {
@@ -426,7 +449,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         setVal('anuncio-valor', anuncio?.valor ?? '');
         setVal('anuncio-condominio', imovelEmEdicao?.valorCondominio ?? 0);
         setVal('anuncio-iptu', imovelEmEdicao?.valorIptu ?? 0);
-        setVal('anuncio-tags', anuncio?.tags ? anuncio.tags.join(', ') : '');
+        definirTagsSelecionadas(anuncio?.tags || []);
         document.getElementById('anuncio-mobiliado').checked = Boolean(imovelEmEdicao?.mobiliado);
         document.getElementById('anuncio-aceita-pet').checked = Boolean(imovelEmEdicao?.aceitaPet);
 
@@ -497,13 +520,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function obterAnuncioPayload(imovelId) {
-        const tagsInput = obterValor('anuncio-tags');
         return {
             imovelId,
             anuncianteId: usuarioLogado.id,
             valor: obterNumero('anuncio-valor'),
             modalidade: document.getElementById('anuncio-modalidade')?.value,
-            tags: tagsInput ? tagsInput.split(',').map(tag => tag.trim()).filter(Boolean) : [],
+            tags: obterTagsSelecionadas(),
             status: anuncioEmEdicao?.status || 'ATIVO'
         };
     }
@@ -753,8 +775,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 } else {
                     // Novo cadastro
-                    const tagsInput = document.getElementById('anuncio-tags')?.value || '';
-                    const tagsArray = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t.length > 0) : [];
+                    const tagsArray = obterTagsSelecionadas();
 
                     const getVal = (id) => document.getElementById(id)?.value?.trim() || '';
 
@@ -819,8 +840,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     throw new Error('Por favor, informe um valor válido para o anúncio.');
                 }
 
-                const tagsInput = document.getElementById('anuncio-tags')?.value || '';
-                const tagsArray = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t.length > 0) : [];
+                const tagsArray = obterTagsSelecionadas();
 
                 const getVal = (id) => document.getElementById(id)?.value?.trim() || '';
 

@@ -153,7 +153,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('val-iptu').innerText = Number(dadosAnuncio.valorIptu).toLocaleString('pt-BR');
         }
 
-        const tags = Array.isArray(dadosAnuncio.tags) ? dadosAnuncio.tags : [];
+        const tags = Array.isArray(dadosAnuncio.tags) ? [...dadosAnuncio.tags] : [];
+        const aceitaPet = dadosImovel?.aceitaPet ?? dadosAnuncio.aceitaPet;
+        if (aceitaPet === true) tags.unshift('Aceita pet');
         document.getElementById('imovel-tags').innerHTML = tags.length
             ? tags.map(tag => `<span class="bg-brand-cream border border-[#dfd7c8] text-brand-brown font-bold text-[11px] px-2.5 py-1 rounded-md">${escaparHTML(tag)}</span>`).join('')
             : '<span class="text-xs text-stone-400">Nenhum diferencial cadastrado.</span>';
@@ -330,6 +332,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     function configurarContato(dadosLocador, titulo, falhaDetalhes, dadosAnuncio) {
         const nomeElem = document.getElementById('proprietario-nome');
         const inicialElem = document.getElementById('proprietario-inicial');
+        const fotoElem = document.getElementById('proprietario-foto');
         const emailElem = document.getElementById('proprietario-email');
         const linkWhatsapp = document.getElementById('btn-whatsapp');
         const formulario = document.getElementById('form-contato-direto');
@@ -340,6 +343,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         const nomeAnunciante = dadosAnuncio?.anuncianteNome || 'Anunciante';
         nomeElem.innerText = nomeAnunciante;
         inicialElem.innerText = nomeAnunciante.charAt(0).toLocaleUpperCase('pt-BR') || 'A';
+
+        if (dadosAnuncio?.anuncianteFotoPerfil) {
+            fotoElem.src = dadosAnuncio.anuncianteFotoPerfil;
+            fotoElem.alt = `Foto de perfil de ${nomeAnunciante}`;
+            fotoElem.classList.remove('hidden');
+            inicialElem.classList.add('hidden');
+            fotoElem.onerror = () => {
+                fotoElem.onerror = null;
+                fotoElem.classList.add('hidden');
+                inicialElem.classList.remove('hidden');
+            };
+        }
 
         if (dadosAnuncio?.anuncianteEmail) {
             emailElem.href = `mailto:${dadosAnuncio.anuncianteEmail}`;
@@ -360,11 +375,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (!telefone) {
-            mensagemAviso.innerText = falhaDetalhes?.status === 400
-                ? 'O perfil de contato deste anunciante ainda não está cadastrado.'
-                : falhaDetalhes
-                    ? 'Não foi possível carregar os dados de contato. Verifique sua sessão e tente novamente.'
-                    : 'O anunciante ainda não cadastrou telefone ou WhatsApp.';
+            if (falhaDetalhes?.status === 400) {
+                aviso.classList.add('hidden');
+                return;
+            }
+            mensagemAviso.innerText = falhaDetalhes
+                ? 'Não foi possível carregar os dados de contato. Verifique sua sessão e tente novamente.'
+                : 'O anunciante ainda não cadastrou telefone ou WhatsApp.';
             aviso.classList.remove('hidden');
             return;
         }

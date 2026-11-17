@@ -223,7 +223,8 @@ public class AnuncioService {
                     endereco,
                     anunciante != null ? anunciante.getNome() : null,
                     anunciante != null ? anunciante.getEmail() : null,
-                    imovel != null ? fotosCapa.get(imovel.getId()) : null);
+                    imovel != null ? fotosCapa.get(imovel.getId()) : null,
+                    anunciante != null ? anunciante.getFotoPerfil() : null);
         });
     }
 
@@ -249,7 +250,8 @@ public class AnuncioService {
                 endereco,
                 anunciante != null ? anunciante.getNome() : null,
                 anunciante != null ? anunciante.getEmail() : null,
-                fotoCapa);
+                fotoCapa,
+                anunciante != null ? anunciante.getFotoPerfil() : null);
     }
 
     private void validarAcessoAnunciante(UUID anuncianteId) {
